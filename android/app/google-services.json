@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "1069512086183",
+    "project_id": "app-dev-4768b",
+    "storage_bucket": "app-dev-4768b.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1069512086183:android:fb8c6ba4fae84d540c0182",
+        "android_client_info": {
+          "package_name": "com.nextcs.gene"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDVGG9pQfGTOddAQlUH6LnRE4EEePfq1e0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1069512086183:android:6b96b37f6dd3b1400c0182",
+        "android_client_info": {
+          "package_name": "com.yourcompany.smart_hospital_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDVGG9pQfGTOddAQlUH6LnRE4EEePfq1e0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
