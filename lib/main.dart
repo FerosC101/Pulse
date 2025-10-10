@@ -13,7 +13,7 @@ void main() async {
   try {
     await Firebase.initializeApp();
   } catch (e) {
-    print('Firebase initialization error: $e');
+    debugPrint('Firebase initialization error: $e');
   }
   
   runApp(
@@ -28,13 +28,11 @@ class MyApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final authState = ref.watch(authStateProvider);
-
     return MaterialApp(
       title: 'MedMap AI',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
-      home: authState.when(
+      home: ref.watch(authStateProvider).when(
         data: (user) {
           if (user != null) {
             return const HomeScreen();

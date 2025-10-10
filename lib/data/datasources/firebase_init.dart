@@ -1,5 +1,6 @@
 // lib/data/datasources/firebase_init.dart
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 
 class FirebaseInit {
   static final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -15,7 +16,7 @@ class FirebaseInit {
         await _addSampleHospitals();
       }
     } catch (e) {
-      print('Error initializing sample data: $e');
+      debugPrint('Error initializing sample data: $e');
     }
   }
 
@@ -75,6 +76,6 @@ class FirebaseInit {
       await _firestore.collection('hospitals').add(hospital);
     }
 
-    print('Sample hospitals added successfully');
+    debugPrint('Sample hospitals added successfully');
   }
 }

@@ -23,7 +23,7 @@ if (flutterVersionName == null) {
 }
 
 android {
-    namespace "com.yourcompany.smart_hospital_app"
+    namespace "com.nextcs.gene"
     compileSdk 34
     ndkVersion flutter.ndkVersion
 
@@ -41,8 +41,8 @@ android {
     }
 
     defaultConfig {
-        applicationId "com.yourcompany.smart_hospital_app"
-        minSdk 23
+        applicationId "com.nextcs.gene"
+        minSdkVersion flutter.minSdkVersion
         targetSdk 34
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName

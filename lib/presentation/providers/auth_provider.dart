@@ -15,9 +15,9 @@ final authStateProvider = StreamProvider<User?>((ref) {
 
 // Current user data provider - Stream of UserModel
 final currentUserProvider = StreamProvider<UserModel?>((ref) async* {
-  final authState = ref.watch(authStateProvider);
+  final authStateStream = ref.watch(authServiceProvider).authStateChanges;
   
-  await for (final user in authState.stream) {
+  await for (final user in authStateStream) {
     if (user != null) {
       final userData = await ref.read(authServiceProvider).getUserData(user.uid);
       yield userData;
@@ -27,9 +27,6 @@ final currentUserProvider = StreamProvider<UserModel?>((ref) async* {
   }
 });
 
-extension on AsyncValue<User?> {
-  get stream => null;
-}
 
 // Auth controller with proper StateNotifier
 class AuthController extends StateNotifier<AsyncValue<void>> {
