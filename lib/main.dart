@@ -41,7 +41,7 @@ class MyApp extends ConsumerWidget {
         },
         loading: () => const SplashScreen(),
         error: (error, stack) {
-          print('Auth error: $error');
+          debugPrint('Auth error: $error');
           return const WelcomeScreen();
         },
       ),
