@@ -1,38 +1,67 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart'; // Import the generated file
 import 'package:smart_hospital_app/core/themes/app_theme.dart';
-import 'package:smart_hospital_app/presentation/providers/auth_provider.dart';
+import 'package:smart_hospital_app/presentation/screens/splash/splash_screen.dart';
 import 'package:smart_hospital_app/presentation/screens/auth/welcome_screen.dart';
 import 'package:smart_hospital_app/presentation/screens/home/home_screen.dart';
-import 'package:smart_hospital_app/presentation/screens/splash/splash_screen.dart';
+import 'package:smart_hospital_app/presentation/providers/auth_provider.dart';
 
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  
-  try {
-    await Firebase.initializeApp();
-  } catch (e) {
-    debugPrint('Firebase initialization error: $e');
-  }
-  
-  runApp(
-    const ProviderScope(
-      child: MyApp(),
-    ),
-  );
+void main() {
+  runApp(const MyApp());
 }
 
-class MyApp extends ConsumerWidget {
+class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
+  Widget build(BuildContext context) {
+    return FutureBuilder(
+      // Initialize Firebase before app starts
+      future: Firebase.initializeApp(
+        options: DefaultFirebaseOptions.currentPlatform,
+      ),
+      builder: (context, snapshot) {
+        // Check for errors
+        if (snapshot.hasError) {
+          return MaterialApp(
+            home: Scaffold(
+              body: Center(
+                child: Text('Error initializing Firebase: ${snapshot.error}'),
+              ),
+            ),
+          );
+        }
+
+        // Once complete, show app
+        if (snapshot.connectionState == ConnectionState.done) {
+          return const ProviderScope(
+            child: AppRoot(),
+          );
+        }
+
+        // Otherwise, show loading indicator
+        return const MaterialApp(
+          home: SplashScreen(),
+        );
+      },
+    );
+  }
+}
+
+class AppRoot extends ConsumerWidget {
+  const AppRoot({super.key});
+
+  @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final authState = ref.watch(authStateProvider);
+
     return MaterialApp(
       title: 'MedMap AI',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
-      home: ref.watch(authStateProvider).when(
+      home: authState.when(
         data: (user) {
           if (user != null) {
             return const HomeScreen();
@@ -41,8 +70,11 @@ class MyApp extends ConsumerWidget {
         },
         loading: () => const SplashScreen(),
         error: (error, stack) {
-          debugPrint('Auth error: $error');
-          return const WelcomeScreen();
+          return Scaffold(
+            body: Center(
+              child: Text('Auth error: $error'),
+            ),
+          );
         },
       ),
     );

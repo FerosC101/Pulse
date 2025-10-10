@@ -1,122 +1,168 @@
-// lib/services/gemini_ai_service.dart
-import 'package:google_generative_ai/google_generative_ai.dart';
+import 'dart:convert';
 import 'package:flutter/foundation.dart';
+import 'package:http/http.dart' as http;
 
 class GeminiAIService {
-  static const String apiKey = 'AIzaSyBgePDAyyEv2c4OR-iMxY1P_ge6QDOsC8s';
-  
-  late final GenerativeModel _model;
-  late final ChatSession _chat;
+  static const String apiKey = 'AIzaSyDsqyQ_IlhJfjzGN6YXNONMq3e0c87RqEk';
+
+  final List<Map<String, dynamic>> _conversationHistory = [];
+  final String _modelName = 'chat-bison-001'; 
 
   GeminiAIService() {
-    _model = GenerativeModel(
-      model: 'gemini-pro',
-      apiKey: apiKey,
-      generationConfig: GenerationConfig(
-        temperature: 0.7,
-        topK: 40,
-        topP: 0.95,
-        maxOutputTokens: 1024,
-      ),
-      safetySettings: [
-        SafetySetting(HarmCategory.harassment, HarmBlockThreshold.medium),
-        SafetySetting(HarmCategory.hateSpeech, HarmBlockThreshold.medium),
-        SafetySetting(HarmCategory.sexuallyExplicit, HarmBlockThreshold.medium),
-        SafetySetting(HarmCategory.dangerousContent, HarmBlockThreshold.medium),
-      ],
-    );
-
     _initializeChat();
   }
 
   void _initializeChat() {
-    _chat = _model.startChat(history: [
-      Content.text(_getSystemPrompt()),
-    ]);
+    _conversationHistory.clear();
+    // Add system prompt
+    _conversationHistory.add({
+      'role': 'user',
+      'parts': [{'text': _getSystemPrompt()}]
+    });
+    _conversationHistory.add({
+      'role': 'model',
+      'parts': [
+        {
+          'text':
+              'I understand. I am your AI Medical Assistant for MedMap AI, ready to help with hospital and healthcare-related queries in the Calamba, Laguna area.'
+        }
+      ]
+    });
   }
 
   String _getSystemPrompt() {
     return '''
-You are an AI Medical Assistant for MedMap AI - Smart Hospital Management System.
+You are an AI Medical Assistant for MedMap AI - Smart Hospital Management System in the Philippines.
 
-STRICT RULES YOU MUST FOLLOW:
-1. ONLY answer questions related to:
+STRICT RULES:
+1. ONLY answer questions about:
    - Hospital services and facilities
    - Finding hospitals and doctors
    - Booking appointments
    - Medical emergencies and first aid
    - General health information
-   - Using the MedMap AI app features
-   
-2. DO NOT answer questions about:
-   - Non-medical topics (politics, entertainment, etc.)
-   - Specific medical diagnoses (always recommend seeing a doctor)
-   - Prescription medications (refer to healthcare professionals)
-   - Personal advice unrelated to the app
-   
-3. If asked about non-medical topics, politely redirect:
-   "I'm specialized in helping with hospital and healthcare-related queries through MedMap AI. How can I assist you with finding medical services?"
+   - MedMap AI app features
 
-4. Always be:
-   - Professional and empathetic
-   - Clear and concise
-   - Safety-conscious (in emergencies, recommend calling emergency services)
-   
-5. You have access to:
-   - Real-time hospital bed availability
-   - Doctor schedules and specialties
-   - Hospital locations and contact information
-   - Emergency routing capabilities
+2. DO NOT answer:
+   - Non-medical topics
+   - Specific medical diagnoses (refer to doctors)
+   - Prescription medications
 
-CURRENT CONTEXT:
-- App Name: MedMap AI
+3. Always be professional, empathetic, and concise
+4. In emergencies, recommend calling emergency services
+
+CONTEXT:
+- App: MedMap AI
+- Location: Calamba, Laguna, Philippines
 - Features: Hospital mapping, AI assistance, emergency routing, appointment booking
-- Location: Philippines (primarily Calamba, Laguna area)
 
-RESPONSE FORMAT:
-- Keep responses under 200 words
-- Use bullet points for lists
-- Be conversational but professional
-- Suggest relevant app features when appropriate
-
-How can I help you today?
+Keep responses under 200 words and conversational.
 ''';
   }
 
-  Future<String> sendMessage(
-    String message, {
-    Map<String, dynamic>? context,
-  }) async {
+  /// Send a message to the AI
+  Future<String> sendMessage(String message,
+      {Map<String, dynamic>? context}) async {
     try {
-      // Add context if provided (hospital data, user location, etc.)
+      // Add context if provided
       String enhancedMessage = message;
-      
       if (context != null && context.isNotEmpty) {
         enhancedMessage += '\n\nContext: ${_formatContext(context)}';
       }
 
-      final response = await _chat.sendMessage(
-        Content.text(enhancedMessage),
-      );
+      // Add user message to history
+      _conversationHistory.add({
+        'role': 'user',
+        'parts': [
+          {'text': enhancedMessage}
+        ]
+      });
 
-      return response.text ?? 'I apologize, but I could not generate a response. Please try again.';
+      final responseText = await _tryModel(_modelName);
+
+      if (responseText != null) {
+        _conversationHistory.add({
+          'role': 'model',
+          'parts': [
+            {'text': responseText}
+          ]
+        });
+        return responseText;
+      }
+
+      return 'I apologize, but I\'m having trouble connecting. Please check your internet connection and try again.';
     } catch (e) {
       debugPrint('Gemini API Error: $e');
-      return 'I encountered an error. Please try again or contact support if the issue persists.';
+      return 'I encountered an error. Please try again in a moment.';
     }
   }
 
+  /// Try generating content from a given model
+  Future<String?> _tryModel(String modelName) async {
+    try {
+      final url = Uri.parse(
+          'https://generativelanguage.googleapis.com/v1beta/models/$modelName:generateContent?key=$apiKey');
+
+      final response = await http
+          .post(
+            url,
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode({
+              'contents': _conversationHistory,
+              'generationConfig': {
+                'temperature': 0.7,
+                'topK': 40,
+                'topP': 0.95,
+                'maxOutputTokens': 1024,
+              },
+              'safetySettings': [
+                {
+                  'category': 'HARM_CATEGORY_HARASSMENT',
+                  'threshold': 'BLOCK_MEDIUM_AND_ABOVE'
+                },
+                {
+                  'category': 'HARM_CATEGORY_HATE_SPEECH',
+                  'threshold': 'BLOCK_MEDIUM_AND_ABOVE'
+                },
+                {
+                  'category': 'HARM_CATEGORY_SEXUALLY_EXPLICIT',
+                  'threshold': 'BLOCK_MEDIUM_AND_ABOVE'
+                },
+                {
+                  'category': 'HARM_CATEGORY_DANGEROUS_CONTENT',
+                  'threshold': 'BLOCK_MEDIUM_AND_ABOVE'
+                },
+              ],
+            }),
+          )
+          .timeout(const Duration(seconds: 30));
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['candidates'] != null && data['candidates'].isNotEmpty) {
+          return data['candidates'][0]['content']['parts'][0]['text'];
+        }
+      } else {
+        debugPrint('❌ Model $modelName failed: ${response.statusCode} - ${response.body}');
+      }
+    } catch (e) {
+      debugPrint('❌ Model $modelName error: $e');
+    }
+
+    return null;
+  }
+
   String _formatContext(Map<String, dynamic> context) {
-    StringBuffer buffer = StringBuffer();
-    
+    final buffer = StringBuffer();
+
     if (context.containsKey('nearbyHospitals')) {
       buffer.write('Nearby hospitals: ${context['nearbyHospitals']}. ');
     }
-    
+
     if (context.containsKey('userLocation')) {
       buffer.write('User location: ${context['userLocation']}. ');
     }
-    
+
     if (context.containsKey('availableBeds')) {
       buffer.write('Available beds: ${context['availableBeds']}. ');
     }
@@ -124,35 +170,24 @@ How can I help you today?
     return buffer.toString();
   }
 
-  // Get quick action responses
   Future<String> getQuickActionResponse(String action) async {
     switch (action) {
       case 'Find nearest hospital':
-        return await sendMessage(
-          'I need to find the nearest hospital. Can you help me locate one?',
-        );
-      
+        return await sendMessage('I need to find the nearest hospital. Can you help me locate one?');
       case 'Check ICU availability':
-        return await sendMessage(
-          'Show me hospitals with available ICU beds',
-        );
-      
+        return await sendMessage('Show me hospitals with available ICU beds');
       case 'Emergency routing':
-        return await sendMessage(
-          'I have a medical emergency. Guide me to the nearest hospital.',
-        );
-      
+        return await sendMessage('I have a medical emergency. Guide me to the nearest hospital.');
       case 'Book appointment':
-        return await sendMessage(
-          'I want to book a doctor appointment. What information do you need?',
-        );
-      
+        return await sendMessage('I want to book a doctor appointment. What information do you need?');
       default:
         return await sendMessage(action);
     }
   }
 
+  /// Reset chat safely
   void resetChat() {
     _initializeChat();
+    // Model stays hardcoded
   }
 }
