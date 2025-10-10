@@ -42,11 +42,11 @@ android {
 
     defaultConfig {
         applicationId "com.yourcompany.smart_hospital_app"
-        minSdk 23  // Updated for Firebase
+        minSdk 23
         targetSdk 34
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
-        multiDexEnabled true  // Add this
+        multiDexEnabled true
     }
 
     buildTypes {

@@ -1,4 +1,3 @@
-// lib/presentation/screens/auth/widgets/role_card.dart
 import 'package:flutter/material.dart';
 import 'package:smart_hospital_app/core/constants/app_colors.dart';
 import 'package:smart_hospital_app/data/models/user_type.dart';
@@ -27,7 +26,6 @@ class RoleCard extends StatelessWidget {
           padding: const EdgeInsets.all(24.0),
           child: Row(
             children: [
-              // Icon
               Container(
                 width: 60,
                 height: 60,
@@ -44,21 +42,22 @@ class RoleCard extends StatelessWidget {
               ),
               const SizedBox(width: 20),
               
-              // Text Content
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       userType.displayName,
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      style: const TextStyle(
+                        fontSize: 18,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       userType.description,
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      style: const TextStyle(
+                        fontSize: 14,
                         color: AppColors.textSecondary,
                       ),
                     ),
@@ -66,7 +65,6 @@ class RoleCard extends StatelessWidget {
                 ),
               ),
               
-              // Arrow Icon
               const Icon(
                 Icons.arrow_forward_ios,
                 color: AppColors.primary,

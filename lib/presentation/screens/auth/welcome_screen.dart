@@ -1,4 +1,3 @@
-// lib/presentation/screens/auth/welcome_screen.dart
 import 'package:flutter/material.dart';
 import 'package:smart_hospital_app/core/constants/app_colors.dart';
 import 'package:smart_hospital_app/presentation/screens/auth/role_selection_screen.dart';
@@ -29,20 +28,20 @@ class WelcomeScreen extends StatelessWidget {
               children: [
                 const Spacer(),
                 
-                // Logo and App Name
-                Icon(
+                const Icon(
                   Icons.local_hospital_rounded,
                   size: 100,
                   color: Colors.white,
                 ),
                 const SizedBox(height: 24),
                 
-                Text(
+                const Text(
                   'MedMap AI',
                   textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.displayLarge?.copyWith(
-                    color: Colors.white,
+                  style: TextStyle(
+                    fontSize: 40,
                     fontWeight: FontWeight.bold,
+                    color: Colors.white,
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -50,13 +49,13 @@ class WelcomeScreen extends StatelessWidget {
                 Text(
                   'Smart Hospital System',
                   textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  style: TextStyle(
+                    fontSize: 18,
                     color: Colors.white.withOpacity(0.9),
                   ),
                 ),
                 const SizedBox(height: 48),
                 
-                // Features
                 _buildFeature(context, Icons.map, 'Real-time Hospital Mapping'),
                 const SizedBox(height: 16),
                 _buildFeature(context, Icons.analytics, 'AI-Powered Analytics'),
@@ -65,7 +64,6 @@ class WelcomeScreen extends StatelessWidget {
                 
                 const Spacer(),
                 
-                // Get Started Button
                 ElevatedButton(
                   onPressed: () {
                     Navigator.push(
@@ -83,17 +81,16 @@ class WelcomeScreen extends StatelessWidget {
                       borderRadius: BorderRadius.circular(16),
                     ),
                   ),
-                  child: Text(
+                  child: const Text(
                     'Get Started',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: AppColors.primary,
+                    style: TextStyle(
+                      fontSize: 16,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                 ),
                 const SizedBox(height: 16),
                 
-                // Login Link
                 TextButton(
                   onPressed: () {
                     Navigator.push(
@@ -134,8 +131,9 @@ class WelcomeScreen extends StatelessWidget {
         Expanded(
           child: Text(
             text,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+            style: const TextStyle(
               color: Colors.white,
+              fontSize: 16,
             ),
           ),
         ),

@@ -1,6 +1,6 @@
-// lib/presentation/providers/auth_provider.dart
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/legacy.dart';
 import 'package:smart_hospital_app/data/models/user_model.dart';
 import 'package:smart_hospital_app/data/models/user_type.dart';
 import 'package:smart_hospital_app/services/auth_service.dart';
@@ -8,12 +8,12 @@ import 'package:smart_hospital_app/services/auth_service.dart';
 // Auth service provider
 final authServiceProvider = Provider<AuthService>((ref) => AuthService());
 
-// Auth state provider
+// Auth state provider - Stream of Firebase User
 final authStateProvider = StreamProvider<User?>((ref) {
   return ref.watch(authServiceProvider).authStateChanges;
 });
 
-// Current user data provider
+// Current user data provider - Stream of UserModel
 final currentUserProvider = StreamProvider<UserModel?>((ref) async* {
   final authState = ref.watch(authStateProvider);
   
@@ -27,19 +27,24 @@ final currentUserProvider = StreamProvider<UserModel?>((ref) async* {
   }
 });
 
-// Auth controller
-class AuthController extends StateNotifier<AsyncValue<UserModel?>> {
+extension on AsyncValue<User?> {
+  get stream => null;
+}
+
+// Auth controller with proper StateNotifier
+class AuthController extends StateNotifier<AsyncValue<void>> {
   final AuthService _authService;
 
-  AuthController(this._authService) : super(const AsyncValue.loading());
+  AuthController(this._authService) : super(const AsyncValue.data(null));
 
   Future<void> signIn(String email, String password) async {
     state = const AsyncValue.loading();
     try {
-      final user = await _authService.signInWithEmail(email, password);
-      state = AsyncValue.data(user);
+      await _authService.signInWithEmail(email, password);
+      state = const AsyncValue.data(null);
     } catch (e, stack) {
       state = AsyncValue.error(e, stack);
+      rethrow;
     }
   }
 
@@ -53,7 +58,7 @@ class AuthController extends StateNotifier<AsyncValue<UserModel?>> {
   }) async {
     state = const AsyncValue.loading();
     try {
-      final user = await _authService.registerWithEmail(
+      await _authService.registerWithEmail(
         email: email,
         password: password,
         fullName: fullName,
@@ -61,9 +66,10 @@ class AuthController extends StateNotifier<AsyncValue<UserModel?>> {
         phoneNumber: phoneNumber,
         additionalData: additionalData,
       );
-      state = AsyncValue.data(user);
+      state = const AsyncValue.data(null);
     } catch (e, stack) {
       state = AsyncValue.error(e, stack);
+      rethrow;
     }
   }
 
@@ -73,11 +79,16 @@ class AuthController extends StateNotifier<AsyncValue<UserModel?>> {
   }
 
   Future<void> resetPassword(String email) async {
-    await _authService.resetPassword(email);
+    try {
+      await _authService.resetPassword(email);
+    } catch (e, stack) {
+      state = AsyncValue.error(e, stack);
+      rethrow;
+    }
   }
 }
 
 final authControllerProvider =
-    StateNotifierProvider<AuthController, AsyncValue<UserModel?>>((ref) {
+    StateNotifierProvider<AuthController, AsyncValue<void>>((ref) {
   return AuthController(ref.watch(authServiceProvider));
 });

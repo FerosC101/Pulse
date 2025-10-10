@@ -1,4 +1,3 @@
-// lib/presentation/screens/auth/role_selection_screen.dart
 import 'package:flutter/material.dart';
 import 'package:smart_hospital_app/core/constants/app_colors.dart';
 import 'package:smart_hospital_app/data/models/user_type.dart';
@@ -33,13 +32,13 @@ class RoleSelectionScreen extends StatelessWidget {
                 isLogin
                     ? 'Choose your account type to continue'
                     : 'How would you like to use MedMap AI?',
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                style: const TextStyle(
+                  fontSize: 18,
                   color: AppColors.textSecondary,
                 ),
               ),
               const SizedBox(height: 32),
               
-              // Role Cards
               Expanded(
                 child: ListView(
                   children: [

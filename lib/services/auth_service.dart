@@ -1,4 +1,3 @@
-// lib/services/auth_service.dart
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:smart_hospital_app/data/models/user_model.dart';
@@ -8,10 +7,7 @@ class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  // Get current user
   User? get currentUser => _auth.currentUser;
-
-  // Auth state changes
   Stream<User?> get authStateChanges => _auth.authStateChanges();
 
   // Sign in with email and password
@@ -23,12 +19,10 @@ class AuthService {
       );
 
       if (result.user != null) {
-        // Update last login
         await _firestore.collection('users').doc(result.user!.uid).update({
           'lastLogin': FieldValue.serverTimestamp(),
         });
 
-        // Get user data
         return await getUserData(result.user!.uid);
       }
       return null;
@@ -53,7 +47,6 @@ class AuthService {
       );
 
       if (result.user != null) {
-        // Create user document
         final userData = {
           'email': email,
           'fullName': fullName,
@@ -69,7 +62,6 @@ class AuthService {
             .doc(result.user!.uid)
             .set(userData);
 
-        // Update display name
         await result.user!.updateDisplayName(fullName);
 
         return await getUserData(result.user!.uid);
@@ -122,6 +114,8 @@ class AuthService {
         return 'Password is too weak.';
       case 'operation-not-allowed':
         return 'Operation not allowed.';
+      case 'invalid-credential':
+        return 'Invalid credentials provided.';
       default:
         return 'An error occurred. Please try again.';
     }
