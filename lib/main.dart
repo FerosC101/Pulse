@@ -1,57 +1,37 @@
+// lib/main.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'firebase_options.dart'; // Import the generated file
 import 'package:smart_hospital_app/core/themes/app_theme.dart';
-import 'package:smart_hospital_app/presentation/screens/splash/splash_screen.dart';
+import 'package:smart_hospital_app/data/models/user_type.dart';
+import 'package:smart_hospital_app/presentation/providers/auth_provider.dart';
 import 'package:smart_hospital_app/presentation/screens/auth/welcome_screen.dart';
 import 'package:smart_hospital_app/presentation/screens/home/home_screen.dart';
-import 'package:smart_hospital_app/presentation/providers/auth_provider.dart';
+import 'package:smart_hospital_app/presentation/screens/staff/staff_dashboard_screen.dart';
+import 'package:smart_hospital_app/presentation/screens/splash/splash_screen.dart';
+import 'firebase_options.dart'; // ✅ Make sure this exists
 
-void main() {
-  runApp(const MyApp());
-}
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return FutureBuilder(
-      // Initialize Firebase before app starts
-      future: Firebase.initializeApp(
-        options: DefaultFirebaseOptions.currentPlatform,
-      ),
-      builder: (context, snapshot) {
-        // Check for errors
-        if (snapshot.hasError) {
-          return MaterialApp(
-            home: Scaffold(
-              body: Center(
-                child: Text('Error initializing Firebase: ${snapshot.error}'),
-              ),
-            ),
-          );
-        }
-
-        // Once complete, show app
-        if (snapshot.connectionState == ConnectionState.done) {
-          return const ProviderScope(
-            child: AppRoot(),
-          );
-        }
-
-        // Otherwise, show loading indicator
-        return const MaterialApp(
-          home: SplashScreen(),
-        );
-      },
+  try {
+    // ✅ Initialize Firebase with correct platform-specific config
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
     );
+  } catch (e) {
+    debugPrint('🔥 Firebase initialization error: $e');
   }
+
+  runApp(
+    const ProviderScope(
+      child: MyApp(),
+    ),
+  );
 }
 
-class AppRoot extends ConsumerWidget {
-  const AppRoot({super.key});
+class MyApp extends ConsumerWidget {
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -64,17 +44,45 @@ class AppRoot extends ConsumerWidget {
       home: authState.when(
         data: (user) {
           if (user != null) {
-            return const HomeScreen();
+            return Consumer(
+              builder: (context, ref, child) {
+                final userDataAsync = ref.watch(currentUserProvider);
+
+                return userDataAsync.when(
+                  data: (userData) {
+
+                    debugPrint('User data loaded: ${userData?.toMap()}');
+                    debugPrint('User type: ${userData?.userType}');
+                    if (userData == null) {
+                      debugPrint('⚠️ User data is null, redirecting to welcome');
+                      return const WelcomeScreen();
+                    }
+
+                    // ✅ Route based on user type
+                    switch (userData.userType) {
+                      case UserType.hospitalStaff:
+                        return StaffDashboardScreen();
+                      case UserType.doctor:
+                        return const StaffDashboardScreen();
+                      case UserType.patient:
+                        return const HomeScreen();
+                    }
+                  },
+                  loading: () => const SplashScreen(),
+                  error: (error, stack) {
+                    debugPrint('User data error: $error');
+                    return const WelcomeScreen();
+                  },
+                );
+              },
+            );
           }
           return const WelcomeScreen();
         },
         loading: () => const SplashScreen(),
         error: (error, stack) {
-          return Scaffold(
-            body: Center(
-              child: Text('Auth error: $error'),
-            ),
-          );
+          debugPrint('Auth error: $error');
+          return const WelcomeScreen();
         },
       ),
     );
