@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:smart_hospital_app/core/constants/app_colors.dart';
 import 'package:smart_hospital_app/data/models/user_type.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:smart_hospital_app/presentation/providers/auth_provider.dart';
 import 'package:smart_hospital_app/presentation/screens/auth/login_screen.dart';
 import 'package:smart_hospital_app/presentation/screens/auth/widgets/auth_text_field.dart';
@@ -35,6 +36,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   // Hospital Staff-specific
   final _positionController = TextEditingController();
   final _departmentController = TextEditingController();
+  String? _selectedHospitalId;
+  String? _selectedHospitalName;
   
   // Patient-specific
   final _addressController = TextEditingController();
@@ -48,6 +51,30 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   final List<String> _bloodTypes = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
 
   @override
+  void initState() {
+    super.initState();
+    // Fetch hospitals if registering hospital staff so dropdown has initial data
+    if (widget.userType == UserType.hospitalStaff) {
+      _fetchHospitals();
+    }
+  }
+
+  Future<void> _fetchHospitals() async {
+    try {
+      final snap = await FirebaseFirestore.instance.collection('hospitals').limit(1).get();
+      if (snap.docs.isNotEmpty && _selectedHospitalId == null) {
+        final doc = snap.docs.first;
+        final data = (doc.data() as Map<String, dynamic>?) ?? <String, dynamic>{};
+        setState(() {
+          _selectedHospitalId = doc.id;
+          _selectedHospitalName = data['name'] as String?;
+        });
+      }
+    } catch (_) {
+      // ignore errors here; StreamBuilder will handle live data
+    }
+  }
+
   void dispose() {
     _fullNameController.dispose();
     _emailController.dispose();
@@ -91,6 +118,15 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           additionalData = {
             'position': _positionController.text.trim(),
             'department': _departmentController.text.trim(),
+            'staffHospitalId': _selectedHospitalId,
+            'staffHospitalName': _selectedHospitalName,
+            'permissions': ['bed_management', 'patient_management', 'queue_management'],
+          };
+          break;
+        case UserType.admin:
+          additionalData = {
+            'permissions': ['full_access'],
+            'isSystemAdmin': true,
           };
           break;
         case UserType.patient:
@@ -474,10 +510,83 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
       case UserType.hospitalStaff:
         return [
+          // Hospital selection + position/department
+          StreamBuilder<QuerySnapshot>(
+            stream: FirebaseFirestore.instance.collection('hospitals').snapshots(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              }
+
+              if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                return Column(
+                  children: [
+                    const Text(
+                      'No hospitals available. Please contact admin.',
+                      style: TextStyle(color: AppColors.error),
+                    ),
+                    const SizedBox(height: 16),
+                  ],
+                );
+              }
+
+              final hospitals = snapshot.data!.docs;
+
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Select Hospital',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  DropdownButtonFormField<String>(
+                    value: _selectedHospitalId,
+                    decoration: InputDecoration(
+                      hintText: 'Choose your hospital',
+                      prefixIcon: const Icon(Icons.local_hospital),
+                      filled: true,
+                      fillColor: Colors.white,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: Colors.grey.shade300),
+                      ),
+                    ),
+                    items: hospitals.map((doc) {
+                      final data = (doc.data() as Map<String, dynamic>?) ?? <String, dynamic>{};
+                      return DropdownMenuItem(
+                        value: doc.id,
+                        child: Text(data['name'] ?? 'Unknown Hospital'),
+                      );
+                    }).toList(),
+                    onChanged: (value) {
+                      setState(() {
+                        _selectedHospitalId = value;
+                        final hospitalDoc = hospitals.firstWhere((doc) => doc.id == value);
+                        final data = (hospitalDoc.data() as Map<String, dynamic>?) ?? <String, dynamic>{};
+                        _selectedHospitalName = data['name'] as String?;
+                      });
+                    },
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please select your hospital';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                ],
+              );
+            },
+          ),
           AuthTextField(
             controller: _positionController,
             label: 'Position',
-            hint: 'e.g., Administrator, Nurse',
+            hint: 'e.g., Nurse, Receptionist',
             prefixIcon: Icons.work_outline,
             validator: (value) {
               if (value == null || value.isEmpty) {
@@ -500,6 +609,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             },
           ),
         ];
+
+      case UserType.admin:
+        // Admin-specific fields can be added here, for now none required
+        return [];
 
       case UserType.patient:
         return [

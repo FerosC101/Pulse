@@ -27,6 +27,7 @@ class UserModel {
   
   // Hospital Staff-specific fields
   final String? staffHospitalId;
+  final String? staffHospitalName;  
   final String? department;
   final String? position;
   final List<String>? permissions;
@@ -51,6 +52,7 @@ class UserModel {
     this.qualifications,
     this.yearsOfExperience,
     this.staffHospitalId,
+    this.staffHospitalName,
     this.department,
     this.position,
     this.permissions,
@@ -107,6 +109,7 @@ class UserModel {
           : null,
       yearsOfExperience: data['yearsOfExperience'],
       staffHospitalId: data['staffHospitalId'],
+      staffHospitalName: data['staffHospitalName'],
       department: data['department'],
       position: data['position'],
       permissions: data['permissions'] != null 
@@ -135,6 +138,7 @@ class UserModel {
       if (qualifications != null) 'qualifications': qualifications,
       if (yearsOfExperience != null) 'yearsOfExperience': yearsOfExperience,
       if (staffHospitalId != null) 'staffHospitalId': staffHospitalId,
+      if (staffHospitalName != null) 'staffHospitalName': staffHospitalName,
       if (department != null) 'department': department,
       if (position != null) 'position': position,
       if (permissions != null) 'permissions': permissions,

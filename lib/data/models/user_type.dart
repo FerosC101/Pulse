@@ -1,7 +1,9 @@
+// lib/data/models/user_type.dart
 enum UserType {
   patient,
   doctor,
-  hospitalStaff;
+  hospitalStaff,
+  admin; // NEW
 
   String get displayName {
     switch (this) {
@@ -11,6 +13,8 @@ enum UserType {
         return 'Doctor';
       case UserType.hospitalStaff:
         return 'Hospital Staff';
+      case UserType.admin:
+        return 'System Administrator';
     }
   }
 
@@ -21,7 +25,9 @@ enum UserType {
       case UserType.doctor:
         return 'Manage schedules, view patients, and collaborate with hospitals';
       case UserType.hospitalStaff:
-        return 'Manage hospital operations, bed capacity, and resources';
+        return 'Manage hospital beds, patients, and daily operations';
+      case UserType.admin:
+        return 'Full system access - manage all hospitals and users';
     }
   }
 
@@ -32,16 +38,12 @@ enum UserType {
       case UserType.doctor:
         return '👨‍⚕️';
       case UserType.hospitalStaff:
-        return '🏥';
+        return '👔';
+      case UserType.admin:
+        return '⚙️';
     }
   }
 
-  /// Parse a [String] coming from storage (Firestore, API) into a [UserType].
-  ///
-  /// This is tolerant of common formats such as:
-  /// - enum name: "hospitalStaff"
-  /// - snake/case/space variants: "hospital_staff", "Hospital Staff"
-  /// - short forms like "staff"
   static UserType fromString(String? value) {
     if (value == null) return UserType.patient;
 

@@ -1,331 +1,215 @@
-// lib/presentation/screens/staff/staff_dashboard_screen.dart
-// ignore_for_file: deprecated_member_use
-
+// lib/presentation/screens/staff/staff_dashboard_screen.dart (COMPLETE NEW VERSION)
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:smart_hospital_app/core/constants/app_colors.dart';
 import 'package:smart_hospital_app/presentation/providers/auth_provider.dart';
-import 'package:smart_hospital_app/presentation/providers/hospital_provider.dart';
 import 'package:smart_hospital_app/presentation/screens/auth/welcome_screen.dart';
-import 'package:smart_hospital_app/presentation/screens/staff/hospital_management_screen.dart';
-import 'package:smart_hospital_app/presentation/screens/staff/bed_management_screen.dart';
-import 'package:smart_hospital_app/presentation/screens/staff/doctor_management_screen.dart';
+import 'package:smart_hospital_app/presentation/screens/staff/tabs/overview_tab.dart';
+import 'package:smart_hospital_app/presentation/screens/staff/tabs/bed_status_tab.dart';
+import 'package:smart_hospital_app/presentation/screens/staff/tabs/queue_tab.dart';
 
-class StaffDashboardScreen extends ConsumerWidget {
+class StaffDashboardScreen extends ConsumerStatefulWidget {
   const StaffDashboardScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<StaffDashboardScreen> createState() => _StaffDashboardScreenState();
+}
+
+class _StaffDashboardScreenState extends ConsumerState<StaffDashboardScreen> {
+  int _currentIndex = 0;
+
+  @override
+  Widget build(BuildContext context) {
     final userAsync = ref.watch(currentUserProvider);
-    final hospitalsAsync = ref.watch(hospitalsStreamProvider);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Staff Dashboard'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: () async {
-              await ref.read(authControllerProvider.notifier).signOut();
-              if (context.mounted) {
-                Navigator.of(context).pushAndRemoveUntil(
-                  MaterialPageRoute(builder: (context) => const WelcomeScreen()),
-                  (route) => false,
-                );
-              }
-            },
-          ),
-        ],
-      ),
-      body: userAsync.when(
-        data: (user) {
-          if (user == null) return const Center(child: Text('No user data'));
+    return userAsync.when(
+      data: (user) {
+        if (user == null) {
+          return const Scaffold(
+            body: Center(child: Text('No user data')),
+          );
+        }
 
-          return SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
-            child: Column(
+        // Check if staff has hospital assigned
+        if (user.staffHospitalId == null) {
+          return Scaffold(
+            appBar: AppBar(
+              title: const Text('Error'),
+              backgroundColor: AppColors.error,
+            ),
+            body: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(
+                    Icons.error_outline,
+                    size: 80,
+                    color: AppColors.error,
+                  ),
+                  const SizedBox(height: 16),
+                  const Text(
+                    'No Hospital Assigned',
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  const Text(
+                    'Please contact your administrator to assign you to a hospital.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                  const SizedBox(height: 32),
+                  ElevatedButton(
+                    onPressed: () async {
+                      await ref.read(authControllerProvider.notifier).signOut();
+                      if (context.mounted) {
+                        Navigator.of(context).pushAndRemoveUntil(
+                          MaterialPageRoute(
+                            builder: (context) => const WelcomeScreen(),
+                          ),
+                          (route) => false,
+                        );
+                      }
+                    },
+                    child: const Text('Logout'),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+
+        // Create tabs with hospital ID
+        final tabs = [
+          OverviewTab(hospitalId: user.staffHospitalId!),
+          BedStatusTab(hospitalId: user.staffHospitalId!),
+          QueueTab(hospitalId: user.staffHospitalId!),
+        ];
+
+        return Scaffold(
+          appBar: AppBar(
+            title: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Welcome Section
-                Text(
-                  'Welcome, ${user.fullName}',
-                  style: const TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  '${user.position} • ${user.department}',
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-                const SizedBox(height: 32),
-
-                // Statistics Cards
-                hospitalsAsync.when(
-                  data: (hospitals) {
-                    int totalBeds = 0;
-                    int occupiedBeds = 0;
-          for (var hospital in hospitals) {
-                      totalBeds += hospital.status.icuTotal +
-                          hospital.status.erTotal +
-                          hospital.status.wardTotal;
-                      occupiedBeds += hospital.status.icuOccupied +
-                          hospital.status.erOccupied +
-                          hospital.status.wardOccupied;
-                    }
-
-                    return Column(
-                      children: [
-                        Row(
-                          children: [
-                            Expanded(
-                              child: _StatCard(
-                                title: 'Total Hospitals',
-                                value: hospitals.length.toString(),
-                                icon: Icons.local_hospital,
-                                color: AppColors.primary,
-                              ),
-                            ),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: _StatCard(
-                                title: 'Total Beds',
-                                value: totalBeds.toString(),
-                                icon: Icons.bed,
-                                color: AppColors.info,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 16),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: _StatCard(
-                                title: 'Occupied',
-                                value: occupiedBeds.toString(),
-                                icon: Icons.person,
-                                color: AppColors.warning,
-                              ),
-                            ),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: _StatCard(
-                                title: 'Available',
-                                value: (totalBeds - occupiedBeds).toString(),
-                                icon: Icons.check_circle,
-                                color: AppColors.success,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    );
-                  },
-                  loading: () => const Center(child: CircularProgressIndicator()),
-                  error: (error, _) => Text('Error: $error'),
-                ),
-                const SizedBox(height: 32),
-
-                // Management Options
                 const Text(
-                  'Management',
+                  'Staff Portal',
                   style: TextStyle(
-                    fontSize: 20,
+                    fontSize: 18,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                const SizedBox(height: 16),
-
-                _ManagementCard(
-                  title: 'Hospital Management',
-                  subtitle: 'Add, edit, or remove hospitals',
-                  icon: Icons.local_hospital,
-                  color: AppColors.primary,
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const HospitalManagementScreen(),
-                      ),
-                    );
-                  },
-                ),
-                const SizedBox(height: 16),
-
-                _ManagementCard(
-                  title: 'Bed Status Management',
-                  subtitle: 'Update bed availability in real-time',
-                  icon: Icons.bed,
-                  color: AppColors.info,
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const BedManagementScreen(),
-                      ),
-                    );
-                  },
-                ),
-                const SizedBox(height: 16),
-
-                _ManagementCard(
-                  title: 'Doctor Management',
-                  subtitle: 'Manage doctor profiles and schedules',
-                  icon: Icons.medical_services,
-                  color: AppColors.success,
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const DoctorManagementScreen(),
-                      ),
-                    );
-                  },
+                Text(
+                  user.staffHospitalName ?? 'Hospital',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.white.withOpacity(0.9),
+                    fontWeight: FontWeight.normal,
+                  ),
                 ),
               ],
             ),
-          );
-        },
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => Center(child: Text('Error: $error')),
-      ),
-    );
-  }
-}
-
-// Stat Card Widget
-class _StatCard extends StatelessWidget {
-  final String title;
-  final String value;
-  final IconData icon;
-  final Color color;
-
-  const _StatCard({
-    required this.title,
-    required this.value,
-    required this.icon,
-    required this.color,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.notifications_outlined),
+                onPressed: () {
+                  // TODO: Show notifications
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Notifications feature coming soon'),
+                    ),
+                  );
+                },
+              ),
+              PopupMenuButton(
+                icon: const Icon(Icons.more_vert),
+                itemBuilder: (context) => [
+                  PopupMenuItem(
+                    child: ListTile(
+                      leading: const Icon(Icons.person),
+                      title: const Text('Profile'),
+                      onTap: () {
+                        Navigator.pop(context);
+                        // TODO: Navigate to profile
+                      },
+                    ),
+                  ),
+                  PopupMenuItem(
+                    child: ListTile(
+                      leading: const Icon(Icons.settings),
+                      title: const Text('Settings'),
+                      onTap: () {
+                        Navigator.pop(context);
+                        // TODO: Navigate to settings
+                      },
+                    ),
+                  ),
+                  PopupMenuItem(
+                    child: ListTile(
+                      leading: const Icon(Icons.logout, color: AppColors.error),
+                      title: const Text(
+                        'Logout',
+                        style: TextStyle(color: AppColors.error),
+                      ),
+                      onTap: () async {
+                        Navigator.pop(context);
+                        await ref.read(authControllerProvider.notifier).signOut();
+                        if (context.mounted) {
+                          Navigator.of(context).pushAndRemoveUntil(
+                            MaterialPageRoute(
+                              builder: (context) => const WelcomeScreen(),
+                            ),
+                            (route) => false,
+                          );
+                        }
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Icon(icon, color: color, size: 24),
+          body: tabs[_currentIndex],
+          bottomNavigationBar: BottomNavigationBar(
+            currentIndex: _currentIndex,
+            onTap: (index) => setState(() => _currentIndex = index),
+            selectedItemColor: AppColors.primary,
+            unselectedItemColor: AppColors.textSecondary,
+            items: const [
+              BottomNavigationBarItem(
+                icon: Icon(Icons.dashboard_outlined),
+                activeIcon: Icon(Icons.dashboard),
+                label: 'Overview',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.bed_outlined),
+                activeIcon: Icon(Icons.bed),
+                label: 'Bed Status',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.queue_outlined),
+                activeIcon: Icon(Icons.queue),
+                label: 'Queue',
+              ),
+            ],
           ),
-          const SizedBox(height: 12),
-          Text(
-            value,
-            style: const TextStyle(
-              fontSize: 28,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            title,
-            style: const TextStyle(
-              fontSize: 12,
-              color: AppColors.textSecondary,
-            ),
-          ),
-        ],
+        );
+      },
+      loading: () => const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
       ),
-    );
-  }
-}
-
-// Management Card Widget
-class _ManagementCard extends StatelessWidget {
-  final String title;
-  final String subtitle;
-  final IconData icon;
-  final Color color;
-  final VoidCallback onTap;
-
-  const _ManagementCard({
-    required this.title,
-    required this.subtitle,
-    required this.icon,
-    required this.color,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Row(
+      error: (error, _) => Scaffold(
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: color.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(icon, color: color, size: 28),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      subtitle,
-                      style: const TextStyle(
-                        fontSize: 13,
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const Icon(
-                Icons.arrow_forward_ios,
-                size: 18,
-                color: AppColors.textSecondary,
-              ),
+              const Icon(Icons.error, size: 60, color: AppColors.error),
+              const SizedBox(height: 16),
+              Text('Error: $error'),
             ],
           ),
         ),

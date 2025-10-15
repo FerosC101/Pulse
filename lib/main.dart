@@ -2,26 +2,31 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 import 'package:smart_hospital_app/core/themes/app_theme.dart';
 import 'package:smart_hospital_app/data/models/user_type.dart';
 import 'package:smart_hospital_app/presentation/providers/auth_provider.dart';
 import 'package:smart_hospital_app/presentation/screens/auth/welcome_screen.dart';
 import 'package:smart_hospital_app/presentation/screens/home/home_screen.dart';
 import 'package:smart_hospital_app/presentation/screens/staff/staff_dashboard_screen.dart';
+import 'package:smart_hospital_app/presentation/screens/admin/admin_dashboard_screen.dart';
 import 'package:smart_hospital_app/presentation/screens/splash/splash_screen.dart';
-import 'firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
+  
   try {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
+    // remove debug prints in production; keep as info for init
+    // ignore: avoid_print
+    print('✅ Firebase initialized successfully');
   } catch (e) {
-    debugPrint('🔥 Firebase initialization error: $e');
+    // ignore: avoid_print
+    print('❌ Firebase initialization error: $e');
   }
-
+  
   runApp(
     const ProviderScope(
       child: MyApp(),
@@ -34,57 +39,87 @@ class MyApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final authState = ref.watch(authStateProvider);
-
     return MaterialApp(
       title: 'MedMap AI',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
-      home: authState.when(
-        data: (user) {          
-          if (user != null) {
-            return Consumer(
-              builder: (context, ref, child) {
-                final userDataAsync = ref.watch(currentUserProvider);
+      home: const AuthWrapper(),
+    );
+  }
+}
 
-                return userDataAsync.when(
-                  data: (userData) {
+class AuthWrapper extends ConsumerWidget {
+  const AuthWrapper({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final authState = ref.watch(authStateProvider);
+
+    return authState.when(
+      data: (user) {
+        if (user == null) {
+          print('❌ No user - showing WelcomeScreen');
+          return const WelcomeScreen();
+        }
+
+        print('✅ User logged in: ${user.email}');
+        
+        final userDataAsync = ref.watch(currentUserProvider);
+        
+        return userDataAsync.when(
+          data: (userData) {
+            if (userData == null) {
+              print('❌ No user data - showing WelcomeScreen');
+              return const WelcomeScreen();
+            }
+
+            print('👤 User Type: ${userData.userType.name}');
             
-                    if (userData == null) {
-                      return const WelcomeScreen();
-                    }
-                    
-                    switch (userData.userType) {
-                      case UserType.hospitalStaff:
-                        return const StaffDashboardScreen();
-                        
-                      case UserType.doctor:
-                        return const HomeScreen();
-                        
-                      case UserType.patient:
-                        return const HomeScreen();
-                    }
-                  },
-                  loading: () {
-                    return const SplashScreen();
-                  },
-                  error: (error, stack) {
-                    return const WelcomeScreen();
-                  },
-                );
-              },
-            );
-          }
-          
-          return const WelcomeScreen();
-        },
-        loading: () {
-          return const SplashScreen();
-        },
-        error: (error, stack) {
-          return const WelcomeScreen();
-        },
-      ),
+            // Route based on user type
+            switch (userData.userType) {
+              case UserType.admin:
+                print('🔧 Routing to AdminDashboardScreen');
+                return const AdminDashboardScreen();
+                
+              case UserType.hospitalStaff:
+                print('👔 Routing to StaffDashboardScreen');
+                if (userData.staffHospitalId == null) {
+                  return Scaffold(
+                    appBar: AppBar(title: const Text('Error')),
+                    body: const Center(
+                      child: Text('No hospital assigned. Contact admin.'),
+                    ),
+                  );
+                }
+                return const StaffDashboardScreen();
+                
+              case UserType.doctor:
+                print('👨‍⚕️ Routing to HomeScreen (Doctor)');
+                return const HomeScreen();
+                
+              case UserType.patient:
+                print('👤 Routing to HomeScreen (Patient)');
+                return const HomeScreen();
+            }
+          },
+          loading: () {
+            print('⏳ Loading user data...');
+            return const SplashScreen();
+          },
+          error: (error, stack) {
+            print('❌ User data error: $error');
+            return const WelcomeScreen();
+          },
+        );
+      },
+      loading: () {
+        print('⏳ Loading auth state...');
+        return const SplashScreen();
+      },
+      error: (error, stack) {
+        print('❌ Auth state error: $error');
+        return const WelcomeScreen();
+      },
     );
   }
 }
