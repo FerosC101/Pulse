@@ -8,6 +8,7 @@ import 'package:smart_hospital_app/presentation/screens/auth/login_screen.dart';
 import 'package:smart_hospital_app/presentation/screens/auth/widgets/auth_text_field.dart';
 import 'package:smart_hospital_app/presentation/screens/home/home_screen.dart';
 import 'package:smart_hospital_app/presentation/screens/staff/staff_dashboard_screen.dart';
+import 'package:smart_hospital_app/presentation/screens/admin/admin_dashboard_screen.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
   final UserType userType;
@@ -160,7 +161,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           if (userData != null) {
             final Widget target = userData.userType == UserType.hospitalStaff
                 ? StaffDashboardScreen()
-                : const HomeScreen();
+                : (userData.userType == UserType.admin
+                    ? const AdminDashboardScreen()
+                    : const HomeScreen());
 
             Navigator.of(context).pushAndRemoveUntil(
               MaterialPageRoute(builder: (context) => target),
@@ -187,9 +190,11 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             return;
           }
 
-          final Widget target = userData.userType == UserType.hospitalStaff
-              ? StaffDashboardScreen()
-              : const HomeScreen();
+      final Widget target = userData.userType == UserType.hospitalStaff
+        ? StaffDashboardScreen()
+        : (userData.userType == UserType.admin
+          ? const AdminDashboardScreen()
+          : const HomeScreen());
 
           Navigator.of(context).pushAndRemoveUntil(
             MaterialPageRoute(builder: (context) => target),

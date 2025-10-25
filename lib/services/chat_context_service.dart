@@ -1,6 +1,5 @@
-// lib/services/chat_context_service.dart
+// lib/services/chat_context_service.dart (UPDATE)
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/foundation.dart';
 
 class ChatContextService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -10,6 +9,7 @@ class ChatContextService {
     try {
       final hospitalsSnapshot = await _firestore
           .collection('hospitals')
+          .where('status.isOperational', isEqualTo: true)
           .limit(5)
           .get();
 
@@ -17,32 +17,53 @@ class ChatContextService {
         return {
           'nearbyHospitals': 'No hospitals found in database',
           'availableBeds': 0,
+          'hospitalCount': 0,
         };
       }
 
-      List<String> hospitalNames = [];
-      int totalAvailableBeds = 0;
+      List<Map<String, dynamic>> hospitalsList = [];
+      num totalIcuAvailable = 0;
+      num totalErAvailable = 0;
+      num totalWardAvailable = 0;
 
       for (var doc in hospitalsSnapshot.docs) {
         final data = doc.data();
-        hospitalNames.add(data['name'] ?? 'Unknown Hospital');
-        
         final status = data['status'] as Map<String, dynamic>?;
+        
         if (status != null) {
-          totalAvailableBeds += ((status['icuTotal'] ?? 0) - (status['icuOccupied'] ?? 0) as num).toInt();
+          final icuAvailable = (status['icuTotal'] ?? 0) - (status['icuOccupied'] ?? 0);
+          final erAvailable = (status['erTotal'] ?? 0) - (status['erOccupied'] ?? 0);
+          final wardAvailable = (status['wardTotal'] ?? 0) - (status['wardOccupied'] ?? 0);
+          
+          totalIcuAvailable += icuAvailable;
+          totalErAvailable += erAvailable;
+          totalWardAvailable += wardAvailable;
+          
+          hospitalsList.add({
+            'name': data['name'],
+            'icuAvailable': icuAvailable,
+            'erAvailable': erAvailable,
+            'wardAvailable': wardAvailable,
+            'waitTime': status['waitTimeMinutes'] ?? 0,
+          });
         }
       }
 
       return {
-        'nearbyHospitals': hospitalNames.join(', '),
-        'availableBeds': totalAvailableBeds,
         'hospitalCount': hospitalsSnapshot.docs.length,
+        'hospitals': hospitalsList,
+        'totalIcuAvailable': totalIcuAvailable,
+        'totalErAvailable': totalErAvailable,
+        'totalWardAvailable': totalWardAvailable,
+        'nearbyHospitals': hospitalsList.map((h) => h['name']).join(', '),
       };
     } catch (e) {
-      debugPrint('Error fetching hospital context: $e');
+      print('Error fetching hospital context: $e');
       return {
         'nearbyHospitals': 'Unable to fetch hospital data',
         'availableBeds': 0,
+        'hospitalCount': 0,
+        'error': e.toString(),
       };
     }
   }
@@ -64,7 +85,7 @@ class ChatContextService {
         'timestamp': FieldValue.serverTimestamp(),
       });
     } catch (e) {
-      debugPrint('Error saving chat message: $e');
+      print('Error saving chat message: $e');
     }
   }
 
