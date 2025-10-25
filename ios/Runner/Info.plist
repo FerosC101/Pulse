@@ -42,14 +42,14 @@
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
 	
-	<!-- Location permissions -->
+	<!-- ios/Runner/Info.plist -->
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>We need your location to find nearby hospitals</string>
+	<string>MedMap AI needs your location to find the nearest hospitals and provide accurate distance information.</string>
 	<key>NSLocationAlwaysUsageDescription</key>
-	<string>We need your location for emergency routing</string>
+	<string>MedMap AI needs your location for emergency routing and finding nearby medical facilities.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>We need your location to provide hospital services</string>
-	
+	<string>MedMap AI needs your location to help you find nearby hospitals quickly in case of emergencies.</string>
+		
 	<!-- Camera permission -->
 	<key>NSCameraUsageDescription</key>
 	<string>We need camera access to update your profile picture</string>

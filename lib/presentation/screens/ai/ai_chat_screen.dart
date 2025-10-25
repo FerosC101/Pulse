@@ -8,6 +8,7 @@ import 'package:smart_hospital_app/presentation/providers/chat_provider.dart';
 import 'package:smart_hospital_app/presentation/screens/ai/widgets/chat_bubble.dart';
 import 'package:smart_hospital_app/presentation/screens/ai/widgets/typing_indicator.dart';
 import 'package:smart_hospital_app/presentation/screens/ai/widgets/quick_action_button.dart';
+import 'package:smart_hospital_app/services/location_service.dart';
 
 class AIChatScreen extends ConsumerStatefulWidget {
   const AIChatScreen({super.key});
@@ -132,6 +133,55 @@ class _AIChatScreenState extends ConsumerState<AIChatScreen> {
       ),
       body: Column(
         children: [
+          // Location Status Banner
+          Consumer(
+            builder: (context, ref, child) {
+              final chatState = ref.watch(chatControllerProvider);
+
+              if (!chatState.hasLocation) {
+                return Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(12),
+                  color: AppColors.warning.withOpacity(0.1),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.location_off,
+                        size: 20,
+                        color: AppColors.warning,
+                      ),
+                      const SizedBox(width: 8),
+                      const Expanded(
+                        child: Text(
+                          'Location disabled. Enable for accurate distance information.',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: AppColors.warning,
+                          ),
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: () async {
+                          // Request location permission
+                          final locationService = LocationService();
+                          await locationService.requestPermission();
+                          // Refresh chat
+                          ref.read(chatControllerProvider.notifier).resetChat();
+                        },
+                        child: const Text(
+                          'Enable',
+                          style: TextStyle(fontSize: 12),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }
+
+              return const SizedBox.shrink();
+            },
+          ),
+
           // Messages List
           Expanded(
             child: ListView.builder(
@@ -142,7 +192,7 @@ class _AIChatScreenState extends ConsumerState<AIChatScreen> {
                 if (index == chatState.messages.length && chatState.isLoading) {
                   return const TypingIndicator();
                 }
-                
+
                 return ChatBubble(message: chatState.messages[index]);
               },
             ),

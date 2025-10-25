@@ -15,22 +15,26 @@ class ChatState {
   final List<ChatMessage> messages;
   final bool isLoading;
   final String? error;
+  final bool hasLocation;
 
   ChatState({
     required this.messages,
     this.isLoading = false,
     this.error,
+    this.hasLocation = false,
   });
 
   ChatState copyWith({
     List<ChatMessage>? messages,
     bool? isLoading,
     String? error,
+    bool? hasLocation,
   }) {
     return ChatState(
       messages: messages ?? this.messages,
       isLoading: isLoading ?? this.isLoading,
       error: error,
+      hasLocation: hasLocation ?? this.hasLocation,
     );
   }
 }
@@ -49,17 +53,45 @@ class ChatController extends StateNotifier<ChatState> {
     _initializeChat();
   }
 
-  void _initializeChat() {
+  void _initializeChat() async {
     // Add welcome message
     final welcomeMessage = ChatMessage.ai(
-      'Hello! I\'m your AI medical assistant for Metro General Hospital. '
-      'I can help you find hospitals, check availability, book appointments, '
-      'and provide emergency routing. How can I assist you today?',
+      'Hello! I\'m your AI medical assistant. I can help you:\n\n'
+      '• Find the nearest hospital to your location\n'
+      '• Check real-time bed availability\n'
+      '• Provide emergency guidance\n'
+      '• Answer general health questions\n\n'
+      'How can I help you today?',
     );
     
     state = state.copyWith(
       messages: [welcomeMessage],
     );
+
+    // Check location permission and load context
+    await _loadInitialContext();
+  }
+
+  Future<void> _loadInitialContext() async {
+    try {
+      final context = await _contextService.getHospitalContext();
+      state = state.copyWith(hasLocation: context['hasLocation'] ?? false);
+      
+      if (context['hospitals'] != null && (context['hospitals'] as List).isNotEmpty) {
+        final hospitalCount = (context['hospitals'] as List).length;
+        final contextMessage = ChatMessage.ai(
+          'I can see $hospitalCount ${hospitalCount == 1 ? 'hospital' : 'hospitals'} nearby. '
+          '${state.hasLocation ? "I've detected your location." : "Enable location for distance information."} '
+          'Feel free to ask me anything!',
+        );
+        
+        state = state.copyWith(
+          messages: [...state.messages, contextMessage],
+        );
+      }
+    } catch (e) {
+      print('Error loading initial context: $e');
+    }
   }
 
   Future<void> sendMessage(String message) async {
@@ -74,14 +106,29 @@ class ChatController extends StateNotifier<ChatState> {
 
     // Save to Firebase
     if (_userId != null) {
-      await _contextService.saveChatMessage(_userId, message, 'user');
+      await _contextService.saveChatMessage(_userId!, message, 'user');
     }
 
     try {
-      // Get hospital context
+      // Get fresh hospital context with location
+      print('🔄 Fetching fresh hospital context...');
       final context = await _contextService.getHospitalContext();
+      
+      if (context['error'] != null) {
+        final errorMessage = ChatMessage.ai(
+          'I\'m having trouble accessing hospital data right now. ${context['error']} Please try again later.',
+        );
+        
+        state = state.copyWith(
+          messages: [...state.messages, errorMessage],
+          isLoading: false,
+        );
+        return;
+      }
 
-      // Send to Gemini
+      print('✅ Context loaded, sending to Gemini...');
+      
+      // Send to Gemini with context
       final response = await _geminiService.sendMessage(
         message,
         context: context,
@@ -93,16 +140,23 @@ class ChatController extends StateNotifier<ChatState> {
       state = state.copyWith(
         messages: [...state.messages, aiMessage],
         isLoading: false,
+        hasLocation: context['hasLocation'] ?? false,
       );
 
       // Save AI response to Firebase
       if (_userId != null) {
-        await _contextService.saveChatMessage(_userId, response, 'ai');
+        await _contextService.saveChatMessage(_userId!, response, 'ai');
       }
     } catch (e) {
+      print('❌ Error in sendMessage: $e');
+      
+      final errorMessage = ChatMessage.ai(
+        'I apologize, but I encountered an error. Please try again.',
+      );
+      
       state = state.copyWith(
+        messages: [...state.messages, errorMessage],
         isLoading: false,
-        error: e.toString(),
       );
     }
   }
@@ -111,8 +165,24 @@ class ChatController extends StateNotifier<ChatState> {
     state = state.copyWith(isLoading: true);
 
     try {
+      print('⚡ Quick action: $action');
+      
+      // Get fresh context
       final context = await _contextService.getHospitalContext();
-      final response = await _geminiService.getQuickActionResponse(action);
+      
+      if (context['error'] != null) {
+        final errorMessage = ChatMessage.ai(
+          'I\'m unable to access hospital data at the moment. Please ensure hospitals are registered in the system.',
+        );
+        
+        state = state.copyWith(
+          messages: [...state.messages, errorMessage],
+          isLoading: false,
+        );
+        return;
+      }
+
+      final response = await _geminiService.getQuickActionResponse(action, context);
 
       final aiMessage = ChatMessage.ai(response, metadata: context);
       
@@ -121,9 +191,15 @@ class ChatController extends StateNotifier<ChatState> {
         isLoading: false,
       );
     } catch (e) {
+      print('❌ Error in sendQuickAction: $e');
+      
+      final errorMessage = ChatMessage.ai(
+        'I encountered an error processing your request. Please try again.',
+      );
+      
       state = state.copyWith(
+        messages: [...state.messages, errorMessage],
         isLoading: false,
-        error: e.toString(),
       );
     }
   }
