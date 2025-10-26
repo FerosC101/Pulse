@@ -30,7 +30,7 @@ class LiveStatsPanel extends StatelessWidget {
         .length;
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: Colors.black.withOpacity(0.8),
         borderRadius: BorderRadius.circular(16),
@@ -58,10 +58,10 @@ class LiveStatsPanel extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 12),
-              Expanded(
+              const Expanded(
                 child: Text(
                   'Live Statistics',
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: Colors.white,
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
@@ -70,7 +70,7 @@ class LiveStatsPanel extends StatelessWidget {
                   maxLines: 1,
                 ),
               ),
-              const Spacer(),
+              const SizedBox(width: 8),
               Container(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 8,
@@ -105,7 +105,7 @@ class LiveStatsPanel extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 14),
           Row(
             children: [
               Expanded(
@@ -116,18 +116,18 @@ class LiveStatsPanel extends StatelessWidget {
                   color: AppColors.info,
                 ),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 10),
               Expanded(
                 child: _StatItem(
                   label: 'Occupied',
-                  value: '${hospital.status.totalOccupied} (${(hospital.status.totalOccupied / hospital.status.totalBeds * 100).toInt()}%)',
+                  value: '${hospital.status.totalOccupied}',
                   icon: Icons.people,
                   color: AppColors.warning,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 10),
           Row(
             children: [
               Expanded(
@@ -138,7 +138,7 @@ class LiveStatsPanel extends StatelessWidget {
                   color: AppColors.success,
                 ),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 10),
               Expanded(
                 child: _StatItem(
                   label: 'Critical',
@@ -149,9 +149,9 @@ class LiveStatsPanel extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 10),
           Container(
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
               color: Colors.white.withOpacity(0.05),
               borderRadius: BorderRadius.circular(8),
@@ -167,7 +167,7 @@ class LiveStatsPanel extends StatelessWidget {
                 ),
                 Container(
                   width: 1,
-                  height: 30,
+                  height: 25,
                   color: Colors.white.withOpacity(0.2),
                 ),
                 _DepartmentMini(
@@ -178,7 +178,7 @@ class LiveStatsPanel extends StatelessWidget {
                 ),
                 Container(
                   width: 1,
-                  height: 30,
+                  height: 25,
                   color: Colors.white.withOpacity(0.2),
                 ),
                 _DepartmentMini(
@@ -212,7 +212,7 @@ class _StatItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
         color: color.withOpacity(0.1),
         borderRadius: BorderRadius.circular(8),
@@ -223,8 +223,8 @@ class _StatItem extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Icon(icon, color: color, size: 20),
-          const SizedBox(width: 8),
+          Icon(icon, color: color, size: 18),
+          const SizedBox(width: 6),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -233,17 +233,20 @@ class _StatItem extends StatelessWidget {
                   label,
                   style: const TextStyle(
                     color: Colors.white70,
-                    fontSize: 11,
+                    fontSize: 10,
                   ),
+                  overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 2),
                 Text(
                   value,
                   style: const TextStyle(
                     color: Colors.white,
-                    fontSize: 14,
+                    fontSize: 13,
                     fontWeight: FontWeight.bold,
                   ),
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
                 ),
               ],
             ),
@@ -271,33 +274,37 @@ class _DepartmentMini extends StatelessWidget {
   Widget build(BuildContext context) {
     final percentage = total > 0 ? (occupied / total * 100).toInt() : 0;
     
-    return Column(
-      children: [
-        Text(
-          label,
-          style: const TextStyle(
-            color: Colors.white70,
-            fontSize: 11,
+    return Flexible(
+      child: Column(
+        children: [
+          Text(
+            label,
+            style: const TextStyle(
+              color: Colors.white70,
+              fontSize: 10,
+            ),
+            overflow: TextOverflow.ellipsis,
           ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          '$occupied/$total',
-          style: TextStyle(
-            color: color,
-            fontSize: 14,
-            fontWeight: FontWeight.bold,
+          const SizedBox(height: 4),
+          Text(
+            '$occupied/$total',
+            style: TextStyle(
+              color: color,
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+            ),
+            overflow: TextOverflow.ellipsis,
           ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          '$percentage%',
-          style: const TextStyle(
-            color: Colors.white54,
-            fontSize: 10,
+          const SizedBox(height: 2),
+          Text(
+            '$percentage%',
+            style: const TextStyle(
+              color: Colors.white54,
+              fontSize: 9,
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

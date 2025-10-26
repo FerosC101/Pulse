@@ -1,8 +1,8 @@
 ﻿[
   {
-    "origin": ["http://localhost:30415", "http://localhost:52739", "http://localhost:3617", "https://your-production-domain.com"],
+    "origin": ["*"],
     "method": ["GET", "HEAD", "OPTIONS"],
-    "responseHeader": ["Content-Type", "Access-Control-Allow-Origin"],
+    "responseHeader": ["Content-Type", "Access-Control-Allow-Origin", "Range"],
     "maxAgeSeconds": 3600
   }
 ]
