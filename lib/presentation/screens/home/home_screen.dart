@@ -9,6 +9,7 @@ import 'package:smart_hospital_app/presentation/screens/ai/ai_chat_screen.dart';
 import 'package:smart_hospital_app/presentation/screens/patient/hospital_list_screen.dart';
 import 'package:smart_hospital_app/presentation/screens/patient/hospital_detail_screen.dart';
 import 'package:smart_hospital_app/presentation/screens/digital_twin/digital_twin_screen.dart';
+import 'package:smart_hospital_app/presentation/screens/map/hospital_map_screen.dart';
 import 'package:model_viewer_plus/model_viewer_plus.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
@@ -159,10 +160,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         // Emergency Mode Card
                         InkWell(
                           onTap: () {
-                            // TODO: Navigate to emergency routing
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Emergency routing coming soon'),
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const HospitalMapScreen(isEmergencyMode: true),
                               ),
                             );
                           },
@@ -170,36 +171,50 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             padding: const EdgeInsets.all(20),
                             decoration: BoxDecoration(
                               gradient: const LinearGradient(
-                                colors: [Color(0xFF7C3AED), Color(0xFF6D28D9)],
+                                colors: [Color(0xFFDC2626), Color(0xFFB91C1C)],
                               ),
                               borderRadius: BorderRadius.circular(16),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: const Color(0xFFDC2626).withOpacity(0.3),
+                                  blurRadius: 12,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
                             ),
                             child: Row(
                               children: [
-                                const Icon(
-                                  Icons.emergency,
-                                  color: Colors.white,
-                                  size: 28,
+                                Container(
+                                  padding: const EdgeInsets.all(12),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withOpacity(0.2),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: const Icon(
+                                    Icons.emergency,
+                                    color: Colors.white,
+                                    size: 28,
+                                  ),
                                 ),
                                 const SizedBox(width: 16),
-                                Expanded(
+                                const Expanded(
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      const Text(
-                                        'Emergency Mode Available',
+                                      Text(
+                                        'Emergency Mode',
                                         style: TextStyle(
                                           color: Colors.white,
                                           fontWeight: FontWeight.bold,
-                                          fontSize: 15,
+                                          fontSize: 16,
                                         ),
                                       ),
-                                      const SizedBox(height: 4),
+                                      SizedBox(height: 4),
                                       Text(
-                                        'Tap for instant hospital routing',
+                                        'Find nearest hospital instantly',
                                         style: TextStyle(
-                                          color: Colors.white.withOpacity(0.9),
-                                          fontSize: 12,
+                                          color: Colors.white,
+                                          fontSize: 13,
                                         ),
                                       ),
                                     ],
@@ -208,7 +223,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                 const Icon(
                                   Icons.arrow_forward_ios,
                                   color: Colors.white,
-                                  size: 18,
+                                  size: 20,
                                 ),
                               ],
                             ),
@@ -321,7 +336,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (context) => const HospitalListScreen(),
+                                    builder: (context) => const HospitalMapScreen(),
                                   ),
                                 );
                               },
