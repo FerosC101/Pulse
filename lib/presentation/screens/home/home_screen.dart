@@ -20,7 +20,7 @@ class HomeScreen extends ConsumerStatefulWidget {
 }
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
-  String _selectedCard = 'ai'; // 'ai' or 'twin'
+  String _selectedCard = 'ai'; // 'map', 'ai' or 'twin'
   String? _selectedHospitalId;
 
   @override
@@ -333,13 +333,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               Icons.map_outlined,
                               'Map',
                               () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => const HospitalMapScreen(),
-                                  ),
-                                );
+                                setState(() {
+                                  _selectedCard = 'map';
+                                });
                               },
+                              isHighlighted: _selectedCard == 'map',
                             ),
                             _buildNavTab(
                               context,
@@ -380,8 +378,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         ),
                         const SizedBox(height: 24),
 
-                        // Bottom Card - AI Assistant or Digital Twin
-                        if (_selectedCard == 'ai')
+                        // Bottom Card - Map, AI Assistant or Digital Twin
+                        if (_selectedCard == 'map')
+                          _buildMapCard(context, hospitalsAsync)
+                        else if (_selectedCard == 'ai')
                           _buildAIAssistantCard(context, hospitalsAsync)
                         else
                           _buildDigitalTwinCard(context),
@@ -1197,6 +1197,160 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildMapCard(BuildContext context, AsyncValue hospitalsAsync) {
+    return InkWell(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const HospitalMapScreen(),
+          ),
+        );
+      },
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: AppColors.primary.withOpacity(0.2),
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: AppColors.info.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: const Icon(
+                    Icons.map,
+                    color: AppColors.info,
+                    size: 22,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                const Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Hospital Map',
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.location_on,
+                            size: 12,
+                            color: AppColors.info,
+                          ),
+                          SizedBox(width: 4),
+                          Text(
+                            'View on Map',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppColors.info.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Text(
+                    'MAP',
+                    style: TextStyle(
+                      color: AppColors.info,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            hospitalsAsync.when(
+              data: (hospitals) {
+                if (hospitals.isEmpty) {
+                  return const Text(
+                    'View hospitals on the map to find the nearest one and get directions.',
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: AppColors.textSecondary,
+                      height: 1.5,
+                    ),
+                  );
+                }
+
+                return Text(
+                  'Found ${hospitals.length} hospital${hospitals.length != 1 ? 's' : ''} nearby. Tap to view on map and get directions to the nearest facility.',
+                  style: const TextStyle(
+                    fontSize: 13,
+                    color: AppColors.textSecondary,
+                    height: 1.5,
+                  ),
+                );
+              },
+              loading: () => const Text(
+                'Loading hospital locations...',
+                style: TextStyle(
+                  fontSize: 13,
+                  color: AppColors.textSecondary,
+                ),
+              ),
+              error: (_, __) => const Text(
+                'View hospitals on the map to find the nearest one.',
+                style: TextStyle(
+                  fontSize: 13,
+                  color: AppColors.textSecondary,
+                  height: 1.5,
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            // Quick Action Buttons
+            Wrap(
+              spacing: 6,
+              runSpacing: 6,
+              children: [
+                _buildQuickActionChip('Nearby'),
+                _buildQuickActionChip('Directions'),
+                _buildQuickActionChip('Emergency'),
+                _buildQuickActionChip('Filter'),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
