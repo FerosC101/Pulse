@@ -58,11 +58,11 @@ class WelcomeScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 48),
                 
-                _buildFeature(context, Icons.map, 'Real-time Hospital Mapping'),
+                _buildFeatureImage('assets/images/feature_map.png', 'Real-time Hospital Mapping', fallbackIcon: Icons.map),
                 const SizedBox(height: 16),
-                _buildFeature(context, Icons.analytics, 'AI-Powered Analytics'),
+                _buildFeatureImage('assets/images/feature_analytics.png', 'AI-Powered Analytics', fallbackIcon: Icons.analytics),
                 const SizedBox(height: 16),
-                _buildFeature(context, Icons.emergency, 'Emergency Routing'),
+                _buildFeatureImage('assets/images/feature_emergency.png', 'Emergency Routing', fallbackIcon: Icons.emergency),
                 
                 const Spacer(),
                 
@@ -128,6 +128,41 @@ class WelcomeScreen extends StatelessWidget {
             borderRadius: BorderRadius.circular(12),
           ),
           child: Icon(icon, color: Colors.white, size: 24),
+        ),
+        const SizedBox(width: 16),
+        Expanded(
+          child: Text(
+            text,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 16,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildFeatureImage(String assetPath, String text, {IconData? fallbackIcon}) {
+    return Row(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.2),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Image.asset(
+            assetPath,
+            width: 24,
+            height: 24,
+            fit: BoxFit.contain,
+            errorBuilder: (context, error, stackTrace) => Icon(
+              fallbackIcon ?? Icons.image,
+              color: Colors.white,
+              size: 24,
+            ),
+          ),
         ),
         const SizedBox(width: 16),
         Expanded(

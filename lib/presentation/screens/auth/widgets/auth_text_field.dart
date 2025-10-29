@@ -6,6 +6,7 @@ class AuthTextField extends StatelessWidget {
   final String label;
   final String hint;
   final IconData prefixIcon;
+  final String? prefixIconAsset; // optional PNG icon asset path
   final Widget? suffixIcon;
   final bool obscureText;
   final TextInputType? keyboardType;
@@ -18,6 +19,7 @@ class AuthTextField extends StatelessWidget {
     required this.label,
     required this.hint,
     required this.prefixIcon,
+    this.prefixIconAsset,
     this.suffixIcon,
     this.obscureText = false,
     this.keyboardType,
@@ -47,7 +49,18 @@ class AuthTextField extends StatelessWidget {
           validator: validator,
           decoration: InputDecoration(
             hintText: hint,
-            prefixIcon: Icon(prefixIcon, color: AppColors.primary),
+            prefixIcon: prefixIconAsset != null
+                ? Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                    child: Image.asset(
+                      prefixIconAsset!,
+                      width: 20,
+                      height: 20,
+                      fit: BoxFit.contain,
+                      errorBuilder: (context, error, stackTrace) => Icon(prefixIcon, color: AppColors.primary),
+                    ),
+                  )
+                : Icon(prefixIcon, color: AppColors.primary),
             suffixIcon: suffixIcon,
             filled: true,
             fillColor: Colors.white,

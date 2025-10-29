@@ -177,9 +177,21 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text(
-                        widget.userType.icon,
-                        style: const TextStyle(fontSize: 20),
+                      Image.asset(
+                        widget.userType == UserType.patient
+                            ? 'assets/images/usertype_patient.png'
+                            : widget.userType == UserType.doctor
+                                ? 'assets/images/usertype_doctor.png'
+                                : widget.userType == UserType.hospitalStaff
+                                    ? 'assets/images/usertype_hospital_staff.png'
+                                    : 'assets/images/usertype_admin.png',
+                        width: 20,
+                        height: 20,
+                        fit: BoxFit.contain,
+                        errorBuilder: (context, error, stackTrace) => Text(
+                          widget.userType.icon,
+                          style: const TextStyle(fontSize: 20),
+                        ),
                       ),
                       const SizedBox(width: 8),
                       Text(

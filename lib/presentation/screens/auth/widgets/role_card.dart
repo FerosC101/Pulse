@@ -35,9 +35,15 @@ class RoleCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Center(
-                  child: Text(
-                    userType.icon,
-                    style: const TextStyle(fontSize: 32),
+                  child: Image.asset(
+                    _assetFor(userType),
+                    width: 32,
+                    height: 32,
+                    fit: BoxFit.contain,
+                    errorBuilder: (context, error, stackTrace) => Text(
+                      userType.icon,
+                      style: const TextStyle(fontSize: 32),
+                    ),
                   ),
                 ),
               ),
@@ -76,5 +82,18 @@ class RoleCard extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  String _assetFor(UserType type) {
+    switch (type) {
+      case UserType.patient:
+        return 'assets/images/usertype_patient.png';
+      case UserType.doctor:
+        return 'assets/images/usertype_doctor.png';
+      case UserType.hospitalStaff:
+        return 'assets/images/usertype_hospital_staff.png';
+      case UserType.admin:
+        return 'assets/images/usertype_admin.png';
+    }
   }
 }

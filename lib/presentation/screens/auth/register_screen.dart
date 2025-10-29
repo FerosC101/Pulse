@@ -246,9 +246,21 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text(
-                        widget.userType.icon,
-                        style: const TextStyle(fontSize: 20),
+                      Image.asset(
+                        widget.userType == UserType.patient
+                            ? 'assets/images/usertype_patient.png'
+                            : widget.userType == UserType.doctor
+                                ? 'assets/images/usertype_doctor.png'
+                                : widget.userType == UserType.hospitalStaff
+                                    ? 'assets/images/usertype_hospital_staff.png'
+                                    : 'assets/images/usertype_admin.png',
+                        width: 20,
+                        height: 20,
+                        fit: BoxFit.contain,
+                        errorBuilder: (context, error, stackTrace) => Text(
+                          widget.userType.icon,
+                          style: const TextStyle(fontSize: 20),
+                        ),
                       ),
                       const SizedBox(width: 8),
                       Text(
@@ -562,7 +574,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       ),
                     ),
                     items: hospitals.map((doc) {
-                      final data = (doc.data() as Map<String, dynamic>?) ?? <String, dynamic>{};
+                      final data = (doc.data() as Map<String, dynamic>?) ??
+                          <String, dynamic>{};
                       return DropdownMenuItem(
                         value: doc.id,
                         child: Text(data['name'] ?? 'Unknown Hospital'),
@@ -571,8 +584,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     onChanged: (value) {
                       setState(() {
                         _selectedHospitalId = value;
-                        final hospitalDoc = hospitals.firstWhere((doc) => doc.id == value);
-                        final data = (hospitalDoc.data() as Map<String, dynamic>?) ?? <String, dynamic>{};
+                        final hospitalDoc = hospitals.firstWhere(
+                            (doc) => doc.id == value);
+                        final data = (hospitalDoc.data() as Map<String, dynamic>?) ??
+                            <String, dynamic>{};
                         _selectedHospitalName = data['name'] as String?;
                       });
                     },
