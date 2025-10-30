@@ -30,10 +30,16 @@ class WelcomeScreen extends StatelessWidget {
               children: [
                 const Spacer(),
                 
-                const Icon(
-                  Icons.local_hospital_rounded,
-                  size: 100,
-                  color: Colors.white,
+                Image.asset(
+                  'assets/images/logo_pulse.png',
+                  width: 100,
+                  height: 100,
+                  fit: BoxFit.contain,
+                  errorBuilder: (context, error, stackTrace) => const Icon(
+                    Icons.local_hospital_rounded,
+                    size: 100,
+                    color: Colors.white,
+                  ),
                 ),
                 const SizedBox(height: 24),
                 

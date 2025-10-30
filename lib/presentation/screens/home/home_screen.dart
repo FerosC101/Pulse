@@ -23,6 +23,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   String _selectedCard = 'ai'; // 'map', 'ai' or 'twin'
   String? _selectedHospitalId;
 
+  String _hospitalLogoAsset(String name) {
+    final n = name.toLowerCase();
+    if (n.contains('metro') && n.contains('general')) {
+      return 'assets/images/hospital_metro_general.png';
+    }
+    if (n.contains('batangas') && n.contains('medical')) {
+      return 'assets/images/hospital_batangas_medical.png';
+    }
+    return 'assets/images/icon_hospital.png';
+  }
+
   @override
   Widget build(BuildContext context) {
     final userAsync = ref.watch(currentUserProvider);
@@ -32,13 +43,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       appBar: AppBar(
         title: Row(
           children: [
-            const Icon(Icons.local_hospital, size: 28),
+            Image.asset(
+              'assets/images/logo_pulse.png',
+              width: 28,
+              height: 28,
+              fit: BoxFit.contain,
+              errorBuilder: (context, error, stackTrace) => const Icon(Icons.local_hospital, size: 28, color: Colors.white),
+            ),
             const SizedBox(width: 8),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text(
-                  'MedMap AI',
+                  'PULSE',
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 Text(
@@ -190,10 +207,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                     color: Colors.white.withOpacity(0.2),
                                     borderRadius: BorderRadius.circular(12),
                                   ),
-                                  child: const Icon(
-                                    Icons.emergency,
+                                  child: Image.asset(
+                                    'assets/images/icon_emergency.png',
+                                    width: 28,
+                                    height: 28,
                                     color: Colors.white,
-                                    size: 28,
+                                    fit: BoxFit.contain,
+                                    errorBuilder: (context, error, stackTrace) => const Icon(
+                                      Icons.emergency,
+                                      color: Colors.white,
+                                      size: 28,
+                                    ),
                                   ),
                                 ),
                                 const SizedBox(width: 16),
@@ -274,6 +298,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                         totalHospitals.toString(),
                                         Icons.local_hospital,
                                         AppColors.success,
+                                        iconAsset: 'assets/images/icon_hospital.png',
                                       ),
                                     ),
                                     const SizedBox(width: 16),
@@ -284,6 +309,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                         totalIcuAvailable.toString(),
                                         Icons.airline_seat_flat,
                                         AppColors.info,
+                                        iconAsset: 'assets/images/icon_icu.png',
                                       ),
                                     ),
                                   ],
@@ -298,6 +324,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                         totalErAvailable.toString(),
                                         Icons.emergency,
                                         AppColors.error,
+                                        iconAsset: 'assets/images/icon_er.png',
                                       ),
                                     ),
                                     const SizedBox(width: 16),
@@ -308,6 +335,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                         '${hospitals.where((h) => h.status.isOperational).length}',
                                         Icons.check_circle,
                                         AppColors.warning,
+                                        iconAsset: 'assets/images/icon_operational.png',
                                       ),
                                     ),
                                   ],
@@ -435,6 +463,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                 ),
                               );
                             },
+                            style: TextButton.styleFrom(
+                              foregroundColor: AppColors.primary,
+                            ),
                             child: const Text('View All Hospitals →'),
                           ),
                         ),
@@ -457,8 +488,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     String title,
     String value,
     IconData icon,
-    Color color,
-  ) {
+    Color color, {
+    String? iconAsset,
+  }) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -481,7 +513,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               color: color.withOpacity(0.1),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Icon(icon, color: color, size: 24),
+            child: iconAsset != null
+                ? Image.asset(
+                    iconAsset,
+                    width: 24,
+                    height: 24,
+                    color: color,
+                    fit: BoxFit.contain,
+                    errorBuilder: (context, error, stackTrace) => Icon(icon, color: color, size: 24),
+                  )
+                : Icon(icon, color: color, size: 24),
           ),
           const SizedBox(height: 12),
           Text(
@@ -510,6 +551,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     String label,
     VoidCallback onTap, {
     bool isHighlighted = false,
+    String? iconAsset,
   }) {
     return InkWell(
       onTap: onTap,
@@ -527,11 +569,24 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         ),
         child: Column(
           children: [
-            Icon(
-              icon,
-              color: isHighlighted ? AppColors.primary : AppColors.textSecondary,
-              size: 24,
-            ),
+            iconAsset != null
+                ? Image.asset(
+                    iconAsset,
+                    width: 24,
+                    height: 24,
+                    color: isHighlighted ? AppColors.primary : AppColors.textSecondary,
+                    fit: BoxFit.contain,
+                    errorBuilder: (context, error, stackTrace) => Icon(
+                      icon,
+                      color: isHighlighted ? AppColors.primary : AppColors.textSecondary,
+                      size: 24,
+                    ),
+                  )
+                : Icon(
+                    icon,
+                    color: isHighlighted ? AppColors.primary : AppColors.textSecondary,
+                    size: 24,
+                  ),
             const SizedBox(height: 4),
             Text(
               label,
@@ -595,10 +650,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       color: AppColors.primary.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    child: const Icon(
-                      Icons.local_hospital,
+                    child: Image.asset(
+                      _hospitalLogoAsset(hospital.name),
+                      width: 28,
+                      height: 28,
                       color: AppColors.primary,
-                      size: 28,
+                      fit: BoxFit.contain,
+                      errorBuilder: (context, error, stackTrace) => const Icon(
+                        Icons.local_hospital,
+                        color: AppColors.primary,
+                        size: 28,
+                      ),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -616,10 +678,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         const SizedBox(height: 4),
                         Row(
                           children: [
-                            const Icon(
-                              Icons.location_on,
-                              size: 14,
+                            Image.asset(
+                              'assets/images/icon_location.png',
+                              width: 14,
+                              height: 14,
                               color: AppColors.textSecondary,
+                              fit: BoxFit.contain,
+                              errorBuilder: (context, error, stackTrace) => const Icon(
+                                Icons.location_on,
+                                size: 14,
+                                color: AppColors.textSecondary,
+                              ),
                             ),
                             const SizedBox(width: 4),
                             Expanded(
@@ -679,12 +748,29 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         : AppColors.error,
                   ),
                   const Spacer(),
-                  Text(
-                    '${hospital.status.waitTimeMinutes} min wait',
-                    style: const TextStyle(
-                      fontSize: 11,
-                      color: AppColors.textSecondary,
-                    ),
+                  Row(
+                    children: [
+                      Image.asset(
+                        'assets/images/icon_wait_time.png',
+                        width: 14,
+                        height: 14,
+                        color: AppColors.textSecondary,
+                        fit: BoxFit.contain,
+                        errorBuilder: (context, error, stackTrace) => const Icon(
+                          Icons.access_time,
+                          size: 14,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        '${hospital.status.waitTimeMinutes} min wait',
+                        style: const TextStyle(
+                          fontSize: 11,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),

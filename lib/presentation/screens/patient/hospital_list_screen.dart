@@ -64,10 +64,11 @@ class _HospitalListScreenState extends ConsumerState<HospitalListScreen> {
                           onSelected: (selected) {
                             setState(() => _filterType = type);
                           },
-                          backgroundColor: Colors.white.withOpacity(0.2),
+                          backgroundColor: Colors.white,
                           selectedColor: Colors.white,
+                          side: BorderSide(color: isSelected ? AppColors.primary : Colors.grey.shade300),
                           labelStyle: TextStyle(
-                            color: isSelected ? AppColors.primary : Colors.white,
+                            color: isSelected ? AppColors.primary : AppColors.textPrimary,
                             fontWeight: FontWeight.w600,
                           ),
                         ),

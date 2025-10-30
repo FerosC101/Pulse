@@ -254,12 +254,12 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                                 : widget.userType == UserType.hospitalStaff
                                     ? 'assets/images/usertype_hospital_staff.png'
                                     : 'assets/images/usertype_admin.png',
-                        width: 20,
-                        height: 20,
+                        width: 40,
+                        height: 40,
                         fit: BoxFit.contain,
                         errorBuilder: (context, error, stackTrace) => Text(
                           widget.userType.icon,
-                          style: const TextStyle(fontSize: 20),
+                          style: const TextStyle(fontSize: 40),
                         ),
                       ),
                       const SizedBox(width: 8),

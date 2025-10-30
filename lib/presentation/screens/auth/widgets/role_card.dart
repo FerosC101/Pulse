@@ -37,12 +37,12 @@ class RoleCard extends StatelessWidget {
                 child: Center(
                   child: Image.asset(
                     _assetFor(userType),
-                    width: 32,
-                    height: 32,
+                    width: 40,
+                    height: 40,
                     fit: BoxFit.contain,
                     errorBuilder: (context, error, stackTrace) => Text(
                       userType.icon,
-                      style: const TextStyle(fontSize: 32),
+                      style: const TextStyle(fontSize: 40),
                     ),
                   ),
                 ),
