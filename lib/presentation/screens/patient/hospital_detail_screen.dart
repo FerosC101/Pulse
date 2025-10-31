@@ -11,6 +11,17 @@ class HospitalDetailScreen extends StatelessWidget {
 
   const HospitalDetailScreen({super.key, required this.hospital});
 
+  String _hospitalLogoAsset(String name) {
+    final n = name.toLowerCase();
+    if (n.contains('metro') && n.contains('general')) {
+      return 'assets/images/hospital_metro_general.jpg';
+    }
+    if (n.contains('batangas') && n.contains('medical')) {
+      return 'assets/images/hospital_batangas_medical.jpg';
+    }
+    return 'assets/images/icon_hospital.png';
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -46,16 +57,21 @@ class HospitalDetailScreen extends StatelessWidget {
                   Row(
                     children: [
                       Container(
-                        width: 60,
                         height: 60,
                         decoration: BoxDecoration(
                           color: Colors.white.withOpacity(0.2),
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        child: const Icon(
-                          Icons.local_hospital,
-                          color: Colors.white,
-                          size: 32,
+                        child: Image.asset(
+                          _hospitalLogoAsset(hospital.name),
+                          width: 40,
+                          height: 40,
+                          fit: BoxFit.contain,
+                          errorBuilder: (context, error, stackTrace) => const Icon(
+                            Icons.local_hospital,
+                            color: Colors.white,
+                            size: 32,
+                          ),
                         ),
                       ),
                       const SizedBox(width: 16),
@@ -144,8 +160,8 @@ class HospitalDetailScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  _buildContactItem(
-                    Icons.location_on,
+                  _buildContactItemAsset(
+                    'assets/images/icon_location.png',
                     'Address',
                     hospital.address,
                     () async {
@@ -218,7 +234,14 @@ class HospitalDetailScreen extends StatelessWidget {
                     ),
                     child: Row(
                       children: [
-                        const Icon(Icons.access_time, color: AppColors.warning),
+                        Image.asset(
+                          'assets/images/icon_wait_time.png',
+                          width: 20,
+                          height: 20,
+                          color: AppColors.warning,
+                          fit: BoxFit.contain,
+                          errorBuilder: (context, error, stackTrace) => const Icon(Icons.access_time, color: AppColors.warning),
+                        ),
                         const SizedBox(width: 12),
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -350,6 +373,41 @@ class HospitalDetailScreen extends StatelessWidget {
     String value,
     VoidCallback onTap,
   ) {
+    return _buildContactItemCore(
+      leading: Icon(icon, color: AppColors.primary, size: 20),
+      label: label,
+      value: value,
+      onTap: onTap,
+    );
+  }
+
+  Widget _buildContactItemAsset(
+    String iconAsset,
+    String label,
+    String value,
+    VoidCallback onTap,
+  ) {
+    return _buildContactItemCore(
+      leading: Image.asset(
+        iconAsset,
+        width: 20,
+        height: 20,
+        color: AppColors.primary,
+        fit: BoxFit.contain,
+        errorBuilder: (context, error, stackTrace) => const Icon(Icons.circle, color: AppColors.primary, size: 20),
+      ),
+      label: label,
+      value: value,
+      onTap: onTap,
+    );
+  }
+
+  Widget _buildContactItemCore({
+    required Widget leading,
+    required String label,
+    required String value,
+    required VoidCallback onTap,
+  }) {
     return InkWell(
       onTap: onTap,
       child: Padding(
@@ -362,7 +420,7 @@ class HospitalDetailScreen extends StatelessWidget {
                 color: AppColors.primary.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Icon(icon, color: AppColors.primary, size: 20),
+              child: leading,
             ),
             const SizedBox(width: 16),
             Expanded(

@@ -84,7 +84,7 @@ class AdminDashboardScreen extends ConsumerWidget {
                               child: _StatCard(
                                 title: 'Total Hospitals',
                                 value: hospitals.length.toString(),
-                                icon: Icons.local_hospital,
+                                iconAsset: 'assets/images/icon_hospital.png',
                                 color: AppColors.primary,
                               ),
                             ),
@@ -93,7 +93,7 @@ class AdminDashboardScreen extends ConsumerWidget {
                               child: _StatCard(
                                 title: 'Total Beds',
                                 value: totalBeds.toString(),
-                                icon: Icons.bed,
+                                iconAsset: 'assets/images/icon_bed.png',
                                 color: AppColors.info,
                               ),
                             ),
@@ -106,7 +106,7 @@ class AdminDashboardScreen extends ConsumerWidget {
                               child: _StatCard(
                                 title: 'Occupancy',
                                 value: '${(occupiedBeds / totalBeds * 100).toInt()}%',
-                                icon: Icons.show_chart,
+                                iconAsset: 'assets/images/feature_analytics.png',
                                 color: AppColors.warning,
                               ),
                             ),
@@ -115,7 +115,7 @@ class AdminDashboardScreen extends ConsumerWidget {
                               child: _StatCard(
                                 title: 'Total Staff',
                                 value: totalStaff.toString(),
-                                icon: Icons.people,
+                                iconAsset: 'assets/images/usertype_hospital_staff.png',
                                 color: AppColors.success,
                               ),
                             ),
@@ -142,7 +142,7 @@ class AdminDashboardScreen extends ConsumerWidget {
                 _ManagementCard(
                   title: 'Hospital Management',
                   subtitle: 'Add, edit, or remove hospitals from the system',
-                  icon: Icons.local_hospital,
+                  iconAsset: 'assets/images/icon_hospital.png',
                   color: AppColors.primary,
                   onTap: () {
                     Navigator.push(
@@ -158,7 +158,7 @@ class AdminDashboardScreen extends ConsumerWidget {
                 _ManagementCard(
                   title: 'Staff Management',
                   subtitle: 'Manage hospital staff accounts and permissions',
-                  icon: Icons.people,
+                  iconAsset: 'assets/images/usertype_hospital_staff.png',
                   color: AppColors.info,
                   onTap: () {
                     Navigator.push(
@@ -174,7 +174,7 @@ class AdminDashboardScreen extends ConsumerWidget {
                 _ManagementCard(
                   title: 'Doctor Management',
                   subtitle: 'Manage doctors across all hospitals',
-                  icon: Icons.medical_services,
+                  iconAsset: 'assets/images/usertype_doctor.png',
                   color: AppColors.success,
                   onTap: () {
                     Navigator.push(
@@ -190,7 +190,7 @@ class AdminDashboardScreen extends ConsumerWidget {
                 _ManagementCard(
                   title: 'Digital Twin Viewer',
                   subtitle: 'View 3D hospital models and run simulations',
-                  icon: Icons.view_in_ar,
+                  iconAsset: 'assets/images/feature_map.png',
                   color: const Color(0xFF8B5CF6),
                   onTap: () {
                     _showHospitalSelectorForDigitalTwin(context, ref);
@@ -200,7 +200,7 @@ class AdminDashboardScreen extends ConsumerWidget {
                 _ManagementCard(
                   title: 'System Analytics',
                   subtitle: 'View comprehensive system-wide analytics',
-                  icon: Icons.analytics,
+                  iconAsset: 'assets/images/feature_analytics.png',
                   color: AppColors.warning,
                   onTap: () {
                     // TODO: Navigate to analytics
@@ -217,80 +217,82 @@ class AdminDashboardScreen extends ConsumerWidget {
   }
 
   void _showHospitalSelectorForDigitalTwin(BuildContext context, WidgetRef ref) {
-  final hospitalsAsync = ref.read(hospitalsStreamProvider);
+    final hospitalsAsync = ref.read(hospitalsStreamProvider);
   
-  showDialog(
-    context: context,
-    builder: (context) => AlertDialog(
-      title: const Text('Select Hospital'),
-      content: SizedBox(
-        width: double.maxFinite,
-        child: hospitalsAsync.when(
-          data: (hospitals) {
-            final hospitalsWithModels = hospitals
-                .where((h) => h.has3dModel)
-                .toList();
-            
-            if (hospitalsWithModels.isEmpty) {
-              return const Padding(
-                padding: EdgeInsets.all(24.0),
-                child: Center(
-                  child: Text('No hospitals with 3D models yet'),
-                ),
-              );
-            }
-            
-            return ListView.builder(
-              shrinkWrap: true,
-              itemCount: hospitalsWithModels.length,
-              itemBuilder: (context, index) {
-                final hospital = hospitalsWithModels[index];
-                return ListTile(
-                  leading: const Icon(Icons.view_in_ar, color: AppColors.primary),
-                  title: Text(hospital.name),
-                  subtitle: Text('${hospital.modelMetadata?.floors ?? 0} floors'),
-                  trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                  onTap: () {
-                    Navigator.pop(context);
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => DigitalTwinScreen(
-                          hospitalId: hospital.id,
-                        ),
-                      ),
-                    );
-                  },
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Select Hospital'),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: hospitalsAsync.when(
+            data: (hospitals) {
+              final hospitalsWithModels = hospitals
+                  .where((h) => h.has3dModel)
+                  .toList();
+              
+              if (hospitalsWithModels.isEmpty) {
+                return const Padding(
+                  padding: EdgeInsets.all(24.0),
+                  child: Center(
+                    child: Text('No hospitals with 3D models yet'),
+                  ),
                 );
-              },
-            );
-          },
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (error, _) => Text('Error: $error'),
+              }
+              
+              return ListView.builder(
+                shrinkWrap: true,
+                itemCount: hospitalsWithModels.length,
+                itemBuilder: (context, index) {
+                  final hospital = hospitalsWithModels[index];
+                  return ListTile(
+                    leading: const Icon(Icons.view_in_ar, color: AppColors.primary),
+                    title: Text(hospital.name),
+                    subtitle: Text('${hospital.modelMetadata?.floors ?? 0} floors'),
+                    trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                    onTap: () {
+                      Navigator.pop(context);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => DigitalTwinScreen(
+                            hospitalId: hospital.id,
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                },
+              );
+            },
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (error, _) => Text('Error: $error'),
+          ),
         ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+        ],
       ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: const Text('Cancel'),
-        ),
-      ],
-    ),
-  );
-}
+    );
+  }
 }
 
 // Stat Card Widget
 class _StatCard extends StatelessWidget {
   final String title;
   final String value;
-  final IconData icon;
+  final IconData? icon;
+  final String? iconAsset;
   final Color color;
 
   const _StatCard({
     required this.title,
     required this.value,
-    required this.icon,
+    this.icon,
+    this.iconAsset,
     required this.color,
   });
 
@@ -318,7 +320,16 @@ class _StatCard extends StatelessWidget {
               color: color.withOpacity(0.1),
               borderRadius: BorderRadius.circular(10),
             ),
-            child: Icon(icon, color: color, size: 24),
+            child: iconAsset != null
+                ? Image.asset(
+                    iconAsset!,
+                    width: 24,
+                    height: 24,
+                    fit: BoxFit.contain,
+                    color: color,
+                    errorBuilder: (context, error, stackTrace) => Icon(icon ?? Icons.circle, color: color, size: 24),
+                  )
+                : Icon(icon ?? Icons.circle, color: color, size: 24),
           ),
           const SizedBox(height: 12),
           Text(
@@ -346,14 +357,16 @@ class _StatCard extends StatelessWidget {
 class _ManagementCard extends StatelessWidget {
   final String title;
   final String subtitle;
-  final IconData icon;
+  final IconData? icon;
+  final String? iconAsset;
   final Color color;
   final VoidCallback onTap;
 
   const _ManagementCard({
     required this.title,
     required this.subtitle,
-    required this.icon,
+    this.icon,
+    this.iconAsset,
     required this.color,
     required this.onTap,
   });
@@ -378,7 +391,16 @@ class _ManagementCard extends StatelessWidget {
                   color: color.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(icon, color: color, size: 28),
+                child: iconAsset != null
+                    ? Image.asset(
+                        iconAsset!,
+                        width: 28,
+                        height: 28,
+                        fit: BoxFit.contain,
+                        color: color,
+                        errorBuilder: (context, error, stackTrace) => Icon(icon ?? Icons.circle, color: color, size: 28),
+                      )
+                    : Icon(icon ?? Icons.circle, color: color, size: 28),
               ),
               const SizedBox(width: 16),
               Expanded(

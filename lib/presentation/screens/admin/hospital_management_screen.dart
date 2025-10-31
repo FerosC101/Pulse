@@ -363,6 +363,17 @@ class _HospitalCard extends StatelessWidget {
     required this.onDelete,
   });
 
+  String _hospitalLogoAsset(String name) {
+    final n = name.toLowerCase();
+    if (n.contains('metro') && n.contains('general')) {
+      return 'assets/images/hospital_metro_general.jpg';
+    }
+    if (n.contains('batangas') && n.contains('medical')) {
+      return 'assets/images/hospital_batangas_medical.jpg';
+    }
+    return 'assets/images/icon_hospital.png';
+  }
+
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -378,10 +389,16 @@ class _HospitalCard extends StatelessWidget {
                 color: AppColors.primary.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: const Icon(
-                Icons.local_hospital,
-                color: AppColors.primary,
-                size: 28,
+              child: Image.asset(
+                _hospitalLogoAsset(hospital.name),
+                width: 28,
+                height: 28,
+                fit: BoxFit.contain,
+                errorBuilder: (context, error, stackTrace) => const Icon(
+                  Icons.local_hospital,
+                  color: AppColors.primary,
+                  size: 28,
+                ),
               ),
             ),
             title: Text(

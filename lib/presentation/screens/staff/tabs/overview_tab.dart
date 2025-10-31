@@ -63,6 +63,7 @@ class OverviewTab extends ConsumerWidget {
                 Expanded(
                   child: QuickActionCard(
                     icon: Icons.person_add,
+                    iconAsset: 'assets/images/qa_admit.png',
                     label: 'Admit Patient',
                     color: AppColors.success,
                     onTap: () {
@@ -79,6 +80,7 @@ class OverviewTab extends ConsumerWidget {
                 Expanded(
                   child: QuickActionCard(
                     icon: Icons.exit_to_app,
+                    iconAsset: 'assets/images/qa_discharge.png',
                     label: 'Discharge',
                     color: AppColors.info,
                     onTap: () {
@@ -94,6 +96,7 @@ class OverviewTab extends ConsumerWidget {
                 Expanded(
                   child: QuickActionCard(
                     icon: Icons.swap_horiz,
+                    iconAsset: 'assets/images/qa_transfer.png',
                     label: 'Transfer',
                     color: AppColors.warning,
                     onTap: () {
@@ -105,6 +108,7 @@ class OverviewTab extends ConsumerWidget {
                 Expanded(
                   child: QuickActionCard(
                     icon: Icons.medical_services,
+                    iconAsset: 'assets/images/qa_emergency.png',
                     label: 'Emergency',
                     color: AppColors.error,
                     onTap: () {
@@ -232,7 +236,14 @@ class OverviewTab extends ConsumerWidget {
                         color: AppColors.info.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: const Icon(Icons.task_alt, color: AppColors.info),
+                      child: Image.asset(
+                        'assets/images/feature_analytics.png',
+                        width: 20,
+                        height: 20,
+                        color: AppColors.info,
+                        fit: BoxFit.contain,
+                        errorBuilder: (context, error, stackTrace) => const Icon(Icons.task_alt, color: AppColors.info),
+                      ),
                     ),
                     title: Text('Pending Discharges: $pendingDischarges'),
                     subtitle: const Text('Review and process today'),

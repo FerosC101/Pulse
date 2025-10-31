@@ -26,10 +26,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   String _hospitalLogoAsset(String name) {
     final n = name.toLowerCase();
     if (n.contains('metro') && n.contains('general')) {
-      return 'assets/images/hospital_metro_general.png';
+      return 'assets/images/hospital_metro_general.jpg';
     }
     if (n.contains('batangas') && n.contains('medical')) {
-      return 'assets/images/hospital_batangas_medical.png';
+      return 'assets/images/hospital_batangas_medical.jpg';
     }
     return 'assets/images/icon_hospital.png';
   }
@@ -654,7 +654,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       _hospitalLogoAsset(hospital.name),
                       width: 28,
                       height: 28,
-                      color: AppColors.primary,
                       fit: BoxFit.contain,
                       errorBuilder: (context, error, stackTrace) => const Icon(
                         Icons.local_hospital,
