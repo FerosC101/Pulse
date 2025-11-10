@@ -12,11 +12,15 @@ class AppointmentRepository {
     return _firestore
         .collection(_collection)
         .where('doctorId', isEqualTo: doctorId)
-        .orderBy('dateTime', descending: false)
         .snapshots()
-        .map((snapshot) => snapshot.docs
-            .map((doc) => AppointmentModel.fromFirestore(doc))
-            .toList());
+        .map((snapshot) {
+          final appointments = snapshot.docs
+              .map((doc) => AppointmentModel.fromFirestore(doc))
+              .toList();
+          // Sort by date/time in memory
+          appointments.sort((a, b) => a.dateTime.compareTo(b.dateTime));
+          return appointments;
+        });
   }
 
   // Get appointments for a patient
@@ -24,11 +28,15 @@ class AppointmentRepository {
     return _firestore
         .collection(_collection)
         .where('patientId', isEqualTo: patientId)
-        .orderBy('dateTime', descending: false)
         .snapshots()
-        .map((snapshot) => snapshot.docs
-            .map((doc) => AppointmentModel.fromFirestore(doc))
-            .toList());
+        .map((snapshot) {
+          final appointments = snapshot.docs
+              .map((doc) => AppointmentModel.fromFirestore(doc))
+              .toList();
+          // Sort by date/time in memory
+          appointments.sort((a, b) => a.dateTime.compareTo(b.dateTime));
+          return appointments;
+        });
   }
 
   // Get today's appointments for a doctor
@@ -37,16 +45,26 @@ class AppointmentRepository {
     final startOfDay = DateTime(now.year, now.month, now.day);
     final endOfDay = DateTime(now.year, now.month, now.day, 23, 59, 59);
 
+    // Simplified query - just get all doctor appointments and filter in memory
     return _firestore
         .collection(_collection)
         .where('doctorId', isEqualTo: doctorId)
-        .where('dateTime', isGreaterThanOrEqualTo: Timestamp.fromDate(startOfDay))
-        .where('dateTime', isLessThanOrEqualTo: Timestamp.fromDate(endOfDay))
-        .orderBy('dateTime', descending: false)
         .snapshots()
-        .map((snapshot) => snapshot.docs
-            .map((doc) => AppointmentModel.fromFirestore(doc))
-            .toList());
+        .map((snapshot) {
+          // Filter and sort today's appointments in memory
+          final appointments = snapshot.docs
+              .map((doc) => AppointmentModel.fromFirestore(doc))
+              .where((appointment) {
+                final appointmentDate = appointment.dateTime;
+                return appointmentDate.isAfter(startOfDay) && 
+                       appointmentDate.isBefore(endOfDay);
+              })
+              .toList();
+          
+          // Sort by date/time
+          appointments.sort((a, b) => a.dateTime.compareTo(b.dateTime));
+          return appointments;
+        });
   }
 
   // Get upcoming appointments for a doctor
@@ -56,13 +74,17 @@ class AppointmentRepository {
     return _firestore
         .collection(_collection)
         .where('doctorId', isEqualTo: doctorId)
-        .where('dateTime', isGreaterThan: Timestamp.fromDate(now))
-        .orderBy('dateTime', descending: false)
-        .limit(20)
         .snapshots()
-        .map((snapshot) => snapshot.docs
-            .map((doc) => AppointmentModel.fromFirestore(doc))
-            .toList());
+        .map((snapshot) {
+          // Filter and sort upcoming appointments in memory
+          final appointments = snapshot.docs
+              .map((doc) => AppointmentModel.fromFirestore(doc))
+              .where((appointment) => appointment.dateTime.isAfter(now))
+              .toList();
+          
+          appointments.sort((a, b) => a.dateTime.compareTo(b.dateTime));
+          return appointments.take(20).toList();
+        });
   }
 
   // Get appointment by ID

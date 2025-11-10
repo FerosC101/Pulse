@@ -9,6 +9,7 @@ import 'package:smart_hospital_app/presentation/screens/auth/widgets/auth_text_f
 import 'package:smart_hospital_app/presentation/screens/home/home_screen.dart';
 import 'package:smart_hospital_app/presentation/screens/staff/staff_dashboard_screen.dart';
 import 'package:smart_hospital_app/presentation/screens/admin/admin_dashboard_screen.dart';
+import 'package:smart_hospital_app/presentation/screens/doctor/doctor_dashboard_screen.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
   final UserType userType;
@@ -161,11 +162,21 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           // try provider with short timeout first
           final userData = await ref.read(currentUserProvider.future).timeout(const Duration(seconds: 4));
           if (userData != null) {
-            final Widget target = userData.userType == UserType.hospitalStaff
-                ? StaffDashboardScreen()
-                : (userData.userType == UserType.admin
-                    ? const AdminDashboardScreen()
-                    : const HomeScreen());
+            final Widget target;
+            switch (userData.userType) {
+              case UserType.admin:
+                target = const AdminDashboardScreen();
+                break;
+              case UserType.hospitalStaff:
+                target = const StaffDashboardScreen();
+                break;
+              case UserType.doctor:
+                target = const DoctorDashboardScreen();
+                break;
+              case UserType.patient:
+                target = const HomeScreen();
+                break;
+            }
 
             Navigator.of(context).pushAndRemoveUntil(
               MaterialPageRoute(builder: (context) => target),
@@ -192,11 +203,21 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             return;
           }
 
-      final Widget target = userData.userType == UserType.hospitalStaff
-        ? StaffDashboardScreen()
-        : (userData.userType == UserType.admin
-          ? const AdminDashboardScreen()
-          : const HomeScreen());
+          final Widget target;
+          switch (userData.userType) {
+            case UserType.admin:
+              target = const AdminDashboardScreen();
+              break;
+            case UserType.hospitalStaff:
+              target = const StaffDashboardScreen();
+              break;
+            case UserType.doctor:
+              target = const DoctorDashboardScreen();
+              break;
+            case UserType.patient:
+              target = const HomeScreen();
+              break;
+          }
 
           Navigator.of(context).pushAndRemoveUntil(
             MaterialPageRoute(builder: (context) => target),

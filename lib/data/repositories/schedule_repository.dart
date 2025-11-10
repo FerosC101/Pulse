@@ -11,11 +11,15 @@ class ScheduleRepository {
     return _firestore
         .collection(_collection)
         .where('doctorId', isEqualTo: doctorId)
-        .orderBy('dayOfWeek')
         .snapshots()
-        .map((snapshot) => snapshot.docs
-            .map((doc) => DoctorScheduleModel.fromFirestore(doc))
-            .toList());
+        .map((snapshot) {
+          final schedules = snapshot.docs
+              .map((doc) => DoctorScheduleModel.fromFirestore(doc))
+              .toList();
+          // Sort by dayOfWeek in memory
+          schedules.sort((a, b) => a.dayOfWeek.compareTo(b.dayOfWeek));
+          return schedules;
+        });
   }
 
   // Get schedule for a specific day
