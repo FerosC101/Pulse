@@ -6,11 +6,18 @@ import 'package:smart_hospital_app/presentation/providers/hospital_provider.dart
 import 'package:smart_hospital_app/presentation/screens/analytics/ml_predictions_screen.dart';
 import 'package:fl_chart/fl_chart.dart';
 
-class AnalyticsScreen extends ConsumerWidget {
+class AnalyticsScreen extends ConsumerStatefulWidget {
   const AnalyticsScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<AnalyticsScreen> createState() => _AnalyticsScreenState();
+}
+
+class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
+  String? _selectedHospitalId; // null means "All Hospitals"
+
+  @override
+  Widget build(BuildContext context) {
     final hospitalsAsync = ref.watch(hospitalsStreamProvider);
 
     return Scaffold(
@@ -36,6 +43,11 @@ class AnalyticsScreen extends ConsumerWidget {
             return _buildEmptyState();
           }
 
+          // Filter hospitals based on selection
+          final filteredHospitals = _selectedHospitalId == null
+              ? hospitals
+              : hospitals.where((h) => h.id == _selectedHospitalId).toList();
+
           return RefreshIndicator(
             onRefresh: () async {
               ref.invalidate(hospitalsStreamProvider);
@@ -45,8 +57,12 @@ class AnalyticsScreen extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // Hospital Filter Dropdown
+                  _buildHospitalFilter(hospitals),
+                  const SizedBox(height: 24),
+
                   // System Overview Cards
-                  _buildSystemOverview(hospitals),
+                  _buildSystemOverview(filteredHospitals),
                   const SizedBox(height: 24),
 
                   // ML Predictions Button
@@ -56,31 +72,33 @@ class AnalyticsScreen extends ConsumerWidget {
                   // Bed Occupancy Rate Chart
                   _buildSectionHeader('Bed Occupancy Rate'),
                   const SizedBox(height: 16),
-                  _buildOccupancyChart(hospitals),
+                  _buildOccupancyChart(filteredHospitals),
                   const SizedBox(height: 24),
 
                   // Hospital Comparison
-                  _buildSectionHeader('Hospital Comparison'),
-                  const SizedBox(height: 16),
-                  _buildHospitalComparison(hospitals),
-                  const SizedBox(height: 24),
+                  if (_selectedHospitalId == null) ...[
+                    _buildSectionHeader('Hospital Comparison'),
+                    const SizedBox(height: 16),
+                    _buildHospitalComparison(filteredHospitals),
+                    const SizedBox(height: 24),
+                  ],
 
                   // Department Performance
                   _buildSectionHeader('Department Performance'),
                   const SizedBox(height: 16),
-                  _buildDepartmentPerformance(hospitals),
+                  _buildDepartmentPerformance(filteredHospitals),
                   const SizedBox(height: 24),
 
                   // Capacity Alerts
                   _buildSectionHeader('Capacity Alerts'),
                   const SizedBox(height: 16),
-                  _buildCapacityAlerts(hospitals),
+                  _buildCapacityAlerts(filteredHospitals),
                   const SizedBox(height: 24),
 
                   // AI Insights
                   _buildSectionHeader('AI Insights'),
                   const SizedBox(height: 16),
-                  _buildAIInsights(hospitals),
+                  _buildAIInsights(filteredHospitals),
                 ],
               ),
             ),
@@ -116,6 +134,69 @@ class AnalyticsScreen extends ConsumerWidget {
           Text(
             'Analytics will appear when hospital data is available',
             style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHospitalFilter(List hospitals) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.filter_list, color: AppColors.primary),
+          const SizedBox(width: 12),
+          const Text(
+            'Filter by Hospital:',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: DropdownButtonFormField<String?>(
+              value: _selectedHospitalId,
+              decoration: const InputDecoration(
+                contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                border: OutlineInputBorder(),
+                isDense: true,
+              ),
+              items: [
+                const DropdownMenuItem<String?>(
+                  value: null,
+                  child: Text('All Hospitals'),
+                ),
+                ...hospitals.map<DropdownMenuItem<String?>>((hospital) {
+                  return DropdownMenuItem<String?>(
+                    value: hospital.id,
+                    child: Text(
+                      hospital.name,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  );
+                }).toList(),
+              ],
+              onChanged: (value) {
+                setState(() {
+                  _selectedHospitalId = value;
+                });
+              },
+              icon: const Icon(Icons.arrow_drop_down),
+              isExpanded: true,
+            ),
           ),
         ],
       ),
