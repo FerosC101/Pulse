@@ -83,7 +83,7 @@ class AdminDashboardScreen extends ConsumerWidget {
                               child: _StatCard(
                                 title: 'Total Hospitals',
                                 value: hospitals.length.toString(),
-                                iconAsset: 'assets/images/icon_hospital.png',
+                                iconAsset: 'https://res.cloudinary.com/dhqosbqeh/image/upload/v1763996689/icon_hospital_ekdup6.png',
                                 color: AppColors.primary,
                               ),
                             ),
@@ -92,7 +92,7 @@ class AdminDashboardScreen extends ConsumerWidget {
                               child: _StatCard(
                                 title: 'Total Beds',
                                 value: totalBeds.toString(),
-                                iconAsset: 'assets/images/icon_bed.png',
+                                iconAsset: 'https://res.cloudinary.com/dhqosbqeh/image/upload/v1763996687/icon_bed_akitqa.png',
                                 color: AppColors.info,
                               ),
                             ),
@@ -105,7 +105,7 @@ class AdminDashboardScreen extends ConsumerWidget {
                               child: _StatCard(
                                 title: 'Occupancy',
                                 value: '${(occupiedBeds / totalBeds * 100).toInt()}%',
-                                iconAsset: 'assets/images/feature_analytics.png',
+                                iconAsset: 'https://res.cloudinary.com/dhqosbqeh/image/upload/v1763996689/feature_analytics_t1hcql.png',
                                 color: AppColors.warning,
                               ),
                             ),
@@ -114,7 +114,7 @@ class AdminDashboardScreen extends ConsumerWidget {
                               child: _StatCard(
                                 title: 'Total Staff',
                                 value: totalStaff.toString(),
-                                iconAsset: 'assets/images/usertype_hospital_staff.png',
+                                iconAsset: 'https://res.cloudinary.com/dhqosbqeh/image/upload/v1763996687/usertype_hospital_staff_bh0leu.png',
                                 color: AppColors.success,
                               ),
                             ),
@@ -173,7 +173,7 @@ class AdminDashboardScreen extends ConsumerWidget {
                 _ManagementCard(
                   title: 'Doctor Management',
                   subtitle: 'Manage doctors across all hospitals',
-                  iconAsset: 'assets/images/usertype_doctor.png',
+                  iconAsset: 'https://res.cloudinary.com/dhqosbqeh/image/upload/v1763996687/usertype_doctor_yigfmz.png',
                   color: AppColors.success,
                   onTap: () {
                     Navigator.push(
@@ -189,7 +189,7 @@ class AdminDashboardScreen extends ConsumerWidget {
                 _ManagementCard(
                   title: 'Digital Twin Viewer',
                   subtitle: 'View 3D hospital models and run simulations',
-                  iconAsset: 'assets/images/feature_map.png',
+                  iconAsset: 'https://res.cloudinary.com/dhqosbqeh/image/upload/v1763996686/feature_map_is3b5u.png',
                   color: const Color(0xFF8B5CF6),
                   onTap: () {
                     _showHospitalSelectorForDigitalTwin(context, ref);
@@ -320,14 +320,23 @@ class _StatCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(10),
             ),
             child: iconAsset != null
-                ? Image.asset(
-                    iconAsset!,
-                    width: 24,
-                    height: 24,
-                    fit: BoxFit.contain,
-                    color: color,
-                    errorBuilder: (context, error, stackTrace) => Icon(icon ?? Icons.circle, color: color, size: 24),
-                  )
+                ? (iconAsset!.startsWith('http://') || iconAsset!.startsWith('https://')
+                    ? Image.network(
+                        iconAsset!,
+                        width: 24,
+                        height: 24,
+                        fit: BoxFit.contain,
+                        color: color,
+                        errorBuilder: (context, error, stackTrace) => Icon(icon ?? Icons.circle, color: color, size: 24),
+                      )
+                    : Image.asset(
+                        iconAsset!,
+                        width: 24,
+                        height: 24,
+                        fit: BoxFit.contain,
+                        color: color,
+                        errorBuilder: (context, error, stackTrace) => Icon(icon ?? Icons.circle, color: color, size: 24),
+                      ))
                 : Icon(icon ?? Icons.circle, color: color, size: 24),
           ),
           const SizedBox(height: 12),
@@ -391,14 +400,23 @@ class _ManagementCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: iconAsset != null
-                    ? Image.asset(
-                        iconAsset!,
-                        width: 28,
-                        height: 28,
-                        fit: BoxFit.contain,
-                        color: color,
-                        errorBuilder: (context, error, stackTrace) => Icon(icon ?? Icons.circle, color: color, size: 28),
-                      )
+                    ? (iconAsset!.startsWith('http://') || iconAsset!.startsWith('https://')
+                        ? Image.network(
+                            iconAsset!,
+                            width: 28,
+                            height: 28,
+                            fit: BoxFit.contain,
+                            color: color,
+                            errorBuilder: (context, error, stackTrace) => Icon(icon ?? Icons.circle, color: color, size: 28),
+                          )
+                        : Image.asset(
+                            iconAsset!,
+                            width: 28,
+                            height: 28,
+                            fit: BoxFit.contain,
+                            color: color,
+                            errorBuilder: (context, error, stackTrace) => Icon(icon ?? Icons.circle, color: color, size: 28),
+                          ))
                     : Icon(icon ?? Icons.circle, color: color, size: 28),
               ),
               const SizedBox(width: 16),

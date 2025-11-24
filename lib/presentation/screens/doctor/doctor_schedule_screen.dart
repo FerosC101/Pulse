@@ -104,12 +104,24 @@ class _DoctorScheduleScreenState extends ConsumerState<DoctorScheduleScreen> {
                 const SizedBox(height: 24),
 
                 // Settings
-                const Text(
-                  '⚙️ Appointment Settings',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
+                Row(
+                  children: [
+                    Image.network(
+                      'https://res.cloudinary.com/dhqosbqeh/image/upload/v1763999280/appointment_settings_zntbxo.png',
+                      width: 20,
+                      height: 20,
+                      fit: BoxFit.contain,
+                      errorBuilder: (context, error, stack) => const Icon(Icons.settings, color: AppColors.textSecondary, size: 20),
+                    ),
+                    const SizedBox(width: 8),
+                    const Text(
+                      'Appointment Settings',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 16),
 
@@ -133,6 +145,7 @@ class _DoctorScheduleScreenState extends ConsumerState<DoctorScheduleScreen> {
                         '$_appointmentDuration minutes',
                         Icons.timer,
                         () => _showDurationPicker(),
+                        iconAsset: 'https://res.cloudinary.com/dhqosbqeh/image/upload/v1763999287/wait_time_znlspm.png',
                       ),
                       const Divider(height: 24),
                       _buildSettingRow(
@@ -140,6 +153,7 @@ class _DoctorScheduleScreenState extends ConsumerState<DoctorScheduleScreen> {
                         '$_maxAppointments appointments',
                         Icons.event_note,
                         () => _showMaxAppointmentsPicker(),
+                        iconAsset: 'https://res.cloudinary.com/dhqosbqeh/image/upload/v1763999281/my_appointment_unk0ra.png',
                       ),
                     ],
                   ),
@@ -234,8 +248,9 @@ class _DoctorScheduleScreenState extends ConsumerState<DoctorScheduleScreen> {
     String title,
     String value,
     IconData icon,
-    VoidCallback onTap,
-  ) {
+    VoidCallback onTap, {
+    String? iconAsset,
+  }) {
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(8),
@@ -249,7 +264,25 @@ class _DoctorScheduleScreenState extends ConsumerState<DoctorScheduleScreen> {
                 color: AppColors.primary.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Icon(icon, color: AppColors.primary, size: 20),
+              child: iconAsset != null
+                  ? (iconAsset!.startsWith('http://') || iconAsset!.startsWith('https://')
+                      ? Image.network(
+                          iconAsset!,
+                          width: 20,
+                          height: 20,
+                          fit: BoxFit.contain,
+                          color: AppColors.primary,
+                          errorBuilder: (context, error, stack) => Icon(icon, color: AppColors.primary, size: 20),
+                        )
+                      : Image.asset(
+                          iconAsset!,
+                          width: 20,
+                          height: 20,
+                          fit: BoxFit.contain,
+                          color: AppColors.primary,
+                          errorBuilder: (context, error, stack) => Icon(icon, color: AppColors.primary, size: 20),
+                        ))
+                  : Icon(icon, color: AppColors.primary, size: 20),
             ),
             const SizedBox(width: 16),
             Expanded(

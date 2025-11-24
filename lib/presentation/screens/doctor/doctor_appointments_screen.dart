@@ -45,6 +45,13 @@ class _DoctorAppointmentsScreenState extends ConsumerState<DoctorAppointmentsScr
         title: const Text('My Appointments'),
         bottom: TabBar(
           controller: _tabController,
+          labelColor: Colors.white,
+          unselectedLabelColor: AppColors.textSecondary,
+          indicator: BoxDecoration(
+            color: AppColors.primary,
+            borderRadius: BorderRadius.circular(999),
+          ),
+          indicatorSize: TabBarIndicatorSize.tab,
           tabs: const [
             Tab(text: 'All'),
             Tab(text: 'Pending'),

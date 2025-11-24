@@ -162,7 +162,7 @@ class HospitalDetailScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 16),
                   _buildContactItemAsset(
-                    'assets/images/icon_location.png',
+                    'assets/images/address.png',
                     'Address',
                     hospital.address,
                     () async {
@@ -172,8 +172,8 @@ class HospitalDetailScreen extends StatelessWidget {
                       }
                     },
                   ),
-                  _buildContactItem(
-                    Icons.phone,
+                  _buildContactItemAsset(
+                    'assets/images/phone.png',
                     'Phone',
                     hospital.phone,
                     () async {
@@ -183,8 +183,8 @@ class HospitalDetailScreen extends StatelessWidget {
                       }
                     },
                   ),
-                  _buildContactItem(
-                    Icons.email,
+                  _buildContactItemAsset(
+                    'assets/images/email.png',
                     'Email',
                     hospital.email,
                     () async {
@@ -236,7 +236,7 @@ class HospitalDetailScreen extends StatelessWidget {
                     child: Row(
                       children: [
                         Image.asset(
-                          'assets/images/icon_wait_time.png',
+                          'assets/images/wait_time.png',
                           width: 20,
                           height: 20,
                           color: AppColors.warning,
@@ -335,7 +335,14 @@ class HospitalDetailScreen extends StatelessWidget {
                           ),
                         );
                       },
-                      icon: const Icon(Icons.calendar_today),
+                      icon: Image.asset(
+                        'assets/images/book_appointment.png',
+                        width: 20,
+                        height: 20,
+                        fit: BoxFit.contain,
+                        color: Colors.white,
+                        errorBuilder: (context, error, stack) => const Icon(Icons.calendar_today),
+                      ),
                       label: const Text('Book Appointment'),
                       style: ElevatedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 16),
@@ -353,7 +360,14 @@ class HospitalDetailScreen extends StatelessWidget {
                               await launchUrl(Uri.parse(url));
                             }
                           },
-                          icon: const Icon(Icons.phone),
+                          icon: Image.asset(
+                            'assets/images/phone.png',
+                            width: 20,
+                            height: 20,
+                            fit: BoxFit.contain,
+                            color: Colors.white,
+                            errorBuilder: (context, error, stack) => const Icon(Icons.phone),
+                          ),
                           label: const Text('Call Now'),
                           style: ElevatedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(vertical: 16),
@@ -370,7 +384,13 @@ class HospitalDetailScreen extends StatelessWidget {
                               await launchUrl(Uri.parse(url));
                             }
                           },
-                          icon: const Icon(Icons.directions),
+                          icon: Image.asset(
+                            'assets/images/directions.png',
+                            width: 20,
+                            height: 20,
+                            fit: BoxFit.contain,
+                            errorBuilder: (context, error, stack) => const Icon(Icons.directions),
+                          ),
                           label: const Text('Directions'),
                           style: OutlinedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(vertical: 16),

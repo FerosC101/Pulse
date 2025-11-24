@@ -18,10 +18,18 @@ class RoleSelectionScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(isLogin ? 'Select Your Role to Login' : 'Select Your Role'),
+        title: Text(
+          isLogin ? 'Select Your Role to Login' : 'Select Your Role',
+          style: const TextStyle(color: AppColors.primary),
+        ),
         backgroundColor: Colors.transparent,
         elevation: 0,
-        foregroundColor: AppColors.textPrimary,
+        foregroundColor: AppColors.primary,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          color: AppColors.primary,
+          onPressed: () => Navigator.of(context).pop(),
+        ),
       ),
       body: SafeArea(
         child: Padding(

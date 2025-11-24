@@ -247,10 +247,18 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Create Account'),
+        title: const Text(
+          'Create Account',
+          style: TextStyle(color: AppColors.primary),
+        ),
         backgroundColor: Colors.transparent,
         elevation: 0,
-        foregroundColor: AppColors.textPrimary,
+        foregroundColor: AppColors.primary,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          color: AppColors.primary,
+          onPressed: () => Navigator.of(context).pop(),
+        ),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -269,14 +277,14 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Image.asset(
+                      Image.network(
                         widget.userType == UserType.patient
-                            ? 'assets/images/usertype_patient.png'
+                            ? 'https://res.cloudinary.com/dhqosbqeh/image/upload/v1763996687/usertype_patient_cpp8bs.png'
                             : widget.userType == UserType.doctor
-                                ? 'assets/images/usertype_doctor.png'
+                                ? 'https://res.cloudinary.com/dhqosbqeh/image/upload/v1763996687/usertype_doctor_yigfmz.png'
                                 : widget.userType == UserType.hospitalStaff
-                                    ? 'assets/images/usertype_hospital_staff.png'
-                                    : 'assets/images/usertype_admin.png',
+                                    ? 'https://res.cloudinary.com/dhqosbqeh/image/upload/v1763996687/usertype_hospital_staff_bh0leu.png'
+                                    : 'https://res.cloudinary.com/dhqosbqeh/image/upload/v1763996687/usertype_admin_gqcnrm.png',
                         width: 40,
                         height: 40,
                         fit: BoxFit.contain,
@@ -506,6 +514,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         );
                       },
                       child: const Text('Login'),
+                      style: TextButton.styleFrom(foregroundColor: AppColors.primary),
                     ),
                   ],
                 ),

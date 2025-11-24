@@ -19,12 +19,12 @@ class _HospitalListScreenState extends ConsumerState<HospitalListScreen> {
   String _hospitalLogoAsset(String name) {
     final n = name.toLowerCase();
     if (n.contains('metro') && n.contains('general')) {
-      return 'assets/images/hospital_metro_general.jpg';
+      return 'https://res.cloudinary.com/dhqosbqeh/image/upload/v1763996688/hospital_metro_general_ver2ot.jpg';
     }
     if (n.contains('batangas') && n.contains('medical')) {
-      return 'assets/images/hospital_batangas_medical.jpg';
+      return 'https://res.cloudinary.com/dhqosbqeh/image/upload/v1763996689/hospital_batangas_medical_la9gna.jpg';
     }
-    return 'assets/images/icon_hospital.png';
+    return 'https://res.cloudinary.com/dhqosbqeh/image/upload/v1763996689/icon_hospital_ekdup6.png';
   }
 
   @override
@@ -159,17 +159,29 @@ class _HospitalListScreenState extends ConsumerState<HospitalListScreen> {
                                 color: AppColors.primary.withOpacity(0.1),
                                 borderRadius: BorderRadius.circular(10),
                               ),
-                              child: Image.asset(
-                                _hospitalLogoAsset(hospital.name),
-                                width: 28,
-                                height: 28,
-                                fit: BoxFit.contain,
-                                errorBuilder: (context, error, stackTrace) => const Icon(
-                                  Icons.local_hospital,
-                                  color: AppColors.primary,
-                                  size: 28,
-                                ),
-                              ),
+                              child: (_hospitalLogoAsset(hospital.name).startsWith('http://') || _hospitalLogoAsset(hospital.name).startsWith('https://'))
+                                  ? Image.network(
+                                      _hospitalLogoAsset(hospital.name),
+                                      width: 28,
+                                      height: 28,
+                                      fit: BoxFit.contain,
+                                      errorBuilder: (context, error, stackTrace) => const Icon(
+                                        Icons.local_hospital,
+                                        color: AppColors.primary,
+                                        size: 28,
+                                      ),
+                                    )
+                                  : Image.asset(
+                                      _hospitalLogoAsset(hospital.name),
+                                      width: 28,
+                                      height: 28,
+                                      fit: BoxFit.contain,
+                                      errorBuilder: (context, error, stackTrace) => const Icon(
+                                        Icons.local_hospital,
+                                        color: AppColors.primary,
+                                        size: 28,
+                                      ),
+                                    ),
                             ),
                             const SizedBox(width: 12),
                             Expanded(

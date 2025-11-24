@@ -30,8 +30,8 @@ class WelcomeScreen extends StatelessWidget {
               children: [
                 const Spacer(),
                 
-                Image.asset(
-                  'assets/images/logo_pulse.png',
+                Image.network(
+                  'https://res.cloudinary.com/dhqosbqeh/image/upload/v1763996690/logo_pulse_e2wf52.png',
                   width: 100,
                   height: 100,
                   fit: BoxFit.contain,
@@ -64,11 +64,11 @@ class WelcomeScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 48),
                 
-                _buildFeatureImage('assets/images/feature_map.png', 'Real-time Hospital Mapping', fallbackIcon: Icons.map),
+                _buildFeatureImage('https://res.cloudinary.com/dhqosbqeh/image/upload/v1763996686/feature_map_is3b5u.png', 'Real-time Hospital Mapping', fallbackIcon: Icons.map),
                 const SizedBox(height: 16),
-                _buildFeatureImage('assets/images/feature_analytics.png', 'AI-Powered Analytics', fallbackIcon: Icons.analytics),
+                _buildFeatureImage('https://res.cloudinary.com/dhqosbqeh/image/upload/v1763996689/feature_analytics_t1hcql.png', 'AI-Powered Analytics', fallbackIcon: Icons.analytics),
                 const SizedBox(height: 16),
-                _buildFeatureImage('assets/images/feature_emergency.png', 'Emergency Routing', fallbackIcon: Icons.emergency),
+                _buildFeatureImage('https://res.cloudinary.com/dhqosbqeh/image/upload/v1763996686/feature_emergency_mbr9v3.png', 'Emergency Routing', fallbackIcon: Icons.emergency),
                 
                 const Spacer(),
                 
@@ -158,11 +158,12 @@ class WelcomeScreen extends StatelessWidget {
             color: Colors.white.withOpacity(0.2),
             borderRadius: BorderRadius.circular(12),
           ),
-          child: Image.asset(
+          child: Image.network(
             assetPath,
             width: 24,
             height: 24,
             fit: BoxFit.contain,
+            color: Colors.white,
             errorBuilder: (context, error, stackTrace) => Icon(
               fallbackIcon ?? Icons.image,
               color: Colors.white,

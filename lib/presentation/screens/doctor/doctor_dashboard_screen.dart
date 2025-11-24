@@ -68,13 +68,18 @@ class DoctorDashboardScreen extends ConsumerWidget {
                         width: 60,
                         height: 60,
                         decoration: BoxDecoration(
-                          color: AppColors.primary.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(15),
                         ),
-                        child: const Icon(
-                          Icons.medical_services,
-                          color: AppColors.primary,
-                          size: 30,
+                        child: Image.asset(
+                          'assets/images/usertype_doctor.png',
+                          width: 30,
+                          height: 30,
+                          fit: BoxFit.contain,
+                          errorBuilder: (context, error, stack) => const Icon(
+                            Icons.medical_services,
+                            color: AppColors.primary,
+                            size: 30,
+                          ),
                         ),
                       ),
                       const SizedBox(width: 16),
@@ -130,6 +135,7 @@ class DoctorDashboardScreen extends ConsumerWidget {
                                   appointments.length.toString(),
                                   Icons.event,
                                   AppColors.primary,
+                                  iconAsset: 'https://res.cloudinary.com/dhqosbqeh/image/upload/v1763999287/total_cygmhv.png',
                                 ),
                               ),
                               const SizedBox(width: 12),
@@ -139,6 +145,7 @@ class DoctorDashboardScreen extends ConsumerWidget {
                                   pending.toString(),
                                   Icons.pending_actions,
                                   AppColors.warning,
+                                  iconAsset: 'https://res.cloudinary.com/dhqosbqeh/image/upload/v1763999286/pending_rdr0gv.png',
                                 ),
                               ),
                             ],
@@ -152,6 +159,7 @@ class DoctorDashboardScreen extends ConsumerWidget {
                                   confirmed.toString(),
                                   Icons.check_circle,
                                   AppColors.info,
+                                  iconAsset: 'https://res.cloudinary.com/dhqosbqeh/image/upload/v1763999280/confirmed_znceyd.png',
                                 ),
                               ),
                               const SizedBox(width: 12),
@@ -161,6 +169,7 @@ class DoctorDashboardScreen extends ConsumerWidget {
                                   completed.toString(),
                                   Icons.done_all,
                                   AppColors.success,
+                                  iconAsset: 'https://res.cloudinary.com/dhqosbqeh/image/upload/v1763999280/completed_ldpszs.png',
                                 ),
                               ),
                             ],
@@ -198,6 +207,7 @@ class DoctorDashboardScreen extends ConsumerWidget {
                               ),
                             );
                           },
+                          iconAsset: 'https://res.cloudinary.com/dhqosbqeh/image/upload/v1763999281/my_appointment_unk0ra.png',
                         ),
                       ),
                       const SizedBox(width: 12),
@@ -218,6 +228,7 @@ class DoctorDashboardScreen extends ConsumerWidget {
                               ),
                             );
                           },
+                          iconAsset: 'https://res.cloudinary.com/dhqosbqeh/image/upload/v1763999286/schedule_teajaa.png',
                         ),
                       ),
                     ],
@@ -236,6 +247,7 @@ class DoctorDashboardScreen extends ConsumerWidget {
                         ),
                       );
                     },
+                    iconAsset: 'https://res.cloudinary.com/dhqosbqeh/image/upload/v1763999286/my_patients_lpquud.png',
                   ),
                   const SizedBox(height: 32),
 
@@ -306,7 +318,7 @@ class DoctorDashboardScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildStatCard(String label, String value, IconData icon, Color color) {
+  Widget _buildStatCard(String label, String value, IconData icon, Color color, {String? iconAsset}) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -323,7 +335,25 @@ class DoctorDashboardScreen extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, color: color, size: 24),
+          iconAsset != null
+              ? (iconAsset.startsWith('http://') || iconAsset.startsWith('https://')
+                  ? Image.network(
+                      iconAsset,
+                      width: 28,
+                      height: 28,
+                      fit: BoxFit.contain,
+                      color: color,
+                      errorBuilder: (context, error, stack) => Icon(icon, color: color, size: 28),
+                    )
+                  : Image.asset(
+                      iconAsset,
+                      width: 28,
+                      height: 28,
+                      fit: BoxFit.contain,
+                      color: color,
+                      errorBuilder: (context, error, stack) => Icon(icon, color: color, size: 28),
+                    ))
+              : Icon(icon, color: color, size: 28),
           const SizedBox(height: 12),
           Text(
             value,
@@ -350,8 +380,9 @@ class DoctorDashboardScreen extends ConsumerWidget {
     String label,
     IconData icon,
     Color color,
-    VoidCallback onTap,
-  ) {
+    VoidCallback onTap, {
+    String? iconAsset,
+  }) {
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(
@@ -360,34 +391,56 @@ class DoctorDashboardScreen extends ConsumerWidget {
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: color.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(10),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: 88),
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: color.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: iconAsset != null
+                      ? (iconAsset.startsWith('http://') || iconAsset.startsWith('https://')
+                          ? Image.network(
+                              iconAsset,
+                              width: 24,
+                              height: 24,
+                              fit: BoxFit.contain,
+                              color: color,
+                              errorBuilder: (context, error, stack) => Icon(icon, color: color, size: 24),
+                            )
+                          : Image.asset(
+                              iconAsset,
+                              width: 24,
+                              height: 24,
+                              fit: BoxFit.contain,
+                              color: color,
+                              errorBuilder: (context, error, stack) => Icon(icon, color: color, size: 24),
+                            ))
+                      : Icon(icon, color: color, size: 24),
                 ),
-                child: Icon(icon, color: color, size: 24),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Text(
-                  label,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Text(
+                    label,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
-              ),
-              const Icon(
-                Icons.arrow_forward_ios,
-                size: 16,
-                color: AppColors.textSecondary,
-              ),
-            ],
+                const Icon(
+                  Icons.arrow_forward_ios,
+                  size: 16,
+                  color: AppColors.textSecondary,
+                ),
+              ],
+            ),
           ),
         ),
       ),

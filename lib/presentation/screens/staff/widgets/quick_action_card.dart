@@ -29,7 +29,9 @@ class QuickActionCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         child: Container(
           padding: const EdgeInsets.all(16),
+          height: 120, // added minimum height
           child: Column(
+            mainAxisAlignment: MainAxisAlignment.center, // added center alignment
             children: [
               Container(
                 padding: const EdgeInsets.all(12),
@@ -38,14 +40,23 @@ class QuickActionCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: iconAsset != null
-                    ? Image.asset(
-                        iconAsset!,
-                        width: 32,
-                        height: 32,
-                        fit: BoxFit.contain,
-                        color: color,
-                        errorBuilder: (context, error, stackTrace) => Icon(icon ?? Icons.circle, color: color, size: 32),
-                      )
+                    ? (iconAsset!.startsWith('http://') || iconAsset!.startsWith('https://')
+                        ? Image.network(
+                            iconAsset!,
+                            width: 32,
+                            height: 32,
+                            fit: BoxFit.contain,
+                            color: color,
+                            errorBuilder: (context, error, stackTrace) => Icon(icon ?? Icons.circle, color: color, size: 32),
+                          )
+                        : Image.asset(
+                            iconAsset!,
+                            width: 32,
+                            height: 32,
+                            fit: BoxFit.contain,
+                            color: color,
+                            errorBuilder: (context, error, stackTrace) => Icon(icon ?? Icons.circle, color: color, size: 32),
+                          ))
                     : Icon(icon ?? Icons.circle, color: color, size: 32),
               ),
               const SizedBox(height: 12),

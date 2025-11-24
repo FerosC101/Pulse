@@ -62,7 +62,7 @@ class OverviewTab extends ConsumerWidget {
                 Expanded(
                   child: QuickActionCard(
                     icon: Icons.person_add,
-                    iconAsset: 'assets/images/qa_admit.png',
+                    iconAsset: 'https://res.cloudinary.com/dhqosbqeh/image/upload/v1763996689/qa_admit_q0w1sq.png',
                     label: 'Admit Patient',
                     color: AppColors.success,
                     onTap: () {
@@ -79,7 +79,7 @@ class OverviewTab extends ConsumerWidget {
                 Expanded(
                   child: QuickActionCard(
                     icon: Icons.exit_to_app,
-                    iconAsset: 'assets/images/qa_discharge.png',
+                    iconAsset: 'https://res.cloudinary.com/dhqosbqeh/image/upload/v1763996690/qa_discharge_r5bayu.png',
                     label: 'Discharge',
                     color: AppColors.info,
                     onTap: () {
@@ -95,7 +95,7 @@ class OverviewTab extends ConsumerWidget {
                 Expanded(
                   child: QuickActionCard(
                     icon: Icons.swap_horiz,
-                    iconAsset: 'assets/images/qa_transfer.png',
+                    iconAsset: 'https://res.cloudinary.com/dhqosbqeh/image/upload/v1763996690/qa_transfer_vvlkzj.png',
                     label: 'Transfer',
                     color: AppColors.warning,
                     onTap: () {
@@ -107,7 +107,7 @@ class OverviewTab extends ConsumerWidget {
                 Expanded(
                   child: QuickActionCard(
                     icon: Icons.medical_services,
-                    iconAsset: 'assets/images/qa_emergency.png',
+                    iconAsset: 'https://res.cloudinary.com/dhqosbqeh/image/upload/v1763996690/qa_emergency_nqckn8.png',
                     label: 'Emergency',
                     color: AppColors.error,
                     onTap: () {
@@ -235,8 +235,8 @@ class OverviewTab extends ConsumerWidget {
                         color: AppColors.info.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: Image.asset(
-                        'assets/images/feature_analytics.png',
+                      child: Image.network(
+                        'https://res.cloudinary.com/dhqosbqeh/image/upload/f_auto,q_auto,w_20,h_20/pulse_icons/feature_analytics.png',
                         width: 20,
                         height: 20,
                         color: AppColors.info,

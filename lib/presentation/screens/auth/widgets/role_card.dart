@@ -35,7 +35,7 @@ class RoleCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Center(
-                  child: Image.asset(
+                  child: Image.network(
                     _assetFor(userType),
                     width: 40,
                     height: 40,
@@ -87,13 +87,13 @@ class RoleCard extends StatelessWidget {
   String _assetFor(UserType type) {
     switch (type) {
       case UserType.patient:
-        return 'assets/images/usertype_patient.png';
+        return 'https://res.cloudinary.com/dhqosbqeh/image/upload/v1763996687/usertype_patient_cpp8bs.png';
       case UserType.doctor:
-        return 'assets/images/usertype_doctor.png';
+        return 'https://res.cloudinary.com/dhqosbqeh/image/upload/v1763996687/usertype_doctor_yigfmz.png';
       case UserType.hospitalStaff:
-        return 'assets/images/usertype_hospital_staff.png';
+        return 'https://res.cloudinary.com/dhqosbqeh/image/upload/v1763996687/usertype_hospital_staff_bh0leu.png';
       case UserType.admin:
-        return 'assets/images/usertype_admin.png';
+        return 'https://res.cloudinary.com/dhqosbqeh/image/upload/v1763996687/usertype_admin_gqcnrm.png';
     }
   }
 }

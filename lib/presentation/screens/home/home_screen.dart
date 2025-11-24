@@ -28,12 +28,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   String _hospitalLogoAsset(String name) {
     final n = name.toLowerCase();
     if (n.contains('metro') && n.contains('general')) {
-      return 'assets/images/hospital_metro_general.jpg';
+      return 'https://res.cloudinary.com/dhqosbqeh/image/upload/v1763996688/hospital_metro_general_ver2ot.jpg';
     }
     if (n.contains('batangas') && n.contains('medical')) {
-      return 'assets/images/hospital_batangas_medical.jpg';
+      return 'https://res.cloudinary.com/dhqosbqeh/image/upload/v1763996689/hospital_batangas_medical_la9gna.jpg';
     }
-    return 'assets/images/icon_hospital.png';
+    return 'https://res.cloudinary.com/dhqosbqeh/image/upload/v1763996689/icon_hospital_ekdup6.png';
   }
 
   @override
@@ -45,8 +45,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       appBar: AppBar(
         title: Row(
           children: [
-            Image.asset(
-              'assets/images/logo_pulse.png',
+            Image.network(
+              'https://res.cloudinary.com/dhqosbqeh/image/upload/v1763996690/logo_pulse_e2wf52.png',
               width: 28,
               height: 28,
               fit: BoxFit.contain,
@@ -74,11 +74,23 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.notifications_outlined),
+            icon: Image.network(
+              'https://res.cloudinary.com/dhqosbqeh/image/upload/v1763996690/icon_notification_qjxk9d.png',
+              width: 24,
+              height: 24,
+              fit: BoxFit.contain,
+              errorBuilder: (context, error, stackTrace) => const Icon(Icons.notifications_outlined),
+            ),
             onPressed: () {},
           ),
           IconButton(
-            icon: const Icon(Icons.logout),
+            icon: Image.network(
+              'https://res.cloudinary.com/dhqosbqeh/image/upload/v1763996690/icon_logout_jxk9yd.png',
+              width: 24,
+              height: 24,
+              fit: BoxFit.contain,
+              errorBuilder: (context, error, stackTrace) => const Icon(Icons.logout),
+            ),
             onPressed: () async {
               await ref.read(authControllerProvider.notifier).signOut();
               if (context.mounted) {
@@ -155,7 +167,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             ),
                             child: Row(
                               children: [
-                                const Icon(Icons.search, color: Colors.white),
+                                Image.network(
+                                  'https://res.cloudinary.com/dhqosbqeh/image/upload/v1763996690/icon_search_jxk9yd.png',
+                                  width: 24,
+                                  height: 24,
+                                  fit: BoxFit.contain,
+                                  errorBuilder: (context, error, stackTrace) => const Icon(Icons.search, color: Colors.white),
+                                ),
                                 const SizedBox(width: 12),
                                 Text(
                                   'Search hospitals, services...',
@@ -209,8 +227,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                     color: Colors.white.withOpacity(0.2),
                                     borderRadius: BorderRadius.circular(12),
                                   ),
-                                  child: Image.asset(
-                                    'assets/images/icon_emergency.png',
+                                  child: Image.network(
+                                    'https://res.cloudinary.com/dhqosbqeh/image/upload/v1763996688/icon_emergency_pjklxc.png',
                                     width: 28,
                                     height: 28,
                                     color: Colors.white,
@@ -290,10 +308,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                     color: Colors.white.withOpacity(0.2),
                                     borderRadius: BorderRadius.circular(12),
                                   ),
-                                  child: const Icon(
-                                    Icons.add_circle_outline,
+                                  child: Image.network(
+                                    'https://res.cloudinary.com/dhqosbqeh/image/upload/v1763999280/book_appointment_gh4foi.png',
+                                    width: 28,
+                                    height: 28,
+                                    fit: BoxFit.contain,
                                     color: Colors.white,
-                                    size: 28,
+                                    errorBuilder: (context, error, stackTrace) => const Icon(
+                                      Icons.add_circle_outline,
+                                      color: Colors.white,
+                                      size: 28,
+                                    ),
                                   ),
                                 ),
                                 const SizedBox(width: 16),
@@ -364,10 +389,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                     color: Colors.white.withOpacity(0.2),
                                     borderRadius: BorderRadius.circular(12),
                                   ),
-                                  child: const Icon(
-                                    Icons.calendar_month,
+                                  child: Image.network(
+                                    'https://res.cloudinary.com/dhqosbqeh/image/upload/v1763999281/my_appointment_unk0ra.png',
+                                    width: 28,
+                                    height: 28,
+                                    fit: BoxFit.contain,
                                     color: Colors.white,
-                                    size: 28,
+                                    errorBuilder: (context, error, stackTrace) => const Icon(
+                                      Icons.calendar_month,
+                                      color: Colors.white,
+                                      size: 28,
+                                    ),
                                   ),
                                 ),
                                 const SizedBox(width: 16),
@@ -448,7 +480,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                         totalHospitals.toString(),
                                         Icons.local_hospital,
                                         AppColors.success,
-                                        iconAsset: 'assets/images/icon_hospital.png',
+                                        iconAsset: 'https://res.cloudinary.com/dhqosbqeh/image/upload/v1763996689/icon_hospital_ekdup6.png',
                                       ),
                                     ),
                                     const SizedBox(width: 16),
@@ -459,7 +491,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                         totalIcuAvailable.toString(),
                                         Icons.airline_seat_flat,
                                         AppColors.info,
-                                        iconAsset: 'assets/images/icon_icu.png',
+                                        iconAsset: 'https://res.cloudinary.com/dhqosbqeh/image/upload/v1763996689/icon_icu_x98ozy.png',
                                       ),
                                     ),
                                   ],
@@ -474,7 +506,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                         totalErAvailable.toString(),
                                         Icons.emergency,
                                         AppColors.error,
-                                        iconAsset: 'assets/images/icon_er.png',
+                                        iconAsset: 'https://res.cloudinary.com/dhqosbqeh/image/upload/v1763996688/icon_er_qqzqz4.png',
                                       ),
                                     ),
                                     const SizedBox(width: 16),
@@ -485,7 +517,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                         '${hospitals.where((h) => h.status.isOperational).length}',
                                         Icons.check_circle,
                                         AppColors.warning,
-                                        iconAsset: 'assets/images/icon_operational.png',
+                                        iconAsset: 'https://res.cloudinary.com/dhqosbqeh/image/upload/v1763996689/icon_operational_nsdw1k.png',
                                       ),
                                     ),
                                   ],
@@ -670,7 +702,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               borderRadius: BorderRadius.circular(8),
             ),
             child: iconAsset != null
-                ? Image.asset(
+                ? Image.network(
                     iconAsset,
                     width: 24,
                     height: 24,
@@ -730,7 +762,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             Column(
               children: [
                 iconAsset != null
-                    ? Image.asset(
+                    ? Image.network(
                         iconAsset,
                         width: 24,
                         height: 24,
@@ -865,17 +897,29 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       color: AppColors.primary.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    child: Image.asset(
-                      _hospitalLogoAsset(hospital.name),
-                      width: 28,
-                      height: 28,
-                      fit: BoxFit.contain,
-                      errorBuilder: (context, error, stackTrace) => const Icon(
-                        Icons.local_hospital,
-                        color: AppColors.primary,
-                        size: 28,
-                      ),
-                    ),
+                    child: (_hospitalLogoAsset(hospital.name).startsWith('http://') || _hospitalLogoAsset(hospital.name).startsWith('https://'))
+                        ? Image.network(
+                            _hospitalLogoAsset(hospital.name),
+                            width: 28,
+                            height: 28,
+                            fit: BoxFit.contain,
+                            errorBuilder: (context, error, stackTrace) => const Icon(
+                              Icons.local_hospital,
+                              color: AppColors.primary,
+                              size: 28,
+                            ),
+                          )
+                        : Image.asset(
+                            _hospitalLogoAsset(hospital.name),
+                            width: 28,
+                            height: 28,
+                            fit: BoxFit.contain,
+                            errorBuilder: (context, error, stackTrace) => const Icon(
+                              Icons.local_hospital,
+                              color: AppColors.primary,
+                              size: 28,
+                            ),
+                          ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
@@ -892,8 +936,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         const SizedBox(height: 4),
                         Row(
                           children: [
-                            Image.asset(
-                              'assets/images/icon_location.png',
+                            Image.network(
+                              'https://res.cloudinary.com/dhqosbqeh/image/upload/v1763996690/icon_location_jxk9yd.png',
                               width: 14,
                               height: 14,
                               color: AppColors.textSecondary,
@@ -964,8 +1008,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   const Spacer(),
                   Row(
                     children: [
-                      Image.asset(
-                        'assets/images/icon_wait_time.png',
+                      Image.network(
+                        'https://res.cloudinary.com/dhqosbqeh/image/upload/v1763999287/wait_time_znlspm.png',
                         width: 14,
                         height: 14,
                         color: AppColors.textSecondary,
