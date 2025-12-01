@@ -21,6 +21,13 @@ migrate_working_dir/
 android/app/google-services.json
 ios/Runner/GoogleService-Info.plist
 
+# Local configuration with sensitive data
+android/local.properties
+lib/firebase_options.dart
+
+# Maven wrapper JAR (binary file)
+.mvn/wrapper/maven-wrapper.jar
+
 # IntelliJ related
 *.iml
 *.ipr
