@@ -2,12 +2,12 @@
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class ApiConfig {
-  // API keys with fallback for web platform
-  // These are used when .env is not available (web builds)
-  // Mobile apps should use .env file for better security
+  // IMPORTANT: For production, set API keys via environment variables
+  // These fallback values are for local development only
+  // DO NOT use real API keys here - use .env file instead
   
-  static const String _googleMapsApiKeyFallback = 'AIzaSyD8zE3WkUaWr8OiBuTpg_wEaWgI6AMPtsU';
-  static const String _geminiApiKeyFallback = 'AIzaSyAHtaHaZp9_gHYbVE7HPveRf6BoxOXe9pI';
+  static const String _googleMapsApiKeyFallback = 'YOUR_GOOGLE_MAPS_KEY_HERE';
+  static const String _geminiApiKeyFallback = 'YOUR_GEMINI_KEY_HERE';
   
   static String get googleMapsApiKey {
     try {
