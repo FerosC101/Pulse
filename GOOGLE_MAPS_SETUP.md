@@ -12,7 +12,7 @@ The Google Maps API key needs to be properly configured in the Google Cloud Cons
 Open: https://console.cloud.google.com/google/maps-apis/credentials
 
 ### 2. Find Your API Key
-Look for the API key: `AIzaSyClM3oua_QM_fSy_9WgnhQK6jkoN50lGTc`
+Look for your API key in the credentials page.
 
 ### 3. Enable Required APIs
 You need to enable these APIs for the key:
@@ -66,8 +66,8 @@ Click **Save** and wait 1-2 minutes for changes to propagate.
 - ✅ `.env` - Google Maps key set correctly
 
 ### API Keys:
-- **Google Maps**: `AIzaSyClM3oua_QM_fSy_9WgnhQK6jkoN50lGTc`
-- **Gemini AI**: `AIzaSyCB0fj0yJovgsMjtpCY_klPnFGfDFNX52I` ✅ Working!
+- **Google Maps**: Configured in `.env` file
+- **Gemini AI**: Configured in `.env` file ✅ Working!
 
 ## ⚠️ Important Notes
 

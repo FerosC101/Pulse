@@ -23,7 +23,7 @@ Your Gemini API key was reported as leaked and has been disabled by Google for s
 
 Example:
 ```env
-GEMINI_API_KEY=AIzaSyDxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+GEMINI_API_KEY=your_actual_api_key_here
 ```
 
 ### 3. Restart Your Flutter App
