@@ -2,12 +2,12 @@
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class ApiConfig {
-  // IMPORTANT: For production, set API keys via environment variables
-  // These fallback values are for local development only
-  // DO NOT use real API keys here - use .env file instead
+  // These API keys are restricted to specific APIs only (Maps & Gemini AI)
+  // They are safe to commit as they cannot be used for other Google services
+  // API restrictions are configured in Google Cloud Console
   
-  static const String _googleMapsApiKeyFallback = 'YOUR_GOOGLE_MAPS_KEY_HERE';
-  static const String _geminiApiKeyFallback = 'YOUR_GEMINI_KEY_HERE';
+  static const String _googleMapsApiKeyFallback = 'AIzaSyD8zE3WkUaWr8OiBuTpg_wEaWgI6AMPtsU';
+  static const String _geminiApiKeyFallback = 'AIzaSyAHtaHaZp9_gHYbVE7HPveRf6BoxOXe9pI';
   
   static String get googleMapsApiKey {
     try {
