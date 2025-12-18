@@ -12,15 +12,21 @@ class HospitalDetailScreen extends StatelessWidget {
 
   const HospitalDetailScreen({super.key, required this.hospital});
 
-  String _hospitalLogoAsset(String name) {
-    final n = name.toLowerCase();
+  String? _getHospitalImage(HospitalModel hospital) {
+    // Use uploaded image if available, otherwise use default based on name
+    if (hospital.imageUrl != null && hospital.imageUrl!.isNotEmpty) {
+      return hospital.imageUrl;
+    }
+    
+    // Fallback to default images
+    final n = hospital.name.toLowerCase();
     if (n.contains('metro') && n.contains('general')) {
-      return 'assets/images/hospital_metro_general.jpg';
+      return 'https://res.cloudinary.com/dhqosbqeh/image/upload/v1763996688/hospital_metro_general_ver2ot.jpg';
     }
     if (n.contains('batangas') && n.contains('medical')) {
-      return 'assets/images/hospital_batangas_medical.jpg';
+      return 'https://res.cloudinary.com/dhqosbqeh/image/upload/v1763996689/hospital_batangas_medical_la9gna.jpg';
     }
-    return 'assets/images/icon_hospital.png';
+    return 'https://res.cloudinary.com/dhqosbqeh/image/upload/v1763996689/icon_hospital_ekdup6.png';
   }
 
   @override
@@ -59,20 +65,30 @@ class HospitalDetailScreen extends StatelessWidget {
                     children: [
                       Container(
                         height: 60,
+                        width: 60,
                         decoration: BoxDecoration(
                           color: Colors.white.withOpacity(0.2),
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        child: Image.asset(
-                          _hospitalLogoAsset(hospital.name),
-                          width: 40,
-                          height: 40,
-                          fit: BoxFit.contain,
-                          errorBuilder: (context, error, stackTrace) => const Icon(
-                            Icons.local_hospital,
-                            color: Colors.white,
-                            size: 32,
-                          ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(12),
+                          child: _getHospitalImage(hospital) != null
+                              ? Image.network(
+                                  _getHospitalImage(hospital)!,
+                                  width: 60,
+                                  height: 60,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) => const Icon(
+                                    Icons.local_hospital,
+                                    color: Colors.white,
+                                    size: 32,
+                                  ),
+                                )
+                              : const Icon(
+                                  Icons.local_hospital,
+                                  color: Colors.white,
+                                  size: 32,
+                                ),
                         ),
                       ),
                       const SizedBox(width: 16),

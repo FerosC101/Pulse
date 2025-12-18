@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pulse/core/constants/app_colors.dart';
+import 'package:pulse/data/models/hospital_model.dart';
 import 'package:pulse/presentation/providers/hospital_provider.dart';
 import 'package:pulse/presentation/screens/patient/hospital_detail_screen.dart';
 
@@ -16,8 +17,14 @@ class _HospitalListScreenState extends ConsumerState<HospitalListScreen> {
   String _searchQuery = '';
   String _filterType = 'All';
 
-  String _hospitalLogoAsset(String name) {
-    final n = name.toLowerCase();
+  String? _getHospitalImage(HospitalModel hospital) {
+    // Use uploaded image if available, otherwise use default based on name
+    if (hospital.imageUrl != null && hospital.imageUrl!.isNotEmpty) {
+      return hospital.imageUrl;
+    }
+    
+    // Fallback to default images
+    final n = hospital.name.toLowerCase();
     if (n.contains('metro') && n.contains('general')) {
       return 'https://res.cloudinary.com/dhqosbqeh/image/upload/v1763996688/hospital_metro_general_ver2ot.jpg';
     }
@@ -159,29 +166,26 @@ class _HospitalListScreenState extends ConsumerState<HospitalListScreen> {
                                 color: AppColors.primary.withOpacity(0.1),
                                 borderRadius: BorderRadius.circular(10),
                               ),
-                              child: (_hospitalLogoAsset(hospital.name).startsWith('http://') || _hospitalLogoAsset(hospital.name).startsWith('https://'))
-                                  ? Image.network(
-                                      _hospitalLogoAsset(hospital.name),
-                                      width: 28,
-                                      height: 28,
-                                      fit: BoxFit.contain,
-                                      errorBuilder: (context, error, stackTrace) => const Icon(
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(10),
+                                child: _getHospitalImage(hospital) != null
+                                    ? Image.network(
+                                        _getHospitalImage(hospital)!,
+                                        width: 50,
+                                        height: 50,
+                                        fit: BoxFit.cover,
+                                        errorBuilder: (context, error, stackTrace) => const Icon(
+                                          Icons.local_hospital,
+                                          color: AppColors.primary,
+                                          size: 28,
+                                        ),
+                                      )
+                                    : const Icon(
                                         Icons.local_hospital,
                                         color: AppColors.primary,
                                         size: 28,
                                       ),
-                                    )
-                                  : Image.asset(
-                                      _hospitalLogoAsset(hospital.name),
-                                      width: 28,
-                                      height: 28,
-                                      fit: BoxFit.contain,
-                                      errorBuilder: (context, error, stackTrace) => const Icon(
-                                        Icons.local_hospital,
-                                        color: AppColors.primary,
-                                        size: 28,
-                                      ),
-                                    ),
+                              ),
                             ),
                             const SizedBox(width: 12),
                             Expanded(

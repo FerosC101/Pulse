@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pulse/core/constants/app_colors.dart';
 import 'package:pulse/data/models/hospital_model.dart';
 import 'package:pulse/services/model_3d_service.dart';
+import 'package:pulse/services/image_upload_service.dart';
 import 'package:file_picker/file_picker.dart';
 
 class HospitalFormDialog extends ConsumerStatefulWidget {
@@ -21,6 +22,7 @@ class HospitalFormDialog extends ConsumerStatefulWidget {
 class _HospitalFormDialogState extends ConsumerState<HospitalFormDialog> {
   final _formKey = GlobalKey<FormState>();
   final Model3DService _model3DService = Model3DService();
+  final ImageUploadService _imageUploadService = ImageUploadService();
   
   // Controllers
   late TextEditingController _nameController;
@@ -29,7 +31,6 @@ class _HospitalFormDialogState extends ConsumerState<HospitalFormDialog> {
   late TextEditingController _longController;
   late TextEditingController _phoneController;
   late TextEditingController _emailController;
-  late TextEditingController _imageUrlController;
   late TextEditingController _icuTotalController;
   late TextEditingController _erTotalController;
   late TextEditingController _wardTotalController;
@@ -38,6 +39,10 @@ class _HospitalFormDialogState extends ConsumerState<HospitalFormDialog> {
   String _selectedType = 'public';
   List<String> _selectedServices = [];
   List<String> _selectedSpecialties = [];
+  
+  // Image Upload State
+  PlatformFile? _selectedImage;
+  String? _selectedImageFileName;
   
   // 3D Model Upload State
   PlatformFile? _selected3DModel;
@@ -74,7 +79,6 @@ class _HospitalFormDialogState extends ConsumerState<HospitalFormDialog> {
     _longController = TextEditingController(text: widget.hospital?.longitude.toString() ?? '');
     _phoneController = TextEditingController(text: widget.hospital?.phone ?? '');
     _emailController = TextEditingController(text: widget.hospital?.email ?? '');
-    _imageUrlController = TextEditingController(text: widget.hospital?.imageUrl ?? '');
     
     _icuTotalController = TextEditingController(
       text: widget.hospital?.status.icuTotal.toString() ?? '20'
@@ -104,12 +108,41 @@ class _HospitalFormDialogState extends ConsumerState<HospitalFormDialog> {
     _longController.dispose();
     _phoneController.dispose();
     _emailController.dispose();
-    _imageUrlController.dispose();
     _icuTotalController.dispose();
     _erTotalController.dispose();
     _wardTotalController.dispose();
     _floorsController.dispose();
     super.dispose();
+  }
+
+  Future<void> _pickImage() async {
+    try {
+      final pf = await _imageUploadService.pickImageFile();
+      if (pf != null) {
+        setState(() {
+          _selectedImage = pf;
+          _selectedImageFileName = pf.name;
+        });
+        
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Image selected: $_selectedImageFileName'),
+              backgroundColor: AppColors.success,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(e.toString()),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+    }
   }
 
   Future<void> _pick3DModel() async {
@@ -144,7 +177,7 @@ class _HospitalFormDialogState extends ConsumerState<HospitalFormDialog> {
 
   void _handleSave() {
     if (_formKey.currentState!.validate()) {
-      // Return hospital data + 3D model file
+      // Return hospital data + image file + 3D model file
       Navigator.pop(context, {
         'hospitalData': {
           'name': _nameController.text.trim(),
@@ -156,7 +189,6 @@ class _HospitalFormDialogState extends ConsumerState<HospitalFormDialog> {
           'type': _selectedType,
           'services': _selectedServices,
           'specialties': _selectedSpecialties,
-          'imageUrl': _imageUrlController.text.trim(),
           'status': {
             'icuTotal': int.tryParse(_icuTotalController.text) ?? 0,
             'icuOccupied': widget.hospital?.status.icuOccupied ?? 0,
@@ -168,6 +200,8 @@ class _HospitalFormDialogState extends ConsumerState<HospitalFormDialog> {
             'isOperational': widget.hospital?.status.isOperational ?? true,
           },
         },
+        'imageFile': _selectedImage,
+        'existingImageUrl': widget.hospital?.imageUrl,
         'model3DFile': _selected3DModel,
         'floors': int.tryParse(_floorsController.text) ?? 3,
         'existingModelUrl': widget.hospital?.model3dUrl,
@@ -353,13 +387,181 @@ class _HospitalFormDialogState extends ConsumerState<HospitalFormDialog> {
                           }
                         },
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 24),
                       
-                      TextFormField(
-                        controller: _imageUrlController,
-                        decoration: const InputDecoration(
-                          labelText: 'Image URL',
-                          prefixIcon: Icon(Icons.image),
+                      // Hospital Image Upload
+                      const Text(
+                        'Hospital Image',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      
+                      Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: AppColors.primary.withOpacity(0.05),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: AppColors.primary.withOpacity(0.2),
+                            width: 1,
+                          ),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Show existing image status
+                            if (widget.hospital?.imageUrl != null && _selectedImage == null)
+                              Container(
+                                margin: const EdgeInsets.only(bottom: 12),
+                                padding: const EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  color: AppColors.success.withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Row(
+                                  children: [
+                                    ClipRRect(
+                                      borderRadius: BorderRadius.circular(8),
+                                      child: Image.network(
+                                        widget.hospital!.imageUrl!,
+                                        width: 80,
+                                        height: 80,
+                                        fit: BoxFit.cover,
+                                        errorBuilder: (context, error, stackTrace) {
+                                          return Container(
+                                            width: 80,
+                                            height: 80,
+                                            color: Colors.grey[300],
+                                            child: const Icon(Icons.image, size: 40),
+                                          );
+                                        },
+                                      ),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    const Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            'Current Image',
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 14,
+                                            ),
+                                          ),
+                                          SizedBox(height: 4),
+                                          Text(
+                                            'Click "Select Image" to replace',
+                                            style: TextStyle(
+                                              fontSize: 12,
+                                              color: AppColors.textSecondary,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            
+                            // Show selected new image
+                            if (_selectedImage != null)
+                              Container(
+                                margin: const EdgeInsets.only(bottom: 12),
+                                padding: const EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  color: AppColors.info.withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Row(
+                                  children: [
+                                    if (_selectedImage!.bytes != null)
+                                      ClipRRect(
+                                        borderRadius: BorderRadius.circular(8),
+                                        child: Image.memory(
+                                          _selectedImage!.bytes!,
+                                          width: 80,
+                                          height: 80,
+                                          fit: BoxFit.cover,
+                                        ),
+                                      )
+                                    else
+                                      Container(
+                                        width: 80,
+                                        height: 80,
+                                        decoration: BoxDecoration(
+                                          color: Colors.grey[300],
+                                          borderRadius: BorderRadius.circular(8),
+                                        ),
+                                        child: const Icon(Icons.image, size: 40),
+                                      ),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            _selectedImageFileName ?? 'Unknown file',
+                                            style: const TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 14,
+                                            ),
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                          const SizedBox(height: 4),
+                                          Text(
+                                            _imageUploadService.formatFileSize(_selectedImage!.size),
+                                            style: const TextStyle(
+                                              fontSize: 12,
+                                              color: AppColors.textSecondary,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    IconButton(
+                                      icon: const Icon(Icons.close, size: 20),
+                                      onPressed: () {
+                                        setState(() {
+                                          _selectedImage = null;
+                                          _selectedImageFileName = null;
+                                        });
+                                      },
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            
+                            // Select image button
+                            SizedBox(
+                              width: double.infinity,
+                              child: ElevatedButton.icon(
+                                onPressed: _pickImage,
+                                icon: const Icon(Icons.add_photo_alternate),
+                                label: Text(
+                                  _selectedImage == null 
+                                      ? (widget.hospital?.imageUrl != null ? 'Replace Image' : 'Select Image')
+                                      : 'Change Image'
+                                ),
+                                style: ElevatedButton.styleFrom(
+                                  padding: const EdgeInsets.symmetric(vertical: 14),
+                                ),
+                              ),
+                            ),
+                            
+                            const SizedBox(height: 8),
+                            const Text(
+                              'Supported formats: JPG, JPEG, PNG, WEBP (max 5MB)',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: AppColors.textSecondary,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                       const SizedBox(height: 24),

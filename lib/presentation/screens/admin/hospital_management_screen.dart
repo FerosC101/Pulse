@@ -7,6 +7,7 @@ import 'package:pulse/data/models/hospital_model.dart';
 import 'package:pulse/presentation/providers/hospital_provider.dart';
 import 'package:pulse/presentation/screens/admin/widgets/hospital_form_dialog.dart';
 import 'package:pulse/services/model_3d_service.dart';
+import 'package:pulse/services/image_upload_service.dart';
 import 'package:file_picker/file_picker.dart';
 
 class HospitalManagementScreen extends ConsumerWidget {
@@ -98,11 +99,13 @@ class HospitalManagementScreen extends ConsumerWidget {
     );
 
     if (result != null && context.mounted) {
-      await _saveHospitalWithModel(
+      await _saveHospitalWithImageAndModel(
         context,
         ref,
         result['hospitalData'] as Map<String, dynamic>,
         hospital?.id,
+        result['imageFile'] as PlatformFile?,
+        result['existingImageUrl'] as String?,
         result['model3DFile'] as PlatformFile?,
         result['floors'] as int,
         result['existingModelUrl'] as String?,
@@ -110,11 +113,13 @@ class HospitalManagementScreen extends ConsumerWidget {
     }
   }
 
-  Future<void> _saveHospitalWithModel(
+  Future<void> _saveHospitalWithImageAndModel(
     BuildContext context,
     WidgetRef ref,
     Map<String, dynamic> hospitalData,
     String? existingId,
+    PlatformFile? imageFile,
+    String? existingImageUrl,
     PlatformFile? modelFile,
     int floors,
     String? existingModelUrl,
@@ -133,6 +138,31 @@ class HospitalManagementScreen extends ConsumerWidget {
       
       if (existingId != null) {
         // UPDATE EXISTING HOSPITAL
+        
+        // Upload new image if provided
+        if (imageFile != null) {
+          final imageUploadService = ImageUploadService();
+
+          // Delete old image if exists
+          if (existingImageUrl != null && existingImageUrl.contains('firebasestorage')) {
+            try {
+              await imageUploadService.deleteImage(existingImageUrl);
+            } catch (e) {
+              // ignore delete errors
+            }
+          }
+
+          // Upload new image
+          final imageUrl = await imageUploadService.uploadHospitalImage(
+            platformFile: imageFile,
+            hospitalId: existingId,
+          );
+
+          hospitalData['imageUrl'] = imageUrl;
+        } else if (existingImageUrl != null) {
+          // Keep existing image
+          hospitalData['imageUrl'] = existingImageUrl;
+        }
         
         // Check if we need to upload a new 3D model
         if (modelFile != null) {
@@ -178,6 +208,19 @@ class HospitalManagementScreen extends ConsumerWidget {
       } else {
         // ADD NEW HOSPITAL
         
+        // Generate temporary ID for uploads
+        final tempId = DateTime.now().millisecondsSinceEpoch.toString();
+        
+        // Upload image if provided
+        if (imageFile != null) {
+          final imageUploadService = ImageUploadService();
+          final imageUrl = await imageUploadService.uploadHospitalImage(
+            platformFile: imageFile,
+            hospitalId: tempId,
+          );
+          hospitalData['imageUrl'] = imageUrl;
+        }
+        
         final hospitalId = await ref.read(hospitalRepositoryProvider).createHospital(hospitalData);
 
         // Upload 3D model if provided
@@ -190,7 +233,6 @@ class HospitalManagementScreen extends ConsumerWidget {
 
           // Update hospital with 3D model data
           await hospitalController.updateHospital(hospitalId, {
-            ...hospitalData,
             'model3dUrl': modelUrl,
             'modelMetadata': {
               'floors': floors,
@@ -363,17 +405,6 @@ class _HospitalCard extends StatelessWidget {
     required this.onDelete,
   });
 
-  String _hospitalLogoAsset(String name) {
-    final n = name.toLowerCase();
-    if (n.contains('metro') && n.contains('general')) {
-      return 'assets/images/hospital_metro_general.jpg';
-    }
-    if (n.contains('batangas') && n.contains('medical')) {
-      return 'assets/images/hospital_batangas_medical.jpg';
-    }
-    return 'assets/images/icon_hospital.png';
-  }
-
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -389,16 +420,25 @@ class _HospitalCard extends StatelessWidget {
                 color: AppColors.primary.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: Image.asset(
-                _hospitalLogoAsset(hospital.name),
-                width: 28,
-                height: 28,
-                fit: BoxFit.contain,
-                errorBuilder: (context, error, stackTrace) => const Icon(
-                  Icons.local_hospital,
-                  color: AppColors.primary,
-                  size: 28,
-                ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: hospital.imageUrl != null && hospital.imageUrl!.isNotEmpty
+                    ? Image.network(
+                        hospital.imageUrl!,
+                        width: 56,
+                        height: 56,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) => const Icon(
+                          Icons.local_hospital,
+                          color: AppColors.primary,
+                          size: 28,
+                        ),
+                      )
+                    : const Icon(
+                        Icons.local_hospital,
+                        color: AppColors.primary,
+                        size: 28,
+                      ),
               ),
             ),
             title: Text(

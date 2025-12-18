@@ -32,8 +32,8 @@ Write-Host "5. Paste this JSON:" -ForegroundColor Green
 Write-Host '[' -ForegroundColor White
 Write-Host '  {' -ForegroundColor White
 Write-Host '    "origin": ["*"],' -ForegroundColor White
-Write-Host '    "method": ["GET", "HEAD", "OPTIONS"],' -ForegroundColor White
-Write-Host '    "responseHeader": ["Content-Type", "Access-Control-Allow-Origin", "Range"],' -ForegroundColor White
+Write-Host '    "method": ["GET", "HEAD", "PUT", "POST", "DELETE", "OPTIONS"],' -ForegroundColor White
+Write-Host '    "responseHeader": ["Content-Type", "Access-Control-Allow-Origin", "Range", "Authorization"],' -ForegroundColor White
 Write-Host '    "maxAgeSeconds": 3600' -ForegroundColor White
 Write-Host '  }' -ForegroundColor White
 Write-Host ']' -ForegroundColor White
