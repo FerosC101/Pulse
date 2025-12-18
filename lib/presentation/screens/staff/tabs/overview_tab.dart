@@ -6,6 +6,9 @@ import 'package:pulse/presentation/providers/patient_provider.dart';
 import 'package:pulse/presentation/providers/queue_provider.dart';
 import 'package:pulse/presentation/screens/staff/widgets/quick_action_card.dart';
 import 'package:pulse/presentation/screens/staff/widgets/patient_admission_dialog.dart';
+import 'package:pulse/presentation/screens/staff/widgets/discharge_dialog.dart';
+import 'package:pulse/presentation/screens/staff/widgets/transfer_dialog.dart';
+import 'package:pulse/presentation/screens/staff/widgets/emergency_admission_dialog.dart';
 import 'package:pulse/presentation/screens/staff/widgets/department_status_card.dart';
 import 'package:pulse/presentation/screens/staff/widgets/critical_alert_card.dart';
 import 'package:intl/intl.dart';
@@ -83,7 +86,12 @@ class OverviewTab extends ConsumerWidget {
                     label: 'Discharge',
                     color: AppColors.info,
                     onTap: () {
-                      // TODO: Show discharge dialog
+                      showDialog(
+                        context: context,
+                        builder: (context) => DischargeDialog(
+                          hospitalId: hospitalId,
+                        ),
+                      );
                     },
                   ),
                 ),
@@ -99,7 +107,12 @@ class OverviewTab extends ConsumerWidget {
                     label: 'Transfer',
                     color: AppColors.warning,
                     onTap: () {
-                      // TODO: Show transfer dialog
+                      showDialog(
+                        context: context,
+                        builder: (context) => TransferDialog(
+                          hospitalId: hospitalId,
+                        ),
+                      );
                     },
                   ),
                 ),
@@ -111,7 +124,12 @@ class OverviewTab extends ConsumerWidget {
                     label: 'Emergency',
                     color: AppColors.error,
                     onTap: () {
-                      // TODO: Show emergency admission
+                      showDialog(
+                        context: context,
+                        builder: (context) => EmergencyAdmissionDialog(
+                          hospitalId: hospitalId,
+                        ),
+                      );
                     },
                   ),
                 ),
@@ -163,13 +181,25 @@ class OverviewTab extends ConsumerWidget {
                         return const SizedBox.shrink();
                       },
                       loading: () => const SizedBox.shrink(),
-                      error: (_, __) => const SizedBox.shrink(),
+                      error: (error, stack) {
+                        // Log the error but don't show UI error
+                        debugPrint('Queue fetch error: $error');
+                        return const SizedBox.shrink();
+                      },
                     ),
                   ],
                 );
               },
               loading: () => const CircularProgressIndicator(),
-              error: (_, __) => const SizedBox.shrink(),
+              error: (error, stack) {
+                debugPrint('Patients fetch error: $error');
+                return Center(
+                  child: Text(
+                    'Unable to load critical alerts',
+                    style: TextStyle(color: Colors.grey[600]),
+                  ),
+                );
+              },
             ),
             const SizedBox(height: 24),
 
@@ -209,7 +239,15 @@ class OverviewTab extends ConsumerWidget {
                 );
               },
               loading: () => const Center(child: CircularProgressIndicator()),
-              error: (error, _) => Text('Error: $error'),
+              error: (error, stack) {
+                debugPrint('Department status fetch error: $error');
+                return Center(
+                  child: Text(
+                    'Unable to load department status',
+                    style: TextStyle(color: Colors.grey[600]),
+                  ),
+                );
+              },
             ),
             const SizedBox(height: 24),
 

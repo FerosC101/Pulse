@@ -12,6 +12,12 @@ service cloud.firestore {
     function isOwner(userId) {
       return isAuthenticated() && request.auth.uid == userId;
     }
+
+    // Helper function to check if user is a staff member for hospital
+    function isStaffForHospital(hospitalId) {
+      return isAuthenticated() && 
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.staffHospitalId == hospitalId;
+    }
     
     // Users collection
     match /users/{userId} {
@@ -24,6 +30,24 @@ service cloud.firestore {
     match /hospitals/{hospitalId} {
       allow read: if isAuthenticated();
       allow write: if isAuthenticated(); // In production, restrict to admin only
+    }
+
+    // Patients collection - STAFF ACCESS
+    match /patients/{patientId} {
+      allow read: if isAuthenticated() && (
+        isStaffForHospital(resource.data.hospitalId) ||
+        resource.data.patientId == request.auth.uid
+      );
+      allow create, update, delete: if isAuthenticated() && 
+        isStaffForHospital(request.resource.data.hospitalId);
+    }
+
+    // Queue collection - STAFF ACCESS
+    match /queue/{queueId} {
+      allow read: if isAuthenticated() && 
+        isStaffForHospital(resource.data.hospitalId);
+      allow create, update, delete: if isAuthenticated() && 
+        isStaffForHospital(request.resource.data.hospitalId);
     }
     
     // Appointments collection
