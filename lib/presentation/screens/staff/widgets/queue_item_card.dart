@@ -5,6 +5,8 @@ import 'package:pulse/core/constants/app_colors.dart';
 import 'package:pulse/data/models/queue_model.dart';
 import 'package:pulse/data/models/patient_model.dart';
 import 'package:pulse/presentation/providers/queue_provider.dart';
+import 'package:pulse/presentation/screens/staff/widgets/patient_admission_dialog.dart';
+import 'package:pulse/presentation/screens/staff/widgets/change_priority_dialog.dart';
 
 class QueueItemCard extends ConsumerWidget {
   final QueueModel queueItem;
@@ -160,7 +162,50 @@ class QueueItemCard extends ConsumerWidget {
             ),
           ],
           onSelected: (value) async {
-            if (value == 'remove') {
+            if (value == 'admit') {
+              // Admit patient from queue
+              showDialog(
+                context: context,
+                builder: (context) => PatientAdmissionDialog(
+                  hospitalId: queueItem.hospitalId,
+                ),
+              );
+            } else if (value == 'priority') {
+              // Change triage priority
+              final newPriority = await showDialog<TriageLevel>(
+                context: context,
+                builder: (context) => ChangePriorityDialog(
+                  currentPriority: queueItem.triageLevel,
+                  patientName: queueItem.patientName,
+                ),
+              );
+
+              if (newPriority != null && context.mounted) {
+                try {
+                  await ref
+                      .read(queueControllerProvider.notifier)
+                      .updatePriority(queueItem.id, newPriority.name);
+                  
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Priority updated successfully'),
+                        backgroundColor: AppColors.success,
+                      ),
+                    );
+                  }
+                } catch (e) {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Error: $e'),
+                        backgroundColor: AppColors.error,
+                      ),
+                    );
+                  }
+                }
+              }
+            } else if (value == 'remove') {
               final confirm = await showDialog<bool>(
                 context: context,
                 builder: (context) => AlertDialog(

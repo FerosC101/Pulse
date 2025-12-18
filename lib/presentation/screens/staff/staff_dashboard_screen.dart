@@ -7,6 +7,7 @@ import 'package:pulse/presentation/screens/auth/welcome_screen.dart';
 import 'package:pulse/presentation/screens/staff/tabs/overview_tab.dart';
 import 'package:pulse/presentation/screens/staff/tabs/bed_status_tab.dart';
 import 'package:pulse/presentation/screens/staff/tabs/queue_tab.dart';
+import 'package:pulse/presentation/screens/staff/tabs/discharge_records_tab.dart';
 
 class StaffDashboardScreen extends ConsumerStatefulWidget {
   const StaffDashboardScreen({super.key});
@@ -89,6 +90,7 @@ class _StaffDashboardScreenState extends ConsumerState<StaffDashboardScreen> {
           OverviewTab(hospitalId: user.staffHospitalId!),
           BedStatusTab(hospitalId: user.staffHospitalId!),
           QueueTab(hospitalId: user.staffHospitalId!),
+          DischargeRecordsTab(hospitalId: user.staffHospitalId!),
         ];
 
         return Scaffold(
@@ -179,6 +181,7 @@ class _StaffDashboardScreenState extends ConsumerState<StaffDashboardScreen> {
             onTap: (index) => setState(() => _currentIndex = index),
             selectedItemColor: AppColors.primary,
             unselectedItemColor: AppColors.textSecondary,
+            type: BottomNavigationBarType.fixed,
             items: const [
               BottomNavigationBarItem(
                 icon: Icon(Icons.dashboard_outlined),
@@ -194,6 +197,11 @@ class _StaffDashboardScreenState extends ConsumerState<StaffDashboardScreen> {
                 icon: Icon(Icons.queue_outlined),
                 activeIcon: Icon(Icons.queue),
                 label: 'Queue',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.receipt_long_outlined),
+                activeIcon: Icon(Icons.receipt_long),
+                label: 'Discharge',
               ),
             ],
           ),

@@ -34,6 +34,18 @@ class PatientRepository {
             .toList());
   }
 
+  // Get discharged patients by hospital
+  Stream<List<PatientModel>> getDischargedPatientsStream(String hospitalId) {
+    return _firestore
+        .collection(_collection)
+        .where('hospitalId', isEqualTo: hospitalId)
+        .where('status', isEqualTo: PatientStatus.discharged.name)
+        .snapshots()
+        .map((snapshot) => snapshot.docs
+            .map((doc) => PatientModel.fromFirestore(doc))
+            .toList());
+  }
+
   // Admit patient
   Future<String> admitPatient(Map<String, dynamic> patientData) async {
     final docRef = await _firestore.collection(_collection).add({
