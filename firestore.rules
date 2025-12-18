@@ -70,5 +70,21 @@ service cloud.firestore {
       allow create: if isAuthenticated();
       allow update: if isAuthenticated() && resource.data.doctorId == request.auth.uid;
     }
+    
+    // Patients collection (for hospital staff)
+    match /patients/{patientId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated();
+      allow update: if isAuthenticated();
+      allow delete: if isAuthenticated(); // In production, restrict to admin only
+    }
+    
+    // Queue collection (for hospital staff)
+    match /queue/{queueId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated();
+      allow update: if isAuthenticated();
+      allow delete: if isAuthenticated();
+    }
   }
 }
