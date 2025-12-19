@@ -29,6 +29,7 @@ dependencies:
   cupertino_icons: ^1.0.8
   flutter_markdown: ^0.7.4+1
   url_launcher: ^6.3.2
+  google_fonts: ^6.2.1
 
   # 3D Rendering
   flutter_cube: ^0.1.1
@@ -72,6 +73,7 @@ flutter:
   # Assets (optional, in case you add images or JSON files later)
   assets:
     - assets/images/
+    - assets/updated/
     - fonts/
 
 flutter_launcher_icons:

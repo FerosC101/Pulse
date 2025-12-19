@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pulse/core/constants/app_colors.dart';
 import 'package:pulse/presentation/providers/auth_provider.dart';
-import 'package:pulse/presentation/screens/auth/welcome_screen.dart';
+import 'package:pulse/utils/auth_utils.dart';
 
 class DoctorDashboardWebSimple extends ConsumerWidget {
   const DoctorDashboardWebSimple({super.key});
@@ -31,15 +31,7 @@ class DoctorDashboardWebSimple extends ConsumerWidget {
           ),
           IconButton(
             icon: const Icon(Icons.logout),
-            onPressed: () async {
-              await ref.read(authControllerProvider.notifier).signOut();
-              if (context.mounted) {
-                Navigator.of(context).pushAndRemoveUntil(
-                  MaterialPageRoute(builder: (context) => const WelcomeScreen()),
-                  (route) => false,
-                );
-              }
-            },
+            onPressed: () => AuthUtils.handleLogout(context, ref),
           ),
         ],
       ),
