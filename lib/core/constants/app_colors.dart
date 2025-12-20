@@ -20,6 +20,7 @@ class AppColors {
   static const Color textPrimary = Color(0xFF1F2937);
   static const Color textSecondary = Color(0xFF6B7280);
   static const Color textTertiary = Color(0xFF9CA3AF);
+  static const Color darkText = Color(0xFF1F2937); // Same as textPrimary
   
   // Emergency Mode
   static const Color emergencyRed = Color(0xFFDC2626);
