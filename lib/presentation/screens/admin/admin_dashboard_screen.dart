@@ -6,11 +6,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pulse/core/constants/app_colors.dart';
 import 'package:pulse/presentation/providers/auth_provider.dart';
 import 'package:pulse/presentation/providers/hospital_provider.dart';
-import 'package:pulse/presentation/screens/auth/welcome_screen.dart';
 import 'package:pulse/presentation/screens/admin/doctor_management_screen.dart';
 import 'package:pulse/presentation/screens/admin/staff_management_screen.dart';
 import 'package:pulse/presentation/screens/admin/hospital_management_screen.dart';
 import 'package:pulse/presentation/screens/admin/system_analytics_screen.dart';
+import 'package:pulse/utils/auth_utils.dart';
 
 class AdminDashboardScreen extends ConsumerWidget {
   const AdminDashboardScreen({super.key});
@@ -26,15 +26,7 @@ class AdminDashboardScreen extends ConsumerWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
-            onPressed: () async {
-              await ref.read(authControllerProvider.notifier).signOut();
-              if (context.mounted) {
-                Navigator.of(context).pushAndRemoveUntil(
-                  MaterialPageRoute(builder: (context) => const WelcomeScreen()),
-                  (route) => false,
-                );
-              }
-            },
+            onPressed: () => AuthUtils.handleLogout(context, ref),
           ),
         ],
       ),
