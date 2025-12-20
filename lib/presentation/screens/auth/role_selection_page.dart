@@ -72,24 +72,18 @@ class _RoleSelectionPageState extends State<RoleSelectionPage> {
                 ),
               ),
               const SizedBox(height: 40),
-              // Role cards grid with better spacing
+              // Role cards column
               Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                  child: GridView.builder(
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      crossAxisSpacing: 24,
-                      mainAxisSpacing: 24,
-                      childAspectRatio: 1.1,
-                    ),
-                    itemCount: _roles.length,
-                    itemBuilder: (context, index) {
-                      final role = _roles[index];
-                      final isSelected = _selectedRole == role['value'];
-                      final isHovered = _hoveredRole == role['value'];
-                      
-                      return MouseRegion(
+                child: ListView.builder(
+                  itemCount: _roles.length,
+                  itemBuilder: (context, index) {
+                    final role = _roles[index];
+                    final isSelected = _selectedRole == role['value'];
+                    final isHovered = _hoveredRole == role['value'];
+                    
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 16.0),
+                      child: MouseRegion(
                         onEnter: (_) => setState(() => _hoveredRole = role['value']),
                         onExit: (_) => setState(() => _hoveredRole = null),
                         child: _buildRoleCard(
@@ -103,9 +97,9 @@ class _RoleSelectionPageState extends State<RoleSelectionPage> {
                             });
                           },
                         ),
-                      );
-                    },
-                  ),
+                      ),
+                    );
+                  },
                 ),
               ),
               const SizedBox(height: 24),
@@ -164,10 +158,10 @@ class _RoleSelectionPageState extends State<RoleSelectionPage> {
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
         decoration: BoxDecoration(
           color: getCardColor(),
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(12),
           boxShadow: isSelected
               ? [
                   BoxShadow(
@@ -192,22 +186,27 @@ class _RoleSelectionPageState extends State<RoleSelectionPage> {
                       ),
                     ],
         ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+        child: Row(
           children: [
             Icon(
               icon,
-              size: 44,
+              size: 24,
               color: getIconColor(),
             ),
-            const SizedBox(height: 14),
+            const SizedBox(width: 16),
             Text(
               role,
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     color: getTextColor(),
                     fontWeight: FontWeight.w600,
-                    fontSize: 15,
+                    fontSize: 16,
                   ),
+            ),
+            const Spacer(),
+            Icon(
+              Icons.arrow_drop_down,
+              size: 24,
+              color: getIconColor(),
             ),
           ],
         ),
