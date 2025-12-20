@@ -559,14 +559,37 @@ class _RegisterPageState extends State<RegisterPage> {
             );
           }
 
-          final hospitals = snapshot.data?.docs ?? [];
+          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+            return Column(
+              children: const [
+                Text(
+                  'No hospitals available. Please contact admin.',
+                  style: TextStyle(color: Colors.red),
+                ),
+                SizedBox(height: 16),
+              ],
+            );
+          }
 
-          return DropdownButtonFormField<String>(
-            decoration: InputDecoration(
-              hintText: hospitals.isEmpty 
-                  ? 'No hospitals available - Contact admin' 
-                  : 'Enter your hospital',
-                  prefixIcon: const Icon(Icons.local_hospital, color: AppColors.grey, size: 20),
+          final hospitals = snapshot.data!.docs;
+
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Select Hospital',
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                      color: AppColors.darkText,
+                      fontWeight: FontWeight.w600,
+                    ),
+              ),
+              const SizedBox(height: 8),
+              DropdownButtonFormField<String>(
+                decoration: InputDecoration(
+                  hintText: hospitals.isEmpty 
+                      ? 'No hospitals available - Contact admin' 
+                      : 'Choose your hospital',
+                  prefixIcon: const Icon(Icons.local_hospital),
                   filled: true,
                   fillColor: AppColors.white,
                   border: OutlineInputBorder(
@@ -574,19 +597,14 @@ class _RegisterPageState extends State<RegisterPage> {
                     borderSide: BorderSide.none,
                   ),
                 ),
-                icon: const Icon(Icons.arrow_drop_down, color: AppColors.grey),
-                dropdownColor: AppColors.white,
-                style: Theme.of(context).textTheme.bodyLarge,
-                items: hospitals.isEmpty
-                    ? null
-                    : hospitals.map((doc) {
-                        final data = doc.data() as Map<String, dynamic>? ?? {};
-                        return DropdownMenuItem(
-                          value: doc.id,
-                          child: Text(data['name'] ?? 'Unknown Hospital'),
-                        );
-                      }).toList(),
-                onChanged: hospitals.isEmpty ? null : (value) {
+                items: hospitals.map((doc) {
+                  final data = doc.data() as Map<String, dynamic>? ?? {};
+                  return DropdownMenuItem(
+                    value: doc.id,
+                    child: Text(data['name'] ?? 'Unknown Hospital'),
+                  );
+                }).toList(),
+                onChanged: (value) {
                   setState(() {
                     _selectedHospitalId = value;
                     final hospitalDoc = hospitals.firstWhere((doc) => doc.id == value);
@@ -600,10 +618,12 @@ class _RegisterPageState extends State<RegisterPage> {
                   }
                   return null;
                 },
-              );
+              ),
+              const SizedBox(height: 16),
+            ],
+          );
         },
       ),
-      const SizedBox(height: 16),
       CustomTextField(
         controller: _specialtyController,
         hintText: 'e.g., Cardiology, Pediatrics',
@@ -646,15 +666,38 @@ class _RegisterPageState extends State<RegisterPage> {
             );
           }
 
-          final hospitals = snapshot.data?.docs ?? [];
+          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+            return Column(
+              children: const [
+                Text(
+                  'No hospitals available. Please contact admin.',
+                  style: TextStyle(color: Colors.red),
+                ),
+                SizedBox(height: 16),
+              ],
+            );
+          }
 
-          return DropdownButtonFormField<String>(
-            value: hospitals.isEmpty ? null : _selectedHospitalId,
-            decoration: InputDecoration(
-              hintText: hospitals.isEmpty 
-                  ? 'No hospitals available - Contact admin' 
-                  : 'Enter your hospital',
-                  prefixIcon: const Icon(Icons.local_hospital, color: AppColors.grey, size: 20),
+          final hospitals = snapshot.data!.docs;
+
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Select Hospital',
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                      color: AppColors.darkText,
+                      fontWeight: FontWeight.w600,
+                    ),
+              ),
+              const SizedBox(height: 8),
+              DropdownButtonFormField<String>(
+                value: hospitals.isEmpty ? null : _selectedHospitalId,
+                decoration: InputDecoration(
+                  hintText: hospitals.isEmpty 
+                      ? 'No hospitals available - Contact admin' 
+                      : 'Choose your workplace',
+                  prefixIcon: const Icon(Icons.local_hospital),
                   filled: true,
                   fillColor: AppColors.white,
                   border: OutlineInputBorder(
@@ -662,19 +705,14 @@ class _RegisterPageState extends State<RegisterPage> {
                     borderSide: BorderSide.none,
                   ),
                 ),
-                icon: const Icon(Icons.arrow_drop_down, color: AppColors.grey),
-                dropdownColor: AppColors.white,
-                style: Theme.of(context).textTheme.bodyLarge,
-                items: hospitals.isEmpty
-                    ? null
-                    : hospitals.map((doc) {
-                        final data = doc.data() as Map<String, dynamic>? ?? {};
-                        return DropdownMenuItem(
-                          value: doc.id,
-                          child: Text(data['name'] ?? 'Unknown Hospital'),
-                        );
-                      }).toList(),
-                onChanged: hospitals.isEmpty ? null : (value) {
+                items: hospitals.map((doc) {
+                  final data = doc.data() as Map<String, dynamic>? ?? {};
+                  return DropdownMenuItem(
+                    value: doc.id,
+                    child: Text(data['name'] ?? 'Unknown Hospital'),
+                  );
+                }).toList(),
+                onChanged: (value) {
                   setState(() {
                     _selectedHospitalId = value;
                     final hospitalDoc = hospitals.firstWhere((doc) => doc.id == value);
@@ -688,10 +726,12 @@ class _RegisterPageState extends State<RegisterPage> {
                   }
                   return null;
                 },
-              );
+              ),
+              const SizedBox(height: 16),
+            ],
+          );
         },
       ),
-      const SizedBox(height: 16),
       CustomTextField(
         controller: _positionController,
         hintText: 'e.g., Nurse, Receptionist',

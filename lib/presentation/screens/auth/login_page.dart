@@ -138,22 +138,18 @@ class _LoginPageState extends State<LoginPage> {
     return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
-          child: SizedBox(
-            height: MediaQuery.of(context).size.height -
-                MediaQuery.of(context).padding.top,
-            child: Column(
-              children: [
-                // Header with gradient background and back button
-                _buildHeader(context),
-                // Login form
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.all(24.0),
-                    child: Form(
-                      key: _formKey,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
+          child: Column(
+            children: [
+              // Header with gradient background and back button
+              _buildHeader(context),
+              // Login form
+              Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
                           const SizedBox(height: 32),
                           // Title
                           Center(
@@ -233,53 +229,6 @@ class _LoginPageState extends State<LoginPage> {
                                   text: 'Login',
                                   onPressed: _handleLogin,
                                 ),
-                          const SizedBox(height: 16),
-                          
-                          // Demo credentials hint
-                          Container(
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              color: AppColors.secondary.withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(
-                                color: AppColors.secondary.withOpacity(0.3),
-                              ),
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  children: const [
-                                    Icon(Icons.info_outline, 
-                                      size: 16, 
-                                      color: AppColors.secondary,
-                                    ),
-                                    SizedBox(width: 6),
-                                    Text(
-                                      'Demo Credentials',
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w600,
-                                        color: AppColors.secondary,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  'patient@test.com / doctor@test.com\n'
-                                  'staff@test.com / admin@test.com\n'
-                                  'Password: password123',
-                                  style: TextStyle(
-                                    fontSize: 11,
-                                    color: AppColors.darkText.withOpacity(0.7),
-                                    height: 1.4,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          
                           const SizedBox(height: 24),
                           // Don't have account
                           Center(
@@ -313,13 +262,11 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
-        ),
-      ),
-    );
+        );
   }
 
   Widget _buildHeader(BuildContext context) {
