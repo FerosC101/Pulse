@@ -539,12 +539,17 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         borderSide: BorderSide(color: Colors.grey.shade300),
                       ),
                     ),
+                    isExpanded: true,
                     items: hospitals.map((doc) {
                       final data = (doc.data() as Map<String, dynamic>?) ??
                           <String, dynamic>{};
                       return DropdownMenuItem(
                         value: doc.id,
-                        child: Text(data['name'] ?? 'Unknown Hospital'),
+                        child: Text(
+                          data['name'] ?? 'Unknown Hospital',
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
+                        ),
                       );
                     }).toList(),
                     onChanged: (value) {
@@ -644,12 +649,17 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         borderSide: BorderSide(color: Colors.grey.shade300),
                       ),
                     ),
+                    isExpanded: true,
                     items: hospitals.map((doc) {
                       final data = (doc.data() as Map<String, dynamic>?) ??
                           <String, dynamic>{};
                       return DropdownMenuItem(
                         value: doc.id,
-                        child: Text(data['name'] ?? 'Unknown Hospital'),
+                        child: Text(
+                          data['name'] ?? 'Unknown Hospital',
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
+                        ),
                       );
                     }).toList(),
                     onChanged: (value) {

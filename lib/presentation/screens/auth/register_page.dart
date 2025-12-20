@@ -562,6 +562,7 @@ class _RegisterPageState extends State<RegisterPage> {
           final hospitals = snapshot.data?.docs ?? [];
 
           return DropdownButtonFormField<String>(
+            isExpanded: true,
             decoration: InputDecoration(
               hintText: hospitals.isEmpty 
                   ? 'No hospitals available - Contact admin' 
@@ -583,7 +584,11 @@ class _RegisterPageState extends State<RegisterPage> {
                         final data = doc.data() as Map<String, dynamic>? ?? {};
                         return DropdownMenuItem(
                           value: doc.id,
-                          child: Text(data['name'] ?? 'Unknown Hospital'),
+                          child: Text(
+                            data['name'] ?? 'Unknown Hospital',
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
+                          ),
                         );
                       }).toList(),
                 onChanged: hospitals.isEmpty ? null : (value) {
@@ -650,6 +655,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
           return DropdownButtonFormField<String>(
             value: hospitals.isEmpty ? null : _selectedHospitalId,
+            isExpanded: true,
             decoration: InputDecoration(
               hintText: hospitals.isEmpty 
                   ? 'No hospitals available - Contact admin' 
@@ -671,7 +677,11 @@ class _RegisterPageState extends State<RegisterPage> {
                         final data = doc.data() as Map<String, dynamic>? ?? {};
                         return DropdownMenuItem(
                           value: doc.id,
-                          child: Text(data['name'] ?? 'Unknown Hospital'),
+                          child: Text(
+                            data['name'] ?? 'Unknown Hospital',
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
+                          ),
                         );
                       }).toList(),
                 onChanged: hospitals.isEmpty ? null : (value) {
