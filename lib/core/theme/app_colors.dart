@@ -14,6 +14,17 @@ class AppColors {
   static const Color lightGrey = Color(0xFFE0E0E0);
   static const Color cardBackground = Color(0xFFF5F5F5);
 
+  // Status Colors
+  static const Color success = Color(0xFF10B981);
+  static const Color warning = Color(0xFFF59E0B);
+  static const Color error = Color(0xFFEF4444);
+  static const Color info = Color(0xFF3B82F6);
+
+  // Text Colors
+  static const Color textPrimary = Color(0xFF002C3E); // Same as darkText
+  static const Color textSecondary = Color(0xFF6B7280);
+  static const Color textTertiary = Color(0xFF9CA3AF);
+
   // Gradient Colors (for logo/decorative elements)
   static const Color gradientStart = Color(0xFFF7444E);
   static const Color gradientEnd = Color(0xFF78BCC4);
