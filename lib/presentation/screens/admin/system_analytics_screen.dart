@@ -2,7 +2,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:pulse/core/constants/app_colors.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:pulse/core/theme/app_colors.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
 
@@ -35,6 +36,42 @@ final totalPatientsProvider = StreamProvider<int>((ref) {
       .where('userType', isEqualTo: 'patient')
       .snapshots()
       .map((snapshot) => snapshot.docs.length);
+});
+
+// Total beds across all hospitals
+final totalBedsProvider = StreamProvider<int>((ref) {
+  return FirebaseFirestore.instance
+      .collection('hospitals')
+      .snapshots()
+      .map((snapshot) {
+    int totalBeds = 0;
+    for (var doc in snapshot.docs) {
+      final data = doc.data();
+      final beds = data['totalBeds'] ?? 0;
+      totalBeds += beds as int;
+    }
+    return totalBeds;
+  });
+});
+
+// Occupancy rate calculation
+final occupancyRateProvider = StreamProvider<double>((ref) {
+  return FirebaseFirestore.instance
+      .collection('hospitals')
+      .snapshots()
+      .map((snapshot) {
+    int totalBeds = 0;
+    int occupiedBeds = 0;
+    
+    for (var doc in snapshot.docs) {
+      final data = doc.data();
+      totalBeds += (data['totalBeds'] ?? 0) as int;
+      occupiedBeds += (data['occupiedBeds'] ?? 0) as int;
+    }
+    
+    if (totalBeds == 0) return 0.0;
+    return (occupiedBeds / totalBeds * 100);
+  });
 });
 
 // Staff distribution per hospital
@@ -103,16 +140,29 @@ class SystemAnalyticsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final hospitalsCount = ref.watch(totalHospitalsProvider);
-    final doctorsCount = ref.watch(totalDoctorsProvider);
+    final bedsCount = ref.watch(totalBedsProvider);
     final staffCount = ref.watch(totalStaffProvider);
-    final patientsCount = ref.watch(totalPatientsProvider);
+    final occupancyRate = ref.watch(occupancyRateProvider);
     final staffDistribution = ref.watch(staffDistributionProvider);
     final monthlyRegistration = ref.watch(monthlyRegistrationProvider);
 
     return Scaffold(
+      backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text('System Analytics'),
         elevation: 0,
+        backgroundColor: Colors.white,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: AppColors.darkText),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: Text(
+          'System Analytics',
+          style: GoogleFonts.dmSans(
+            color: AppColors.darkText,
+            fontWeight: FontWeight.w600,
+            fontSize: 18,
+          ),
+        ),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
@@ -120,238 +170,230 @@ class SystemAnalyticsScreen extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Header
-            const Text(
-              'Platform Overview',
-              style: TextStyle(
-                fontSize: 28,
-                fontWeight: FontWeight.bold,
-                color: AppColors.textPrimary,
-              ),
-            ),
-            const SizedBox(height: 8),
             Text(
-              'Real-time system metrics and trends',
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.grey.shade600,
+              'System Overview',
+              style: GoogleFonts.dmSans(
+                fontSize: 20,
+                fontWeight: FontWeight.w700,
+                color: AppColors.darkText,
               ),
             ),
-            const SizedBox(height: 32),
+            const SizedBox(height: 24),
 
-            // Summary Cards
+            // Summary Cards - 2x2 Grid
             Row(
               children: [
                 Expanded(
                   child: _buildMetricCard(
-                    title: 'Total Hospitals',
+                    title: 'Hospitals',
                     value: hospitalsCount.when(
                       data: (count) => count.toString(),
                       loading: () => '...',
                       error: (_, __) => '0',
                     ),
-                    icon: Icons.local_hospital,
-                    color: AppColors.primary,
                     context: context,
                   ),
                 ),
                 const SizedBox(width: 16),
                 Expanded(
                   child: _buildMetricCard(
-                    title: 'Total Doctors',
-                    value: doctorsCount.when(
+                    title: 'Beds',
+                    value: bedsCount.when(
                       data: (count) => count.toString(),
                       loading: () => '...',
                       error: (_, __) => '0',
                     ),
-                    icon: Icons.medical_services,
-                    color: AppColors.success,
                     context: context,
                   ),
                 ),
-                const SizedBox(width: 16),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
                 Expanded(
                   child: _buildMetricCard(
-                    title: 'Total Nurses',
+                    title: 'Staff',
                     value: staffCount.when(
                       data: (count) => count.toString(),
                       loading: () => '...',
                       error: (_, __) => '0',
                     ),
-                    icon: Icons.people,
-                    color: AppColors.info,
                     context: context,
                   ),
                 ),
                 const SizedBox(width: 16),
                 Expanded(
                   child: _buildMetricCard(
-                    title: 'Total Patients',
-                    value: patientsCount.when(
-                      data: (count) => count.toString(),
+                    title: 'Occupancy',
+                    value: occupancyRate.when(
+                      data: (rate) => '${rate.toStringAsFixed(0)}%',
                       loading: () => '...',
-                      error: (_, __) => '0',
+                      error: (_, __) => '0%',
                     ),
-                    icon: Icons.person,
-                    color: AppColors.warning,
                     context: context,
                   ),
                 ),
               ],
             ),
 
-            const SizedBox(height: 40),
+            const SizedBox(height: 32),
 
-            // Charts Section
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Staff Distribution Chart
-                Expanded(
-                  flex: 5,
-                  child: Card(
-                    elevation: 2,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
+            // Staff Distribution Chart
+            Container(
+                    padding: const EdgeInsets.all(24),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.05),
+                          blurRadius: 10,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
                     ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(24),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.all(8),
-                                decoration: BoxDecoration(
-                                  color: AppColors.primary.withOpacity(0.1),
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: const Icon(
-                                  Icons.bar_chart,
-                                  color: AppColors.primary,
-                                  size: 20,
-                                ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: AppColors.primary.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(8),
                               ),
-                              const SizedBox(width: 12),
-                              const Text(
+                              child: const Icon(
+                                Icons.bar_chart,
+                                color: AppColors.primary,
+                                size: 20,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
                                 'Staff Distribution per Hospital',
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
+                                style: GoogleFonts.dmSans(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w700,
+                                  color: AppColors.darkText,
                                 ),
                               ),
-                            ],
-                          ),
-                          const SizedBox(height: 24),
-                          staffDistribution.when(
-                            data: (distribution) {
-                              if (distribution.isEmpty) {
-                                return const Center(
-                                  child: Padding(
-                                    padding: EdgeInsets.all(40),
-                                    child: Text('No staff data available'),
-                                  ),
-                                );
-                              }
-                              return SizedBox(
-                                height: 300,
-                                child: _buildStaffDistributionChart(distribution),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 24),
+                        staffDistribution.when(
+                          data: (distribution) {
+                            if (distribution.isEmpty) {
+                              return const Center(
+                                child: Padding(
+                                  padding: EdgeInsets.all(40),
+                                  child: Text('No staff data available'),
+                                ),
                               );
-                            },
-                            loading: () => const Center(
-                              child: Padding(
-                                padding: EdgeInsets.all(40),
-                                child: CircularProgressIndicator(),
-                              ),
-                            ),
-                            error: (_, __) => const Center(
-                              child: Padding(
-                                padding: EdgeInsets.all(40),
-                                child: Text('Error loading data'),
-                              ),
+                            }
+                            return SizedBox(
+                              height: 300,
+                              child: _buildStaffDistributionChart(distribution),
+                            );
+                          },
+                          loading: () => const Center(
+                            child: Padding(
+                              padding: EdgeInsets.all(40),
+                              child: CircularProgressIndicator(),
                             ),
                           ),
-                        ],
-                      ),
+                          error: (_, __) => const Center(
+                            child: Padding(
+                              padding: EdgeInsets.all(40),
+                              child: Text('Error loading data'),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                ),
 
-                const SizedBox(width: 24),
+                const SizedBox(height: 24),
 
                 // Monthly Registration Trends
-                Expanded(
-                  flex: 5,
-                  child: Card(
-                    elevation: 2,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
+                Container(
+                    padding: const EdgeInsets.all(24),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.05),
+                          blurRadius: 10,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
                     ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(24),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.all(8),
-                                decoration: BoxDecoration(
-                                  color: AppColors.success.withOpacity(0.1),
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: const Icon(
-                                  Icons.trending_up,
-                                  color: AppColors.success,
-                                  size: 20,
-                                ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: AppColors.success.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(8),
                               ),
-                              const SizedBox(width: 12),
-                              const Text(
+                              child: const Icon(
+                                Icons.trending_up,
+                                color: AppColors.success,
+                                size: 20,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
                                 'Monthly Registration Trends',
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
+                                style: GoogleFonts.dmSans(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w700,
+                                  color: AppColors.darkText,
                                 ),
                               ),
-                            ],
-                          ),
-                          const SizedBox(height: 24),
-                          monthlyRegistration.when(
-                            data: (data) {
-                              if (data.isEmpty) {
-                                return const Center(
-                                  child: Padding(
-                                    padding: EdgeInsets.all(40),
-                                    child: Text('No registration data available'),
-                                  ),
-                                );
-                              }
-                              return SizedBox(
-                                height: 300,
-                                child: _buildRegistrationTrendsChart(data),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 24),
+                        monthlyRegistration.when(
+                          data: (data) {
+                            if (data.isEmpty) {
+                              return const Center(
+                                child: Padding(
+                                  padding: EdgeInsets.all(40),
+                                  child: Text('No registration data available'),
+                                ),
                               );
-                            },
-                            loading: () => const Center(
-                              child: Padding(
-                                padding: EdgeInsets.all(40),
-                                child: CircularProgressIndicator(),
-                              ),
-                            ),
-                            error: (_, __) => const Center(
-                              child: Padding(
-                                padding: EdgeInsets.all(40),
-                                child: Text('Error loading data'),
-                              ),
+                            }
+                            return SizedBox(
+                              height: 300,
+                              child: _buildRegistrationTrendsChart(data),
+                            );
+                          },
+                          loading: () => const Center(
+                            child: Padding(
+                              padding: EdgeInsets.all(40),
+                              child: CircularProgressIndicator(),
                             ),
                           ),
-                        ],
-                      ),
+                          error: (_, __) => const Center(
+                            child: Padding(
+                              padding: EdgeInsets.all(40),
+                              child: Text('Error loading data'),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                ),
-              ],
-            ),
           ],
         ),
       ),
@@ -361,57 +403,41 @@ class SystemAnalyticsScreen extends ConsumerWidget {
   Widget _buildMetricCard({
     required String title,
     required String value,
-    required IconData icon,
-    required Color color,
     required BuildContext context,
   }) {
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 20),
+      decoration: BoxDecoration(
+        color: AppColors.primary,
         borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primary.withOpacity(0.2),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
-      child: Container(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: color.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Icon(
-                    icon,
-                    color: color,
-                    size: 28,
-                  ),
-                ),
-              ],
+      child: Column(
+        children: [
+          Text(
+            title,
+            style: GoogleFonts.dmSans(
+              fontSize: 16,
+              color: Colors.white,
+              fontWeight: FontWeight.w500,
             ),
-            const SizedBox(height: 16),
-            Text(
-              value,
-              style: const TextStyle(
-                fontSize: 32,
-                fontWeight: FontWeight.bold,
-                color: AppColors.textPrimary,
-              ),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            value,
+            style: GoogleFonts.dmSans(
+              fontSize: 48,
+              fontWeight: FontWeight.w700,
+              color: Colors.white,
             ),
-            const SizedBox(height: 4),
-            Text(
-              title,
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey.shade600,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
