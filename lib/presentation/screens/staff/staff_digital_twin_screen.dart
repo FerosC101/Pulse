@@ -21,7 +21,6 @@ class StaffDigitalTwinScreen extends ConsumerStatefulWidget {
 
 class _StaffDigitalTwinScreenState extends ConsumerState<StaffDigitalTwinScreen> {
   bool _autoRotate = true;
-  bool _showStaffLocations = true;
   bool _showEquipmentTracking = false;
   bool _showRoomOccupancy = true;
   bool _showIoTSensors = false;
@@ -165,8 +164,6 @@ class _StaffDigitalTwinScreenState extends ConsumerState<StaffDigitalTwinScreen>
                                   ],
                                 ),
                                 const SizedBox(height: 12),
-                                if (_showStaffLocations)
-                                  _buildLayerIndicator('Staff Locations', AppColors.primary),
                                 if (_showEquipmentTracking)
                                   _buildLayerIndicator('Equipment (IoT)', AppColors.warning),
                                 if (_showRoomOccupancy)
@@ -504,11 +501,12 @@ class _StaffDigitalTwinScreenState extends ConsumerState<StaffDigitalTwinScreen>
                 // IoT Equipment Tracking Section
                 if (_showEquipmentTracking) _buildEquipmentTracking(),
 
-                // Staff Location Section
-                if (_showStaffLocations) _buildStaffLocations(),
-
                 // Room Occupancy Status
-                if (_showRoomOccupancy) _buildRoomOccupancy(hospital),
+                if (_showRoomOccupancy) patientsAsync.when(
+                  data: (patients) => _buildRoomOccupancy(patients),
+                  loading: () => const Center(child: CircularProgressIndicator()),
+                  error: (_, __) => const SizedBox.shrink(),
+                ),
 
                 const SizedBox(height: 32),
               ],
@@ -916,14 +914,72 @@ class _StaffDigitalTwinScreenState extends ConsumerState<StaffDigitalTwinScreen>
     );
   }
 
-  Widget _buildRoomOccupancy(hospital) {
-    final mockRooms = [
-      {'number': '301', 'floor': '3', 'status': 'Occupied', 'type': 'ICU'},
-      {'number': '302', 'floor': '3', 'status': 'Available', 'type': 'ICU'},
-      {'number': '101', 'floor': '1', 'status': 'Occupied', 'type': 'ER'},
-      {'number': '201', 'floor': '2', 'status': 'Cleaning', 'type': 'Ward'},
-      {'number': '202', 'floor': '2', 'status': 'Occupied', 'type': 'Ward'},
-    ];
+  Widget _buildRoomOccupancy(List<PatientModel> patients) {
+    // Group patients by room number
+    final Map<String, List<PatientModel>> roomOccupancy = {};
+    for (var patient in patients) {
+      if (patient.roomNumber != null && patient.roomNumber!.isNotEmpty) {
+        roomOccupancy.putIfAbsent(patient.roomNumber!, () => []).add(patient);
+      }
+    }
+
+    // Get all unique rooms (you can extend this to include empty rooms from hospital data)
+    final occupiedRooms = roomOccupancy.entries.toList()
+      ..sort((a, b) => a.key.compareTo(b.key));
+
+    if (occupiedRooms.isEmpty) {
+      return Container(
+        margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: AppColors.success.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(
+                    Icons.door_front_door,
+                    color: AppColors.success,
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                const Text(
+                  'Room Occupancy Status',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Center(
+              child: Text(
+                'No room assignments yet',
+                style: TextStyle(color: Colors.grey[600]),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
 
     return Container(
       margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
@@ -958,7 +1014,7 @@ class _StaffDigitalTwinScreenState extends ConsumerState<StaffDigitalTwinScreen>
               ),
               const SizedBox(width: 12),
               const Text(
-                'Room Occupancy Status',
+                'Room Occupancy Status (Real-time)',
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
@@ -970,11 +1026,24 @@ class _StaffDigitalTwinScreenState extends ConsumerState<StaffDigitalTwinScreen>
           Wrap(
             spacing: 12,
             runSpacing: 12,
-            children: mockRooms.map((room) {
-              final status = room['status'] as String;
-              Color statusColor = AppColors.success;
-              if (status == 'Occupied') statusColor = AppColors.error;
-              if (status == 'Cleaning') statusColor = AppColors.warning;
+            children: occupiedRooms.map((entry) {
+              final roomNumber = entry.key;
+              final patientsInRoom = entry.value;
+              final firstPatient = patientsInRoom.first;
+              final department = firstPatient.department;
+              final bedCount = patientsInRoom.length;
+              
+              // Determine status color based on department and occupancy
+              Color statusColor = AppColors.error; // Occupied is red
+              String status = 'Occupied ($bedCount)';
+              
+              if (department == 'ICU') {
+                statusColor = AppColors.error;
+              } else if (department == 'Emergency') {
+                statusColor = AppColors.warning;
+              } else {
+                statusColor = AppColors.info;
+              }
 
               return Container(
                 width: (MediaQuery.of(context).size.width - 80) / 3,
@@ -991,7 +1060,7 @@ class _StaffDigitalTwinScreenState extends ConsumerState<StaffDigitalTwinScreen>
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          room['number'] as String,
+                          roomNumber,
                           style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
@@ -1009,7 +1078,7 @@ class _StaffDigitalTwinScreenState extends ConsumerState<StaffDigitalTwinScreen>
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      room['type'] as String,
+                      department,
                       style: TextStyle(
                         fontSize: 10,
                         color: Colors.grey[600],
@@ -1024,6 +1093,23 @@ class _StaffDigitalTwinScreenState extends ConsumerState<StaffDigitalTwinScreen>
                         color: statusColor,
                       ),
                     ),
+                    if (patientsInRoom.any((p) => p.condition.toLowerCase().contains('critical')))
+                      Container(
+                        margin: const EdgeInsets.only(top: 4),
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: AppColors.error,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: const Text(
+                          'CRITICAL',
+                          style: TextStyle(
+                            fontSize: 8,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
                   ],
                 ),
               );
@@ -1049,15 +1135,6 @@ class _StaffDigitalTwinScreenState extends ConsumerState<StaffDigitalTwinScreen>
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              SwitchListTile(
-                title: const Text('Staff Locations'),
-                subtitle: const Text('Real-time staff tracking'),
-                value: _showStaffLocations,
-                onChanged: (value) {
-                  setDialogState(() => _showStaffLocations = value);
-                  setState(() => _showStaffLocations = value);
-                },
-              ),
               SwitchListTile(
                 title: const Text('Equipment Tracking'),
                 subtitle: const Text('IoT-enabled medical devices'),

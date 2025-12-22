@@ -28,7 +28,7 @@ service cloud.firestore {
     
     // Hospitals collection
     match /hospitals/{hospitalId} {
-      allow read: if isAuthenticated();
+      allow read: if true; // Allow unauthenticated read for registration
       allow write: if isAuthenticated(); // In production, restrict to admin only
     }
 
