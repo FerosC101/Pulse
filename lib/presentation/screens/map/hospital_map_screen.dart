@@ -1,10 +1,14 @@
 // lib/presentation/screens/map/hospital_map_screen.dart
 import 'dart:async';
+import 'dart:ui' as ui;
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:pulse/core/constants/app_colors.dart';
 import 'package:pulse/data/models/hospital_model.dart';
 import 'package:pulse/presentation/providers/hospital_provider.dart';
@@ -29,6 +33,11 @@ class _HospitalMapScreenState extends ConsumerState<HospitalMapScreen> {
   HospitalModel? _selectedHospital;
   HospitalModel? _nearestHospital;
   bool _isLoadingLocation = true;
+  
+  // Filter states
+  String _selectedFilter = 'All'; // All, ICU, ER, Available
+  bool _showOperationalOnly = true;
+  double _maxDistance = 50.0; // km
 
   @override
   void initState() {
@@ -314,47 +323,196 @@ class _HospitalMapScreenState extends ConsumerState<HospitalMapScreen> {
     }
   }
 
-  void _createMarkers(List<HospitalModel> hospitals) {
-    _markers.clear();
+  Future<void> _createMarkers(List<HospitalModel> hospitals) async {
+    final Set<Marker> markers = {};
 
-    // Add current location marker
+    // Add current location marker with custom icon
     if (_currentPosition != null) {
-      _markers.add(
+      final userIcon = await _createCustomMarker(
+        Colors.blue,
+        Icons.person_pin_circle,
+        size: 70,
+      );
+      
+      markers.add(
         Marker(
           markerId: const MarkerId('current_location'),
           position: LatLng(
             _currentPosition!.latitude,
             _currentPosition!.longitude,
           ),
-          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
+          icon: userIcon,
           infoWindow: const InfoWindow(title: 'Your Location'),
         ),
       );
     }
 
-    // Add hospital markers
-    for (var hospital in hospitals) {
-      _markers.add(
-        Marker(
-          markerId: MarkerId(hospital.id),
-          position: LatLng(hospital.latitude, hospital.longitude),
-          icon: BitmapDescriptor.defaultMarkerWithHue(
-            hospital.status.isOperational
-                ? BitmapDescriptor.hueRed
-                : BitmapDescriptor.hueGreen,
+    // Filter hospitals based on selected filters (no distance filter)
+    List<HospitalModel> filteredHospitals = hospitals.where((hospital) {
+      // Operational filter
+      if (_showOperationalOnly && !hospital.status.isOperational) return false;
+      
+      // Specialty filter
+      if (_selectedFilter == 'ICU' && hospital.status.icuAvailable <= 0) return false;
+      if (_selectedFilter == 'ER' && hospital.status.erAvailable <= 0) return false;
+      if (_selectedFilter == 'Available' && hospital.status.wardAvailable <= 0) return false;
+      
+      return true;
+    }).toList();
+
+    // Add hospital markers with custom icons
+    for (var hospital in filteredHospitals) {
+      try {
+        final markerIcon = await _createHospitalMarker(hospital);
+        
+        markers.add(
+          Marker(
+            markerId: MarkerId(hospital.id),
+            position: LatLng(hospital.latitude, hospital.longitude),
+            icon: markerIcon,
+            infoWindow: InfoWindow(
+              title: hospital.name,
+              snippet: 'Tap for details',
+            ),
+            onTap: () {
+              setState(() {
+                _selectedHospital = hospital;
+              });
+            },
           ),
-          infoWindow: InfoWindow(
-            title: hospital.name,
-            snippet: 'Tap for details',
+        );
+      } catch (e) {
+        print('Error creating marker for ${hospital.name}: $e');
+      }
+    }
+    
+    if (mounted) {
+      setState(() {
+        _markers.clear();
+        _markers.addAll(markers);
+      });
+    }
+  }
+
+  // Create custom marker with hospital icon and red gradient
+  Future<BitmapDescriptor> _createHospitalMarker(HospitalModel hospital) async {
+    final recorder = ui.PictureRecorder();
+    final canvas = Canvas(recorder);
+    final size = 70.0;
+    
+    // Draw gradient background circle
+    final gradientPaint = Paint()
+      ..shader = const LinearGradient(
+        colors: [Color(0xFF60A5FA), Color(0xFF2563EB)],
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+      ).createShader(Rect.fromLTWH(0, 0, size, size));
+    
+    canvas.drawCircle(Offset(size / 2, size / 2), size / 2, gradientPaint);
+    
+    // Draw white circle inside
+    final whitePaint = Paint()..color = Colors.white;
+    canvas.drawCircle(Offset(size / 2, size / 2), size / 2.5, whitePaint);
+    
+    // Draw hospital icon
+    final iconPainter = TextPainter(
+      text: TextSpan(
+        text: String.fromCharCode(Icons.local_hospital.codePoint),
+        style: TextStyle(
+          fontSize: size / 3,
+          fontFamily: Icons.local_hospital.fontFamily,
+          color: const Color(0xFF2563EB),
+        ),
+      ),
+      textDirection: TextDirection.ltr,
+    );
+    iconPainter.layout();
+    iconPainter.paint(
+      canvas,
+      Offset(
+        (size - iconPainter.width) / 2,
+        (size - iconPainter.height) / 2,
+      ),
+    );
+    
+    // Draw availability badge if beds available
+    if (hospital.status.icuAvailable > 0 || hospital.status.erAvailable > 0) {
+      final badgePaint = Paint()..color = const Color(0xFF4CAF50);
+      canvas.drawCircle(Offset(size * 0.8, size * 0.2), size / 6, badgePaint);
+      
+      final checkPainter = TextPainter(
+        text: TextSpan(
+          text: String.fromCharCode(Icons.check.codePoint),
+          style: TextStyle(
+            fontSize: size / 8,
+            fontFamily: Icons.check.fontFamily,
+            color: Colors.white,
           ),
-          onTap: () {
-            setState(() {
-              _selectedHospital = hospital;
-            });
-          },
+        ),
+        textDirection: TextDirection.ltr,
+      );
+      checkPainter.layout();
+      checkPainter.paint(
+        canvas,
+        Offset(
+          size * 0.8 - checkPainter.width / 2,
+          size * 0.2 - checkPainter.height / 2,
         ),
       );
     }
+    
+    final picture = recorder.endRecording();
+    final img = await picture.toImage(size.toInt(), size.toInt());
+    final byteData = await img.toByteData(format: ui.ImageByteFormat.png);
+    final buffer = byteData!.buffer.asUint8List();
+    
+    return BitmapDescriptor.fromBytes(buffer);
+  }
+
+  // Create custom marker for current location
+  Future<BitmapDescriptor> _createCustomMarker(
+    Color color,
+    IconData icon, {
+    double size = 100,
+  }) async {
+    final recorder = ui.PictureRecorder();
+    final canvas = Canvas(recorder);
+    
+    final paint = Paint()..color = color;
+    canvas.drawCircle(Offset(size / 2, size / 2), size / 2, paint);
+    
+    final borderPaint = Paint()
+      ..color = Colors.white
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = size / 20;
+    canvas.drawCircle(Offset(size / 2, size / 2), size / 2, borderPaint);
+    
+    final iconPainter = TextPainter(
+      text: TextSpan(
+        text: String.fromCharCode(icon.codePoint),
+        style: TextStyle(
+          fontSize: size / 2,
+          fontFamily: icon.fontFamily,
+          color: Colors.white,
+        ),
+      ),
+      textDirection: TextDirection.ltr,
+    );
+    iconPainter.layout();
+    iconPainter.paint(
+      canvas,
+      Offset(
+        (size - iconPainter.width) / 2,
+        (size - iconPainter.height) / 2,
+      ),
+    );
+    
+    final picture = recorder.endRecording();
+    final img = await picture.toImage(size.toInt(), size.toInt());
+    final byteData = await img.toByteData(format: ui.ImageByteFormat.png);
+    final buffer = byteData!.buffer.asUint8List();
+    
+    return BitmapDescriptor.fromBytes(buffer);
   }
 
   @override
@@ -362,28 +520,6 @@ class _HospitalMapScreenState extends ConsumerState<HospitalMapScreen> {
     final hospitalsAsync = ref.watch(hospitalsStreamProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.isEmergencyMode ? 'Emergency Mode' : 'Hospital Map'),
-        backgroundColor: widget.isEmergencyMode ? AppColors.error : AppColors.primary,
-        actions: [
-          if (_currentPosition != null)
-            IconButton(
-              icon: const Icon(Icons.my_location),
-              onPressed: () {
-                _mapController?.animateCamera(
-                  CameraUpdate.newLatLngZoom(
-                    LatLng(
-                      _currentPosition!.latitude,
-                      _currentPosition!.longitude,
-                    ),
-                    15,
-                  ),
-                );
-              },
-              tooltip: 'My Location',
-            ),
-        ],
-      ),
       body: hospitalsAsync.when(
         data: (hospitals) {
           _createMarkers(hospitals);
@@ -402,26 +538,242 @@ class _HospitalMapScreenState extends ConsumerState<HospitalMapScreen> {
                 myLocationEnabled: true,
                 myLocationButtonEnabled: false,
                 zoomControlsEnabled: false,
+                mapToolbarEnabled: false,
                 onMapCreated: (controller) {
                   _mapController = controller;
+                  // Apply style to hide all POIs
+                  controller.setMapStyle('''
+                  [
+                    {
+                      "featureType": "poi",
+                      "stylers": [{"visibility": "off"}]
+                    },
+                    {
+                      "featureType": "poi.business",
+                      "stylers": [{"visibility": "off"}]
+                    },
+                    {
+                      "featureType": "poi.park",
+                      "stylers": [{"visibility": "off"}]
+                    },
+                    {
+                      "featureType": "poi.place_of_worship",
+                      "stylers": [{"visibility": "off"}]
+                    },
+                    {
+                      "featureType": "poi.school",
+                      "stylers": [{"visibility": "off"}]
+                    },
+                    {
+                      "featureType": "poi.sports_complex",
+                      "stylers": [{"visibility": "off"}]
+                    },
+                    {
+                      "featureType": "poi.medical",
+                      "stylers": [{"visibility": "off"}]
+                    },
+                    {
+                      "featureType": "poi.government",
+                      "stylers": [{"visibility": "off"}]
+                    },
+                    {
+                      "featureType": "transit",
+                      "elementType": "labels.icon",
+                      "stylers": [{"visibility": "off"}]
+                    }
+                  ]
+                  ''');
                 },
+              ),
+
+              // Top Header with Gradient
+              Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                child: Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        widget.isEmergencyMode 
+                            ? const Color(0xFFFF6B6B)
+                            : const Color(0xFF2563EB),
+                        widget.isEmergencyMode 
+                            ? const Color(0xFFFF6B6B).withOpacity(0.9)
+                            : const Color(0xFF2563EB).withOpacity(0.9),
+                        Colors.transparent,
+                      ],
+                      stops: const [0.0, 0.7, 1.0],
+                    ),
+                  ),
+                  child: SafeArea(
+                    bottom: false,
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        children: [
+                          // Top bar
+                          Row(
+                            children: [
+                              // Back button
+                              Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(12),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.1),
+                                      blurRadius: 8,
+                                      offset: const Offset(0, 2),
+                                    ),
+                                  ],
+                                ),
+                                child: Material(
+                                  color: Colors.transparent,
+                                  child: InkWell(
+                                    onTap: () => Navigator.pop(context),
+                                    borderRadius: BorderRadius.circular(12),
+                                    child: const Padding(
+                                      padding: EdgeInsets.all(12),
+                                      child: Icon(
+                                        Icons.arrow_back,
+                                        color: AppColors.primary,
+                                        size: 24,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              // Title
+                              Expanded(
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 20,
+                                    vertical: 14,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(12),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withOpacity(0.1),
+                                        blurRadius: 8,
+                                        offset: const Offset(0, 2),
+                                      ),
+                                    ],
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                        widget.isEmergencyMode 
+                                            ? Icons.emergency 
+                                            : Icons.map,
+                                        color: widget.isEmergencyMode
+                                            ? const Color(0xFFFF6B6B)
+                                            : AppColors.primary,
+                                        size: 24,
+                                      ),
+                                      const SizedBox(width: 12),
+                                      Expanded(
+                                        child: Text(
+                                          widget.isEmergencyMode 
+                                              ? 'Emergency Mode' 
+                                              : 'Hospital Map',
+                                          style: GoogleFonts.dmSans(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w600,
+                                            color: AppColors.darkText,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              // My Location button
+                              if (_currentPosition != null)
+                                Container(
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(12),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withOpacity(0.1),
+                                        blurRadius: 8,
+                                        offset: const Offset(0, 2),
+                                      ),
+                                    ],
+                                  ),
+                                  child: Material(
+                                    color: Colors.transparent,
+                                    child: InkWell(
+                                      onTap: () {
+                                        _mapController?.animateCamera(
+                                          CameraUpdate.newLatLngZoom(
+                                            LatLng(
+                                              _currentPosition!.latitude,
+                                              _currentPosition!.longitude,
+                                            ),
+                                            15,
+                                          ),
+                                        );
+                                      },
+                                      borderRadius: BorderRadius.circular(12),
+                                      child: const Padding(
+                                        padding: EdgeInsets.all(12),
+                                        child: Icon(
+                                          Icons.my_location,
+                                          color: AppColors.primary,
+                                          size: 24,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ),
+                          const SizedBox(height: 12),
+                          // Filter chips
+                          _buildFilterChips(),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
               ),
 
               // Loading indicator
               if (_isLoadingLocation)
                 Container(
                   color: Colors.black.withOpacity(0.5),
-                  child: const Center(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        CircularProgressIndicator(color: Colors.white),
-                        SizedBox(height: 16),
-                        Text(
-                          'Getting your location...',
-                          style: TextStyle(color: Colors.white),
-                        ),
-                      ],
+                  child: Center(
+                    child: Container(
+                      padding: const EdgeInsets.all(32),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const CircularProgressIndicator(
+                            color: AppColors.primary,
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            'Getting your location...',
+                            style: GoogleFonts.dmSans(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                              color: AppColors.darkText,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -443,6 +795,220 @@ class _HospitalMapScreenState extends ConsumerState<HospitalMapScreen> {
     );
   }
 
+  Widget _buildFilterChips() {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: [
+          _buildFilterChip('All', Icons.grid_view),
+          const SizedBox(width: 8),
+          _buildFilterChip('ICU', Icons.airline_seat_flat),
+          const SizedBox(width: 8),
+          _buildFilterChip('ER', Icons.emergency),
+          const SizedBox(width: 8),
+          _buildFilterChip('Available', Icons.event_available),
+          const SizedBox(width: 8),
+          _buildOperationalToggle(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFilterChip(String label, IconData icon) {
+    final isSelected = _selectedFilter == label;
+    
+    return Container(
+      decoration: BoxDecoration(
+        color: isSelected ? Colors.white : Colors.white.withOpacity(0.9),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: isSelected ? AppColors.primary : Colors.transparent,
+          width: 2,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () {
+            setState(() {
+              _selectedFilter = label;
+            });
+          },
+          borderRadius: BorderRadius.circular(12),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  icon,
+                  size: 18,
+                  color: isSelected ? AppColors.primary : AppColors.darkText,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  label,
+                  style: GoogleFonts.dmSans(
+                    fontSize: 14,
+                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                    color: isSelected ? AppColors.primary : AppColors.darkText,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildOperationalToggle() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.9),
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () {
+            setState(() {
+              _showOperationalOnly = !_showOperationalOnly;
+            });
+          },
+          borderRadius: BorderRadius.circular(12),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  _showOperationalOnly ? Icons.check_circle : Icons.circle_outlined,
+                  size: 18,
+                  color: _showOperationalOnly ? AppColors.success : AppColors.darkText,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  'Open Only',
+                  style: GoogleFonts.dmSans(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    color: AppColors.darkText,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDistanceFilter() {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Colors.white, Color(0xFFF0F7FF)],
+        ),
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.15),
+            blurRadius: 20,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Icon(
+                  Icons.tune,
+                  color: AppColors.primary,
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Text(
+                'Search Radius',
+                style: GoogleFonts.dmSans(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.darkText,
+                ),
+              ),
+              const Spacer(),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: AppColors.primary,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  '${_maxDistance.toStringAsFixed(0)} km',
+                  style: GoogleFonts.dmSans(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          SliderTheme(
+            data: SliderThemeData(
+              activeTrackColor: AppColors.primary,
+              inactiveTrackColor: AppColors.primary.withOpacity(0.2),
+              thumbColor: AppColors.primary,
+              overlayColor: AppColors.primary.withOpacity(0.2),
+              thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 10),
+              overlayShape: const RoundSliderOverlayShape(overlayRadius: 20),
+            ),
+            child: Slider(
+              value: _maxDistance,
+              min: 5,
+              max: 200,
+              divisions: 39,
+              label: '${_maxDistance.toStringAsFixed(0)} km',
+              onChanged: (value) {
+                setState(() {
+                  _maxDistance = value;
+                });
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildHospitalCard(HospitalModel hospital) {
     double? distance;
     if (_currentPosition != null) {
@@ -454,116 +1020,356 @@ class _HospitalMapScreenState extends ConsumerState<HospitalMapScreen> {
       ) / 1000; // Convert to km
     }
 
-    return Card(
-      elevation: 8,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
+    return Container(
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Colors.white, Color(0xFFF0F7FF)],
+        ),
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primary.withOpacity(0.2),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+          ),
+        ],
       ),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
+            // Header with close button
             Row(
               children: [
+                // Hospital Icon with gradient
                 Container(
-                  padding: const EdgeInsets.all(12),
+                  width: 56,
+                  height: 56,
                   decoration: BoxDecoration(
-                    color: AppColors.primary.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(12),
+                    gradient: const LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [Color(0xFF60A5FA), Color(0xFF2563EB)],
+                    ),
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.primary.withOpacity(0.3),
+                        blurRadius: 8,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
                   ),
                   child: const Icon(
                     Icons.local_hospital,
-                    color: AppColors.primary,
+                    color: Colors.white,
                     size: 28,
                   ),
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: 16),
+                // Hospital Info
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         hospital.name,
-                        style: const TextStyle(
-                          fontSize: 16,
+                        style: GoogleFonts.dmSans(
+                          fontSize: 17,
                           fontWeight: FontWeight.bold,
+                          color: AppColors.darkText,
                         ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                       ),
                       if (distance != null) ...[
                         const SizedBox(height: 4),
-                        Text(
-                          '${distance.toStringAsFixed(1)} km away',
-                          style: const TextStyle(
-                            fontSize: 13,
-                            color: AppColors.textSecondary,
-                          ),
+                        Row(
+                          children: [
+                            const Icon(
+                              Icons.location_on,
+                              size: 14,
+                              color: AppColors.primary,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              '${distance.toStringAsFixed(1)} km away • ~${(distance * 3).toInt()} min',
+                              style: GoogleFonts.dmSans(
+                                fontSize: 13,
+                                color: AppColors.textSecondary,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ],
                   ),
                 ),
+                const SizedBox(width: 8),
+                // Status Badge
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
                     color: hospital.status.isOperational
-                        ? AppColors.success.withOpacity(0.1)
-                        : AppColors.error.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(8),
+                        ? AppColors.success
+                        : AppColors.error,
+                    borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
-                    hospital.status.isOperational ? 'Open' : 'Closed',
-                    style: TextStyle(
+                    hospital.status.isOperational ? 'OPEN' : 'CLOSED',
+                    style: GoogleFonts.dmSans(
                       fontSize: 11,
-                      fontWeight: FontWeight.w600,
-                      color: hospital.status.isOperational
-                          ? AppColors.success
-                          : AppColors.error,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                // Close button
+                Container(
+                  decoration: BoxDecoration(
+                    color: AppColors.darkText.withOpacity(0.05),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: () {
+                        setState(() {
+                          _selectedHospital = null;
+                        });
+                      },
+                      borderRadius: BorderRadius.circular(20),
+                      child: const Padding(
+                        padding: EdgeInsets.all(8),
+                        child: Icon(
+                          Icons.close,
+                          size: 20,
+                          color: AppColors.darkText,
+                        ),
+                      ),
                     ),
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                _buildBedInfo('ICU', hospital.status.icuAvailable, hospital.status.icuTotal),
-                const SizedBox(width: 12),
-                _buildBedInfo('ER', hospital.status.erAvailable, hospital.status.erTotal),
-                const SizedBox(width: 12),
-                _buildBedInfo('Ward', hospital.status.wardAvailable, hospital.status.wardTotal),
-              ],
-            ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
+            
+            // Bed Availability Cards
             Row(
               children: [
                 Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => HospitalDetailScreen(hospital: hospital),
-                        ),
-                      );
-                    },
-                    icon: const Icon(Icons.info_outline, size: 18),
-                    label: const Text('Details'),
+                  child: _buildBedInfoCard(
+                    'ICU',
+                    hospital.status.icuAvailable,
+                    hospital.status.icuTotal,
+                    Icons.airline_seat_flat,
+                    const Color(0xFF2196F3),
                   ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: ElevatedButton.icon(
-                    onPressed: () => _launchGoogleMaps(hospital),
-                    icon: const Icon(Icons.directions, size: 18),
-                    label: const Text('Directions'),
+                  child: _buildBedInfoCard(
+                    'ER',
+                    hospital.status.erAvailable,
+                    hospital.status.erTotal,
+                    Icons.emergency,
+                    const Color(0xFFFF6B6B),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _buildBedInfoCard(
+                    'Ward',
+                    hospital.status.wardAvailable,
+                    hospital.status.wardTotal,
+                    Icons.bed,
+                    const Color(0xFF4CAF50),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            
+            // Action Buttons
+            Row(
+              children: [
+                Expanded(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: AppColors.primary,
+                        width: 2,
+                      ),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => HospitalDetailScreen(hospital: hospital),
+                            ),
+                          );
+                        },
+                        borderRadius: BorderRadius.circular(12),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Icon(
+                                Icons.info_outline,
+                                size: 20,
+                                color: AppColors.primary,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                'Details',
+                                style: GoogleFonts.dmSans(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.primary,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [Color(0xFF60A5FA), Color(0xFF2563EB)],
+                      ),
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.primary.withOpacity(0.3),
+                          blurRadius: 8,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        onTap: () => _launchGoogleMaps(hospital),
+                        borderRadius: BorderRadius.circular(12),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Icon(
+                                Icons.directions,
+                                size: 20,
+                                color: Colors.white,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                'Directions',
+                                style: GoogleFonts.dmSans(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
                   ),
                 ),
               ],
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildBedInfoCard(
+    String label,
+    int available,
+    int total,
+    IconData icon,
+    Color color,
+  ) {
+    final percentage = total > 0 ? (available / total * 100).toInt() : 0;
+    
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            color.withOpacity(0.1),
+            color.withOpacity(0.05),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: color.withOpacity(0.3),
+          width: 1,
+        ),
+      ),
+      child: Column(
+        children: [
+          Icon(icon, color: color, size: 20),
+          const SizedBox(height: 6),
+          Text(
+            label,
+            style: GoogleFonts.dmSans(
+              fontSize: 11,
+              color: AppColors.textSecondary,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            '$available/$total',
+            style: GoogleFonts.dmSans(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: color,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Container(
+            height: 4,
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(2),
+            ),
+            child: FractionallySizedBox(
+              alignment: Alignment.centerLeft,
+              widthFactor: percentage / 100,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: color,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

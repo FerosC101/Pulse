@@ -25,19 +25,33 @@ class ChatBubble extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (!isUser) _buildAvatar(),
-          if (!isUser) const SizedBox(width: 8),
+          if (!isUser) const SizedBox(width: 12),
           
           Flexible(
             child: Container(
-              padding: const EdgeInsets.all(12),
+              padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: isUser ? AppColors.primary : Colors.grey.shade100,
+                gradient: isUser
+                    ? const LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [Color(0xFFFF6B6B), Color(0xFFD32F2F)],
+                      )
+                    : null,
+                color: isUser ? null : Colors.white,
                 borderRadius: BorderRadius.only(
-                  topLeft: const Radius.circular(16),
-                  topRight: const Radius.circular(16),
-                  bottomLeft: Radius.circular(isUser ? 16 : 4),
-                  bottomRight: Radius.circular(isUser ? 4 : 16),
+                  topLeft: const Radius.circular(20),
+                  topRight: const Radius.circular(20),
+                  bottomLeft: Radius.circular(isUser ? 20 : 4),
+                  bottomRight: Radius.circular(isUser ? 4 : 20),
                 ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(isUser ? 0.15 : 0.05),
+                    blurRadius: 10,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -79,7 +93,7 @@ class ChatBubble extends StatelessWidget {
             ),
           ),
           
-          if (isUser) const SizedBox(width: 8),
+          if (isUser) const SizedBox(width: 12),
           if (isUser) _buildAvatar(),
         ],
       ),
@@ -90,16 +104,33 @@ class ChatBubble extends StatelessWidget {
     final isUser = message.type == MessageType.user;
     
     return Container(
-      width: 32,
-      height: 32,
+      width: 38,
+      height: 38,
       decoration: BoxDecoration(
-        color: isUser ? AppColors.primary : AppColors.success,
+        gradient: isUser 
+            ? const LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [Color(0xFFFF6B6B), Color(0xFFD32F2F)],
+              )
+            : const LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [Color(0xFF4CAF50), Color(0xFF2E7D32)],
+              ),
         shape: BoxShape.circle,
+        boxShadow: [
+          BoxShadow(
+            color: (isUser ? AppColors.primary : AppColors.success).withOpacity(0.3),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Icon(
-        isUser ? Icons.person : Icons.support_agent,
+        isUser ? Icons.person_rounded : Icons.support_agent_rounded,
         color: Colors.white,
-        size: 18,
+        size: 22,
       ),
     );
   }
