@@ -11,6 +11,8 @@ import 'package:pulse/presentation/screens/staff/widgets/transfer_dialog.dart';
 import 'package:pulse/presentation/screens/staff/widgets/emergency_admission_dialog.dart';
 import 'package:pulse/presentation/screens/staff/widgets/department_status_card.dart';
 import 'package:pulse/presentation/screens/staff/widgets/critical_alert_card.dart';
+import 'package:pulse/presentation/screens/staff/staff_analytics_screen.dart';
+import 'package:pulse/presentation/screens/staff/staff_digital_twin_screen.dart';
 import 'package:intl/intl.dart';
 
 class OverviewTab extends ConsumerWidget {
@@ -128,6 +130,56 @@ class OverviewTab extends ConsumerWidget {
                         context: context,
                         builder: (context) => EmergencyAdmissionDialog(
                           hospitalId: hospitalId,
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
+
+            // Advanced Features
+            const Text(
+              'Advanced Features',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: _buildFeatureCard(
+                    context: context,
+                    icon: Icons.analytics,
+                    title: 'Analytics',
+                    subtitle: 'ML-driven insights',
+                    color: AppColors.primary,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => StaffAnalyticsScreen(hospitalId: hospitalId),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _buildFeatureCard(
+                    context: context,
+                    icon: Icons.view_in_ar,
+                    title: 'Digital Twin',
+                    subtitle: 'Hospital 3D view',
+                    color: AppColors.info,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => StaffDigitalTwinScreen(hospitalId: hospitalId),
                         ),
                       );
                     },
@@ -336,6 +388,64 @@ class OverviewTab extends ConsumerWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildFeatureCard({
+    required BuildContext context,
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: color.withOpacity(0.3)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: color.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(icon, color: color, size: 28),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              title,
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              subtitle,
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.grey[600],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

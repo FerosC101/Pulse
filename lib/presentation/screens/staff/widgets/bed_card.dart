@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pulse/core/constants/app_colors.dart';
 import 'package:pulse/data/models/patient_model.dart';
 import 'package:pulse/presentation/providers/patient_provider.dart';
+import 'package:pulse/presentation/screens/staff/widgets/patient_detail_dialog.dart';
+import 'package:pulse/presentation/screens/staff/widgets/transfer_dialog.dart';
 
 class BedCard extends ConsumerWidget {
   final PatientModel? patient;
@@ -113,7 +115,21 @@ class BedCard extends ConsumerWidget {
                   ),
                 ],
                 onSelected: (value) async {
-                  if (value == 'discharge') {
+                  if (value == 'view') {
+                    // View patient details
+                    showDialog(
+                      context: context,
+                      builder: (context) => PatientDetailDialog(patient: patient!),
+                    );
+                  } else if (value == 'transfer') {
+                    // Transfer patient to another department
+                    showDialog(
+                      context: context,
+                      builder: (context) => TransferDialog(
+                        hospitalId: patient!.hospitalId,
+                      ),
+                    );
+                  } else if (value == 'discharge') {
                     final confirm = await showDialog<bool>(
                       context: context,
                       builder: (context) => AlertDialog(

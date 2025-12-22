@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:pulse/core/constants/app_colors.dart';
 import 'package:pulse/data/models/user_type.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -268,49 +269,12 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  decoration: BoxDecoration(
-                    color: AppColors.primary.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Image.network(
-                        widget.userType == UserType.patient
-                            ? 'https://res.cloudinary.com/dhqosbqeh/image/upload/v1763996687/usertype_patient_cpp8bs.png'
-                            : widget.userType == UserType.doctor
-                                ? 'https://res.cloudinary.com/dhqosbqeh/image/upload/v1763996687/usertype_doctor_yigfmz.png'
-                                : widget.userType == UserType.hospitalStaff
-                                    ? 'https://res.cloudinary.com/dhqosbqeh/image/upload/v1763996687/usertype_hospital_staff_bh0leu.png'
-                                    : 'https://res.cloudinary.com/dhqosbqeh/image/upload/v1763996687/usertype_admin_gqcnrm.png',
-                        width: 40,
-                        height: 40,
-                        fit: BoxFit.contain,
-                        errorBuilder: (context, error, stackTrace) => Text(
-                          widget.userType.icon,
-                          style: const TextStyle(fontSize: 40),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        'Register as ${widget.userType.displayName}',
-                        style: const TextStyle(
-                          color: AppColors.primary,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 32),
-
-                const Text(
-                  'Create Your Account',
-                  style: TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
+                Text(
+                  'Register as ${widget.userType.displayName}',
+                  style: GoogleFonts.openSansCondensed(
+                    fontSize: 32,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.darkText,
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -575,12 +539,17 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         borderSide: BorderSide(color: Colors.grey.shade300),
                       ),
                     ),
+                    isExpanded: true,
                     items: hospitals.map((doc) {
                       final data = (doc.data() as Map<String, dynamic>?) ??
                           <String, dynamic>{};
                       return DropdownMenuItem(
                         value: doc.id,
-                        child: Text(data['name'] ?? 'Unknown Hospital'),
+                        child: Text(
+                          data['name'] ?? 'Unknown Hospital',
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
+                        ),
                       );
                     }).toList(),
                     onChanged: (value) {
@@ -680,12 +649,17 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         borderSide: BorderSide(color: Colors.grey.shade300),
                       ),
                     ),
+                    isExpanded: true,
                     items: hospitals.map((doc) {
                       final data = (doc.data() as Map<String, dynamic>?) ??
                           <String, dynamic>{};
                       return DropdownMenuItem(
                         value: doc.id,
-                        child: Text(data['name'] ?? 'Unknown Hospital'),
+                        child: Text(
+                          data['name'] ?? 'Unknown Hospital',
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
+                        ),
                       );
                     }).toList(),
                     onChanged: (value) {
@@ -776,6 +750,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   prefixIcon: const Icon(Icons.bloodtype_outlined, color: AppColors.primary),
                   filled: true,
                   fillColor: Colors.white,
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 16,
+                  ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                     borderSide: BorderSide(color: Colors.grey.shade300),

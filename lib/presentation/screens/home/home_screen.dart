@@ -5,7 +5,6 @@ import 'package:pulse/core/constants/app_colors.dart';
 import 'package:pulse/data/models/hospital_model.dart';
 import 'package:pulse/presentation/providers/auth_provider.dart';
 import 'package:pulse/presentation/providers/hospital_provider.dart';
-import 'package:pulse/presentation/screens/auth/welcome_screen.dart';
 import 'package:pulse/presentation/screens/ai/ai_chat_screen.dart';
 import 'package:pulse/presentation/screens/patient/hospital_list_screen.dart';
 import 'package:pulse/presentation/screens/patient/hospital_detail_screen.dart';
@@ -13,6 +12,7 @@ import 'package:pulse/presentation/screens/patient/patient_appointments_screen.d
 import 'package:pulse/presentation/screens/digital_twin/digital_twin_screen.dart';
 import 'package:pulse/presentation/screens/map/hospital_map_screen.dart';
 import 'package:pulse/presentation/screens/analytics/analytics_screen.dart';
+import 'package:pulse/utils/auth_utils.dart';
 import 'package:model_viewer_plus/model_viewer_plus.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
@@ -98,15 +98,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               fit: BoxFit.contain,
               errorBuilder: (context, error, stackTrace) => const Icon(Icons.logout),
             ),
-            onPressed: () async {
-              await ref.read(authControllerProvider.notifier).signOut();
-              if (context.mounted) {
-                Navigator.of(context).pushAndRemoveUntil(
-                  MaterialPageRoute(builder: (context) => const WelcomeScreen()),
-                  (route) => false,
-                );
-              }
-            },
+            onPressed: () => AuthUtils.handleLogout(context, ref),
           ),
         ],
       ),

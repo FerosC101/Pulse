@@ -6,11 +6,11 @@ import 'package:pulse/data/models/appointment_model.dart';
 import 'package:pulse/data/models/appointment_status.dart' show AppointmentStatus;
 import 'package:pulse/presentation/providers/auth_provider.dart';
 import 'package:pulse/presentation/providers/appointment_provider.dart';
-import 'package:pulse/presentation/screens/auth/welcome_screen.dart';
 import 'package:pulse/presentation/screens/doctor/doctor_appointments_screen.dart';
 import 'package:pulse/presentation/screens/doctor/doctor_schedule_screen.dart';
 import 'package:pulse/presentation/screens/doctor/doctor_patients_screen.dart';
 import 'package:pulse/presentation/screens/doctor/appointment_detail_screen.dart';
+import 'package:pulse/utils/auth_utils.dart';
 import 'package:intl/intl.dart';
 
 class DoctorDashboardScreen extends ConsumerWidget {
@@ -30,15 +30,7 @@ class DoctorDashboardScreen extends ConsumerWidget {
           ),
           IconButton(
             icon: const Icon(Icons.logout),
-            onPressed: () async {
-              await ref.read(authControllerProvider.notifier).signOut();
-              if (context.mounted) {
-                Navigator.of(context).pushAndRemoveUntil(
-                  MaterialPageRoute(builder: (context) => const WelcomeScreen()),
-                  (route) => false,
-                );
-              }
-            },
+            onPressed: () => AuthUtils.handleLogout(context, ref),
           ),
         ],
       ),

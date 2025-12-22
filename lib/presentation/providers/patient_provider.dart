@@ -18,6 +18,12 @@ final patientsByDepartmentProvider = StreamProvider.family<List<PatientModel>, M
   return repository.getPatientsByDepartment(params['hospitalId']!, params['department']!);
 });
 
+// Discharged patients stream for a hospital
+final dischargedPatientsStreamProvider = StreamProvider.family<List<PatientModel>, String>((ref, hospitalId) {
+  final repository = ref.watch(patientRepositoryProvider);
+  return repository.getDischargedPatientsStream(hospitalId);
+});
+
 // Patient controller
 class PatientController extends StateNotifier<AsyncValue<void>> {
   final PatientRepository _repository;

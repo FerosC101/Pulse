@@ -3,10 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pulse/core/constants/app_colors.dart';
 import 'package:pulse/presentation/providers/auth_provider.dart';
-import 'package:pulse/presentation/screens/auth/welcome_screen.dart';
 import 'package:pulse/presentation/screens/staff/tabs/overview_tab.dart';
 import 'package:pulse/presentation/screens/staff/tabs/bed_status_tab.dart';
 import 'package:pulse/presentation/screens/staff/tabs/queue_tab.dart';
+import 'package:pulse/presentation/screens/staff/tabs/discharge_records_tab.dart';
+import 'package:pulse/utils/auth_utils.dart';
 
 class StaffDashboardScreen extends ConsumerStatefulWidget {
   const StaffDashboardScreen({super.key});
@@ -65,17 +66,7 @@ class _StaffDashboardScreenState extends ConsumerState<StaffDashboardScreen> {
                   ),
                   const SizedBox(height: 32),
                   ElevatedButton(
-                    onPressed: () async {
-                      await ref.read(authControllerProvider.notifier).signOut();
-                      if (context.mounted) {
-                        Navigator.of(context).pushAndRemoveUntil(
-                          MaterialPageRoute(
-                            builder: (context) => const WelcomeScreen(),
-                          ),
-                          (route) => false,
-                        );
-                      }
-                    },
+                    onPressed: () => AuthUtils.handleLogout(context, ref),
                     child: const Text('Logout'),
                   ),
                 ],
@@ -89,6 +80,7 @@ class _StaffDashboardScreenState extends ConsumerState<StaffDashboardScreen> {
           OverviewTab(hospitalId: user.staffHospitalId!),
           BedStatusTab(hospitalId: user.staffHospitalId!),
           QueueTab(hospitalId: user.staffHospitalId!),
+          DischargeRecordsTab(hospitalId: user.staffHospitalId!),
         ];
 
         return Scaffold(
@@ -155,17 +147,9 @@ class _StaffDashboardScreenState extends ConsumerState<StaffDashboardScreen> {
                         'Logout',
                         style: TextStyle(color: AppColors.error),
                       ),
-                      onTap: () async {
+                      onTap: () {
                         Navigator.pop(context);
-                        await ref.read(authControllerProvider.notifier).signOut();
-                        if (context.mounted) {
-                          Navigator.of(context).pushAndRemoveUntil(
-                            MaterialPageRoute(
-                              builder: (context) => const WelcomeScreen(),
-                            ),
-                            (route) => false,
-                          );
-                        }
+                        AuthUtils.handleLogout(context, ref);
                       },
                     ),
                   ),
@@ -179,6 +163,7 @@ class _StaffDashboardScreenState extends ConsumerState<StaffDashboardScreen> {
             onTap: (index) => setState(() => _currentIndex = index),
             selectedItemColor: AppColors.primary,
             unselectedItemColor: AppColors.textSecondary,
+            type: BottomNavigationBarType.fixed,
             items: const [
               BottomNavigationBarItem(
                 icon: Icon(Icons.dashboard_outlined),
@@ -194,6 +179,11 @@ class _StaffDashboardScreenState extends ConsumerState<StaffDashboardScreen> {
                 icon: Icon(Icons.queue_outlined),
                 activeIcon: Icon(Icons.queue),
                 label: 'Queue',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.receipt_long_outlined),
+                activeIcon: Icon(Icons.receipt_long),
+                label: 'Discharge',
               ),
             ],
           ),

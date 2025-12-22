@@ -1,7 +1,8 @@
 // lib/presentation/screens/admin/widgets/hospital_form_dialog.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:pulse/core/constants/app_colors.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:pulse/core/theme/app_colors.dart';
 import 'package:pulse/data/models/hospital_model.dart';
 import 'package:pulse/services/model_3d_service.dart';
 import 'package:pulse/services/image_upload_service.dart';
@@ -81,16 +82,16 @@ class _HospitalFormDialogState extends ConsumerState<HospitalFormDialog> {
     _emailController = TextEditingController(text: widget.hospital?.email ?? '');
     
     _icuTotalController = TextEditingController(
-      text: widget.hospital?.status.icuTotal.toString() ?? '20'
+      text: widget.hospital?.status.icuTotal.toString() ?? ''
     );
     _erTotalController = TextEditingController(
-      text: widget.hospital?.status.erTotal.toString() ?? '15'
+      text: widget.hospital?.status.erTotal.toString() ?? ''
     );
     _wardTotalController = TextEditingController(
-      text: widget.hospital?.status.wardTotal.toString() ?? '100'
+      text: widget.hospital?.status.wardTotal.toString() ?? ''
     );
     _floorsController = TextEditingController(
-      text: widget.hospital?.modelMetadata?.floors.toString() ?? '3'
+      text: widget.hospital?.modelMetadata?.floors.toString() ?? ''
     );
     
     if (widget.hospital != null) {
@@ -212,673 +213,258 @@ class _HospitalFormDialogState extends ConsumerState<HospitalFormDialog> {
   @override
   Widget build(BuildContext context) {
     return Dialog(
+      backgroundColor: Colors.transparent,
+      insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
       child: Container(
-        width: MediaQuery.of(context).size.width * 0.9,
-        height: MediaQuery.of(context).size.height * 0.85,
-        padding: const EdgeInsets.all(24),
+        width: MediaQuery.of(context).size.width,
+        constraints: BoxConstraints(
+          maxHeight: MediaQuery.of(context).size.height * 0.9,
+        ),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+        ),
         child: Form(
           key: _formKey,
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
             children: [
-              Row(
-                children: [
-                  Text(
-                    widget.hospital == null ? 'Add Hospital' : 'Edit Hospital',
-                    style: const TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
+              // Header
+              Padding(
+                padding: const EdgeInsets.all(20),
+                child: Row(
+                  children: [
+                    Text(
+                      widget.hospital == null ? 'Add Hospital' : 'Edit Hospital',
+                      style: GoogleFonts.dmSans(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.darkText,
+                      ),
                     ),
-                  ),
-                  const Spacer(),
-                  IconButton(
-                    icon: const Icon(Icons.close),
-                    onPressed: () => Navigator.pop(context),
-                  ),
-                ],
+                    const Spacer(),
+                    IconButton(
+                      icon: const Icon(Icons.close, color: AppColors.darkText),
+                      onPressed: () => Navigator.pop(context),
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                    ),
+                  ],
+                ),
               ),
-              const SizedBox(height: 24),
               
+              const Divider(height: 1),
+              
+              // Scrollable Content
               Expanded(
                 child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(20),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Basic Information
-                      const Text(
-                        'Basic Information',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      
-                      TextFormField(
-                        controller: _nameController,
-                        decoration: const InputDecoration(
-                          labelText: 'Hospital Name',
-                          prefixIcon: Icon(Icons.local_hospital),
-                        ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter hospital name';
-                          }
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: 16),
-                      
-                      TextFormField(
-                        controller: _addressController,
-                        decoration: const InputDecoration(
-                          labelText: 'Address',
-                          prefixIcon: Icon(Icons.location_on),
-                        ),
-                        maxLines: 2,
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter address';
-                          }
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: 16),
-                      
+                      // Image Upload
                       Row(
                         children: [
-                          Expanded(
-                            child: TextFormField(
-                              controller: _latController,
-                              decoration: const InputDecoration(
-                                labelText: 'Latitude',
-                                prefixIcon: Icon(Icons.map),
-                              ),
-                              keyboardType: TextInputType.number,
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Required';
-                                }
-                                if (double.tryParse(value) == null) {
-                                  return 'Invalid';
-                                }
-                                return null;
-                              },
+                          Text(
+                            'Hospital Image',
+                            style: GoogleFonts.dmSans(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.darkText,
                             ),
                           ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: TextFormField(
-                              controller: _longController,
-                              decoration: const InputDecoration(
-                                labelText: 'Longitude',
-                                prefixIcon: Icon(Icons.map),
-                              ),
-                              keyboardType: TextInputType.number,
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Required';
-                                }
-                                if (double.tryParse(value) == null) {
-                                  return 'Invalid';
-                                }
-                                return null;
-                              },
+                          Text(
+                            ' *',
+                            style: GoogleFonts.dmSans(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.error,
                             ),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 16),
-                      
-                      Row(
-                        children: [
-                          Expanded(
-                            child: TextFormField(
-                              controller: _phoneController,
-                              decoration: const InputDecoration(
-                                labelText: 'Phone',
-                                prefixIcon: Icon(Icons.phone),
-                              ),
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Please enter phone';
-                                }
-                                return null;
-                              },
-                            ),
-                          ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: TextFormField(
-                              controller: _emailController,
-                              decoration: const InputDecoration(
-                                labelText: 'Email',
-                                prefixIcon: Icon(Icons.email),
-                              ),
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Please enter email';
-                                }
-                                return null;
-                              },
-                            ),
-                          ),
-                        ],
+                      const SizedBox(height: 12),
+                      _buildDashedButton(
+                        label: _selectedImageFileName ?? (widget.hospital?.imageUrl != null ? 'Change Image' : 'Select Image'),
+                        icon: widget.hospital?.imageUrl != null ? Icons.edit : Icons.add,
+                        onTap: _pickImage,
+                        hasExistingFile: widget.hospital?.imageUrl != null,
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 20),
                       
-                      DropdownButtonFormField<String>(
-                        initialValue: _selectedType,
-                        decoration: const InputDecoration(
-                          labelText: 'Hospital Type',
-                          prefixIcon: Icon(Icons.category),
-                        ),
-                        items: _hospitalTypes.map((type) {
-                          return DropdownMenuItem(
-                            value: type,
-                            child: Text(type.toUpperCase()),
-                          );
-                        }).toList(),
-                        onChanged: (value) {
-                          if (value != null) {
-                            setState(() {
-                              _selectedType = value;
-                            });
-                          }
-                        },
-                      ),
-                      const SizedBox(height: 24),
-                      
-                      // Hospital Image Upload
-                      const Text(
-                        'Hospital Image',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
+                      // 3D Model Section
+                      Text(
+                        '3D Building Model (optional)',
+                        style: GoogleFonts.dmSans(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.darkText,
                         ),
                       ),
                       const SizedBox(height: 12),
-                      
-                      Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: AppColors.primary.withOpacity(0.05),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: AppColors.primary.withOpacity(0.2),
-                            width: 1,
-                          ),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                      _buildDashedButton(
+                        label: _selectedModelFileName ?? (widget.hospital?.model3dUrl != null ? 'Change Model' : 'Upload Model'),
+                        icon: widget.hospital?.model3dUrl != null ? Icons.edit : Icons.add,
+                        onTap: _pick3DModel,
+                        hasExistingFile: widget.hospital?.model3dUrl != null,
+                      ),
+                      const SizedBox(height: 12),
+                      _buildStyledTextField(
+                        controller: _floorsController,
+                        hint: 'Number of floors',
+                        keyboardType: TextInputType.number,
+                        suffixIcon: Column(
+                          mainAxisSize: MainAxisSize.min,
                           children: [
-                            // Show existing image status
-                            if (widget.hospital?.imageUrl != null && _selectedImage == null)
-                              Container(
-                                margin: const EdgeInsets.only(bottom: 12),
-                                padding: const EdgeInsets.all(12),
-                                decoration: BoxDecoration(
-                                  color: AppColors.success.withOpacity(0.1),
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: Row(
-                                  children: [
-                                    ClipRRect(
-                                      borderRadius: BorderRadius.circular(8),
-                                      child: Image.network(
-                                        widget.hospital!.imageUrl!,
-                                        width: 80,
-                                        height: 80,
-                                        fit: BoxFit.cover,
-                                        errorBuilder: (context, error, stackTrace) {
-                                          return Container(
-                                            width: 80,
-                                            height: 80,
-                                            color: Colors.grey[300],
-                                            child: const Icon(Icons.image, size: 40),
-                                          );
-                                        },
-                                      ),
-                                    ),
-                                    const SizedBox(width: 12),
-                                    const Expanded(
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            'Current Image',
-                                            style: TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 14,
-                                            ),
-                                          ),
-                                          SizedBox(height: 4),
-                                          Text(
-                                            'Click "Select Image" to replace',
-                                            style: TextStyle(
-                                              fontSize: 12,
-                                              color: AppColors.textSecondary,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            
-                            // Show selected new image
-                            if (_selectedImage != null)
-                              Container(
-                                margin: const EdgeInsets.only(bottom: 12),
-                                padding: const EdgeInsets.all(12),
-                                decoration: BoxDecoration(
-                                  color: AppColors.info.withOpacity(0.1),
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: Row(
-                                  children: [
-                                    if (_selectedImage!.bytes != null)
-                                      ClipRRect(
-                                        borderRadius: BorderRadius.circular(8),
-                                        child: Image.memory(
-                                          _selectedImage!.bytes!,
-                                          width: 80,
-                                          height: 80,
-                                          fit: BoxFit.cover,
-                                        ),
-                                      )
-                                    else
-                                      Container(
-                                        width: 80,
-                                        height: 80,
-                                        decoration: BoxDecoration(
-                                          color: Colors.grey[300],
-                                          borderRadius: BorderRadius.circular(8),
-                                        ),
-                                        child: const Icon(Icons.image, size: 40),
-                                      ),
-                                    const SizedBox(width: 12),
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            _selectedImageFileName ?? 'Unknown file',
-                                            style: const TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 14,
-                                            ),
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
-                                          const SizedBox(height: 4),
-                                          Text(
-                                            _imageUploadService.formatFileSize(_selectedImage!.size),
-                                            style: const TextStyle(
-                                              fontSize: 12,
-                                              color: AppColors.textSecondary,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    IconButton(
-                                      icon: const Icon(Icons.close, size: 20),
-                                      onPressed: () {
-                                        setState(() {
-                                          _selectedImage = null;
-                                          _selectedImageFileName = null;
-                                        });
-                                      },
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            
-                            // Select image button
-                            SizedBox(
-                              width: double.infinity,
-                              child: ElevatedButton.icon(
-                                onPressed: _pickImage,
-                                icon: const Icon(Icons.add_photo_alternate),
-                                label: Text(
-                                  _selectedImage == null 
-                                      ? (widget.hospital?.imageUrl != null ? 'Replace Image' : 'Select Image')
-                                      : 'Change Image'
-                                ),
-                                style: ElevatedButton.styleFrom(
-                                  padding: const EdgeInsets.symmetric(vertical: 14),
-                                ),
-                              ),
+                            InkWell(
+                              onTap: () {
+                                int current = int.tryParse(_floorsController.text) ?? 0;
+                                _floorsController.text = (current + 1).toString();
+                              },
+                              child: const Icon(Icons.arrow_drop_up, size: 20),
                             ),
-                            
-                            const SizedBox(height: 8),
-                            const Text(
-                              'Supported formats: JPG, JPEG, PNG, WEBP (max 5MB)',
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: AppColors.textSecondary,
-                              ),
+                            InkWell(
+                              onTap: () {
+                                int current = int.tryParse(_floorsController.text) ?? 0;
+                                if (current > 0) {
+                                  _floorsController.text = (current - 1).toString();
+                                }
+                              },
+                              child: const Icon(Icons.arrow_drop_down, size: 20),
                             ),
                           ],
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      
+                      // Hospital Information
+                      Text(
+                        'Hospital Information',
+                        style: GoogleFonts.dmSans(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.darkText,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      
+                      _buildStyledTextField(
+                        controller: _nameController,
+                        hint: 'Hospital Name',
+                        icon: Icons.local_hospital_outlined,
+                        validator: (value) => value == null || value.isEmpty ? 'Required' : null,
+                      ),
+                      const SizedBox(height: 12),
+                      
+                      _buildStyledTextField(
+                        controller: _addressController,
+                        hint: 'Address',
+                        icon: Icons.location_on_outlined,
+                        validator: (value) => value == null || value.isEmpty ? 'Required' : null,
+                      ),
+                      const SizedBox(height: 12),
+                      
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _buildStyledTextField(
+                              controller: _latController,
+                              hint: 'Longtitude',
+                              icon: Icons.lock_outline,
+                              keyboardType: TextInputType.number,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: _buildStyledTextField(
+                              controller: _longController,
+                              hint: 'Latitude',
+                              icon: Icons.lock_outline,
+                              keyboardType: TextInputType.number,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      
+                      _buildStyledTextField(
+                        controller: _emailController,
+                        hint: 'Email',
+                        icon: Icons.email_outlined,
+                        keyboardType: TextInputType.emailAddress,
+                      ),
+                      const SizedBox(height: 12),
+                      
+                      _buildStyledTextField(
+                        controller: _phoneController,
+                        hint: 'Phone number',
+                        icon: Icons.phone_outlined,
+                        keyboardType: TextInputType.phone,
+                      ),
+                      const SizedBox(height: 12),
+                      
+                      // Hospital Type Dropdown
+                      Container(
+                        decoration: BoxDecoration(
+                          color: AppColors.background,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: DropdownButtonFormField<String>(
+                          value: _selectedType,
+                          decoration: InputDecoration(
+                            hintText: 'Hospital Type',
+                            hintStyle: GoogleFonts.dmSans(
+                              color: AppColors.darkText.withOpacity(0.4),
+                            ),
+                            prefixIcon: Icon(
+                              Icons.water_drop_outlined,
+                              color: AppColors.darkText.withOpacity(0.4),
+                            ),
+                            border: InputBorder.none,
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                          ),
+                          items: _hospitalTypes.map((type) {
+                            return DropdownMenuItem(
+                              value: type,
+                              child: Text(type.toUpperCase()),
+                            );
+                          }).toList(),
+                          onChanged: (value) {
+                            if (value != null) {
+                              setState(() {
+                                _selectedType = value;
+                              });
+                            }
+                          },
                         ),
                       ),
                       const SizedBox(height: 24),
                       
                       // Bed Capacity
-                      const Text(
+                      Text(
                         'Bed Capacity',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
+                        style: GoogleFonts.dmSans(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.darkText,
                         ),
                       ),
                       const SizedBox(height: 16),
                       
-                      Row(
-                        children: [
-                          Expanded(
-                            child: TextFormField(
-                              controller: _icuTotalController,
-                              decoration: const InputDecoration(
-                                labelText: 'ICU Beds',
-                                prefixIcon: Icon(Icons.bed),
-                              ),
-                              keyboardType: TextInputType.number,
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Required';
-                                }
-                                return null;
-                              },
-                            ),
-                          ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: TextFormField(
-                              controller: _erTotalController,
-                              decoration: const InputDecoration(
-                                labelText: 'ER Beds',
-                                prefixIcon: Icon(Icons.bed),
-                              ),
-                              keyboardType: TextInputType.number,
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Required';
-                                }
-                                return null;
-                              },
-                            ),
-                          ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: TextFormField(
-                              controller: _wardTotalController,
-                              decoration: const InputDecoration(
-                                labelText: 'Ward Beds',
-                                prefixIcon: Icon(Icons.bed),
-                              ),
-                              keyboardType: TextInputType.number,
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Required';
-                                }
-                                return null;
-                              },
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 24),
-                      
-                      // 3D Model Upload Section (OPTIONAL)
-                      Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: AppColors.primary.withOpacity(0.05),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: AppColors.primary.withOpacity(0.2),
-                            width: 2,
-                          ),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                Icon(
-                                  Icons.view_in_ar,
-                                  color: AppColors.primary,
-                                  size: 28,
-                                ),
-                                const SizedBox(width: 12),
-                                const Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        '3D Building Model',
-                                        style: TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                      Text(
-                                        'Optional - Can be added later',
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          color: AppColors.textSecondary,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 8,
-                                    vertical: 4,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: AppColors.info.withOpacity(0.1),
-                                    borderRadius: BorderRadius.circular(6),
-                                  ),
-                                  child: const Text(
-                                    'OPTIONAL',
-                                    style: TextStyle(
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.bold,
-                                      color: AppColors.info,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 12),
-                            const Text(
-                              'Upload a 3D model (.glb or .gltf format, max 10MB)',
-                              style: TextStyle(
-                                fontSize: 13,
-                                color: AppColors.textSecondary,
-                              ),
-                            ),
-                            const SizedBox(height: 16),
-                            
-                            // Show existing model status
-                            if (widget.hospital?.has3dModel == true && _selected3DModel == null)
-                              Container(
-                                padding: const EdgeInsets.all(12),
-                                decoration: BoxDecoration(
-                                  color: AppColors.success.withOpacity(0.1),
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: Row(
-                                  children: [
-                                    const Icon(
-                                      Icons.check_circle,
-                                      color: AppColors.success,
-                                      size: 20,
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          const Text(
-                                            '3D Model Already Uploaded',
-                                            style: TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 14,
-                                            ),
-                                          ),
-                                          if (widget.hospital?.modelMetadata != null) ...[
-                                            const SizedBox(height: 4),
-                                            Text(
-                                              '${widget.hospital!.modelMetadata!.floors} floors • ${widget.hospital!.modelMetadata!.fileSizeFormatted}',
-                                              style: const TextStyle(
-                                                fontSize: 12,
-                                                color: AppColors.textSecondary,
-                                              ),
-                                            ),
-                                          ],
-                                        ],
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            
-                            // Show selected new file
-                            if (_selected3DModel != null)
-                              Container(
-                                padding: const EdgeInsets.all(12),
-                                decoration: BoxDecoration(
-                                  color: AppColors.info.withOpacity(0.1),
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: Row(
-                                  children: [
-                                    const Icon(
-                                      Icons.insert_drive_file,
-                                      color: AppColors.info,
-                                      size: 20,
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            _selectedModelFileName ?? 'Unknown file',
-                                            style: const TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 14,
-                                            ),
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
-                                          const SizedBox(height: 4),
-                                          Text(
-                                            '${(_selected3DModel!.size / (1024 * 1024)).toStringAsFixed(2)} MB',
-                                            style: const TextStyle(
-                                              fontSize: 12,
-                                              color: AppColors.textSecondary,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    IconButton(
-                                      icon: const Icon(Icons.close, size: 20),
-                                      onPressed: () {
-                                        setState(() {
-                                          _selected3DModel = null;
-                                          _selectedModelFileName = null;
-                                        });
-                                      },
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            
-                            const SizedBox(height: 12),
-                            
-                            // Floor count (only required if 3D model is selected)
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: TextFormField(
-                                    controller: _floorsController,
-                                    decoration: const InputDecoration(
-                                      labelText: 'Number of Floors',
-                                      prefixIcon: Icon(Icons.layers),
-                                      hintText: '3',
-                                    ),
-                                    keyboardType: TextInputType.number,
-                                    validator: (value) {
-                                      if (_selected3DModel != null || widget.hospital?.has3dModel == true) {
-                                        if (value == null || value.isEmpty) {
-                                          return 'Required when 3D model is present';
-                                        }
-                                        final floors = int.tryParse(value);
-                                        if (floors == null || floors < 1 || floors > 20) {
-                                          return 'Enter 1-20 floors';
-                                        }
-                                      }
-                                      return null;
-                                    },
-                                  ),
-                                ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: ElevatedButton.icon(
-                                    onPressed: _isUploadingModel ? null : _pick3DModel,
-                                    icon: const Icon(Icons.upload_file),
-                                    label: Text(
-                                      _selected3DModel == null 
-                                          ? (widget.hospital?.has3dModel == true ? 'Replace Model' : 'Select Model')
-                                          : 'Change Model'
-                                    ),
-                                    style: ElevatedButton.styleFrom(
-                                      padding: const EdgeInsets.symmetric(vertical: 16),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            
-                            if (_isUploadingModel) ...[
-                              const SizedBox(height: 16),
-                              Column(
-                                children: [
-                                  LinearProgressIndicator(
-                                    value: _uploadProgress,
-                                    backgroundColor: Colors.grey[200],
-                                    valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primary),
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Text(
-                                    'Uploading... ${(_uploadProgress * 100).toStringAsFixed(0)}%',
-                                    style: const TextStyle(
-                                      fontSize: 12,
-                                      color: AppColors.textSecondary,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ],
-                        ),
-                      ),
+                      _buildNumberField('ICU', _icuTotalController),
+                      const SizedBox(height: 12),
+                      _buildNumberField('ER', _erTotalController),
+                      const SizedBox(height: 12),
+                      _buildNumberField('Ward', _wardTotalController),
                       const SizedBox(height: 24),
                       
                       // Services
-                      const Text(
+                      Text(
                         'Services',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
+                        style: GoogleFonts.dmSans(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.darkText,
                         ),
                       ),
                       const SizedBox(height: 12),
@@ -887,31 +473,30 @@ class _HospitalFormDialogState extends ConsumerState<HospitalFormDialog> {
                         runSpacing: 8,
                         children: _availableServices.map((service) {
                           final isSelected = _selectedServices.contains(service);
-                          return FilterChip(
-                            label: Text(service),
-                            selected: isSelected,
-                            onSelected: (selected) {
+                          return _buildChip(
+                            label: service,
+                            isSelected: isSelected,
+                            onTap: () {
                               setState(() {
-                                if (selected) {
-                                  _selectedServices.add(service);
-                                } else {
+                                if (isSelected) {
                                   _selectedServices.remove(service);
+                                } else {
+                                  _selectedServices.add(service);
                                 }
                               });
                             },
-                            selectedColor: AppColors.primary.withOpacity(0.2),
-                            checkmarkColor: AppColors.primary,
                           );
                         }).toList(),
                       ),
                       const SizedBox(height: 24),
                       
                       // Specialties
-                      const Text(
+                      Text(
                         'Specialties',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
+                        style: GoogleFonts.dmSans(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.darkText,
                         ),
                       ),
                       const SizedBox(height: 12),
@@ -920,44 +505,259 @@ class _HospitalFormDialogState extends ConsumerState<HospitalFormDialog> {
                         runSpacing: 8,
                         children: _availableSpecialties.map((specialty) {
                           final isSelected = _selectedSpecialties.contains(specialty);
-                          return FilterChip(
-                            label: Text(specialty),
-                            selected: isSelected,
-                            onSelected: (selected) {
+                          return _buildChip(
+                            label: specialty,
+                            isSelected: isSelected,
+                            onTap: () {
                               setState(() {
-                                if (selected) {
-                                  _selectedSpecialties.add(specialty);
-                                } else {
+                                if (isSelected) {
                                   _selectedSpecialties.remove(specialty);
+                                } else {
+                                  _selectedSpecialties.add(specialty);
                                 }
                               });
                             },
-                            selectedColor: AppColors.info.withOpacity(0.2),
-                            checkmarkColor: AppColors.info,
                           );
                         }).toList(),
                       ),
+                      const SizedBox(height: 24),
                     ],
                   ),
                 ),
               ),
               
-              const SizedBox(height: 24),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  TextButton(
-                    onPressed: _isUploadingModel ? null : () => Navigator.pop(context),
-                    child: const Text('Cancel'),
+              // Buttons
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  border: Border(
+                    top: BorderSide(color: Colors.grey.shade200),
                   ),
-                  const SizedBox(width: 12),
-                  ElevatedButton(
-                    onPressed: _isUploadingModel ? null : _handleSave,
-                    child: Text(widget.hospital == null ? 'Add Hospital' : 'Save Changes'),
-                  ),
-                ],
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () => Navigator.pop(context),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: AppColors.primary,
+                          side: const BorderSide(color: AppColors.primary, width: 2),
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: Text(
+                          'Cancel',
+                          style: GoogleFonts.dmSans(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: _handleSave,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primary,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          elevation: 0,
+                        ),
+                        child: Text(
+                          'Add Hospital',
+                          style: GoogleFonts.dmSans(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDashedButton({
+    required String label,
+    required IconData icon,
+    required VoidCallback onTap,
+    bool hasExistingFile = false,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 20),
+        decoration: BoxDecoration(
+          border: Border.all(
+            color: hasExistingFile ? AppColors.success : AppColors.darkText.withOpacity(0.3),
+            width: 2,
+            strokeAlign: BorderSide.strokeAlignInside,
+          ),
+          borderRadius: BorderRadius.circular(12),
+          color: hasExistingFile ? AppColors.success.withOpacity(0.05) : Colors.transparent,
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              icon, 
+              color: hasExistingFile ? AppColors.success : AppColors.darkText.withOpacity(0.6), 
+              size: 20
+            ),
+            const SizedBox(width: 8),
+            Text(
+              label,
+              style: GoogleFonts.dmSans(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                color: hasExistingFile ? AppColors.success : AppColors.darkText.withOpacity(0.6),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStyledTextField({
+    required TextEditingController controller,
+    required String hint,
+    IconData? icon,
+    TextInputType? keyboardType,
+    String? Function(String?)? validator,
+    Widget? suffixIcon,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: AppColors.darkText.withOpacity(0.1),
+          width: 1,
+        ),
+      ),
+      child: TextFormField(
+        controller: controller,
+        keyboardType: keyboardType,
+        validator: validator,
+        style: GoogleFonts.dmSans(
+          color: AppColors.darkText,
+        ),
+        decoration: InputDecoration(
+          hintText: hint,
+          hintStyle: GoogleFonts.dmSans(
+            color: AppColors.darkText.withOpacity(0.4),
+          ),
+          prefixIcon: icon != null
+              ? Icon(icon, color: AppColors.darkText.withOpacity(0.4))
+              : null,
+          suffixIcon: suffixIcon,
+          border: InputBorder.none,
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNumberField(String label, TextEditingController controller) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: AppColors.darkText.withOpacity(0.1),
+          width: 1,
+        ),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              label,
+              style: GoogleFonts.dmSans(
+                fontSize: 14,
+                color: AppColors.darkText.withOpacity(0.6),
+              ),
+            ),
+          ),
+          SizedBox(
+            width: 80,
+            child: TextFormField(
+              controller: controller,
+              keyboardType: TextInputType.number,
+              textAlign: TextAlign.center,
+              style: GoogleFonts.dmSans(
+                color: AppColors.darkText,
+                fontWeight: FontWeight.w600,
+              ),
+              decoration: const InputDecoration(
+                border: InputBorder.none,
+                contentPadding: EdgeInsets.zero,
+                isDense: true,
+              ),
+            ),
+          ),
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              InkWell(
+                onTap: () {
+                  int current = int.tryParse(controller.text) ?? 0;
+                  controller.text = (current + 1).toString();
+                },
+                child: const Icon(Icons.arrow_drop_up, size: 24),
+              ),
+              InkWell(
+                onTap: () {
+                  int current = int.tryParse(controller.text) ?? 0;
+                  if (current > 0) {
+                    controller.text = (current - 1).toString();
+                  }
+                },
+                child: const Icon(Icons.arrow_drop_down, size: 24),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildChip({
+    required String label,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        decoration: BoxDecoration(
+          color: isSelected ? AppColors.primary : Colors.transparent,
+          border: Border.all(
+            color: AppColors.darkText,
+            width: 1.5,
+          ),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Text(
+          label,
+          style: GoogleFonts.dmSans(
+            fontSize: 13,
+            fontWeight: FontWeight.w500,
+            color: isSelected ? Colors.white : AppColors.darkText,
           ),
         ),
       ),
