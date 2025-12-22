@@ -1,6 +1,3 @@
-// lib/presentation/screens/admin/admin_dashboard_screen.dart
-// ignore_for_file: use_super_parameters
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pulse/core/constants/app_colors.dart';
