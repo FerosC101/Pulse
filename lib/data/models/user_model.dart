@@ -17,6 +17,9 @@ class UserModel {
   final String? address;
   final List<String>? medicalHistory;
   final String? emergencyContact;
+  final String? emergencyPhone;
+  final String? allergies;
+  final String? medicalConditions;
   
   // Doctor-specific fields
   final String? specialty;
@@ -46,6 +49,9 @@ class UserModel {
     this.address,
     this.medicalHistory,
     this.emergencyContact,
+    this.emergencyPhone,
+    this.allergies,
+    this.medicalConditions,
     this.specialty,
     this.licenseNumber,
     this.hospitalId,
@@ -101,6 +107,9 @@ class UserModel {
           ? List<String>.from(data['medicalHistory']) 
           : null,
       emergencyContact: data['emergencyContact'],
+      emergencyPhone: data['emergencyPhone'],
+      allergies: data['allergies'],
+      medicalConditions: data['medicalConditions'],
       specialty: data['specialty'],
       licenseNumber: data['licenseNumber'],
       hospitalId: data['hospitalId'],
@@ -132,6 +141,9 @@ class UserModel {
       if (address != null) 'address': address,
       if (medicalHistory != null) 'medicalHistory': medicalHistory,
       if (emergencyContact != null) 'emergencyContact': emergencyContact,
+      if (emergencyPhone != null) 'emergencyPhone': emergencyPhone,
+      if (allergies != null) 'allergies': allergies,
+      if (medicalConditions != null) 'medicalConditions': medicalConditions,
       if (specialty != null) 'specialty': specialty,
       if (licenseNumber != null) 'licenseNumber': licenseNumber,
       if (hospitalId != null) 'hospitalId': hospitalId,
