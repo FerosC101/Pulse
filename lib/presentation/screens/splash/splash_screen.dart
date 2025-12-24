@@ -33,16 +33,7 @@ class SplashScreen extends StatelessWidget {
                   color: Colors.white,
                 ),
               ),
-              const SizedBox(height: 24),
-              const Text(
-                'PULSE',
-                style: TextStyle(
-                  fontSize: 40,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 32),
               Text(
                 'Smart Hospital System',
                 style: TextStyle(

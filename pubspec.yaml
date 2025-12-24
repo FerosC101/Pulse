@@ -62,7 +62,6 @@ dev_dependencies:
 flutter:
   uses-material-design: true
 
-  # Fonts
   fonts:
     - family: NotoSans
       fonts:
@@ -70,7 +69,6 @@ flutter:
         - asset: fonts/NotoSans-Bold.ttf
           weight: 700
 
-  # Assets (optional, in case you add images or JSON files later)
   assets:
     - assets/images/
     - assets/updated/
@@ -80,6 +78,6 @@ flutter:
 flutter_launcher_icons:
   android: true
   ios: true
-  image_path: "assets/images/logo_pulse.png"
+  image_path: "assets/images/pulse-solid-red.png"
   adaptive_icon_background: "#FFFFFF"
-  adaptive_icon_foreground: "assets/images/logo_pulse.png"
+  adaptive_icon_foreground: "assets/images/pulse-solid-red.png"

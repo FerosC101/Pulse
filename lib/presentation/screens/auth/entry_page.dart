@@ -18,15 +18,7 @@ class EntryPage extends StatelessWidget {
               const Spacer(flex: 2),
               // Logo with gradient wave
               _buildLogo(context),
-              const SizedBox(height: 24),
-              // App name with brand typography
-              Text(
-                'PULSE',
-                style: Theme.of(context).textTheme.displayMedium?.copyWith(
-                      color: AppColors.primary,
-                      letterSpacing: 2,
-                    ),
-              ),
+              const SizedBox(height: 48),
               const Spacer(flex: 3),
               // Get Started button
               PrimaryButton(
