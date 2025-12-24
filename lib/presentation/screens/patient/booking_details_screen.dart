@@ -135,6 +135,7 @@ class _BookingDetailsScreenState extends ConsumerState<BookingDetailsScreen> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: Container(
+                clipBehavior: Clip.hardEdge,
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(16),
@@ -703,8 +704,13 @@ class _BookingDetailsScreenState extends ConsumerState<BookingDetailsScreen> {
     });
 
     try {
-      final currentUser = ref.read(authStateProvider).value;
-      if (currentUser == null) throw Exception('Not authenticated');
+      // Get current user from auth state
+      final authState = ref.read(authStateProvider);
+      final currentUser = authState.value ?? authState.asData?.value;
+      
+      if (currentUser == null) {
+        throw Exception('Please login to book an appointment');
+      }
       
       final currentUserData = await ref.read(currentUserProvider.future);
       if (currentUserData == null) throw Exception('User data not found');
@@ -758,11 +764,22 @@ class _BookingDetailsScreenState extends ConsumerState<BookingDetailsScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(
-              'Failed to book appointment: $e',
-              style: GoogleFonts.dmSans(fontWeight: FontWeight.w600),
+            content: Row(
+              children: [
+                const Icon(Icons.error_outline, color: Colors.white, size: 20),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Failed to book appointment: ${e.toString().replaceAll('Exception: ', '')}',
+                    style: GoogleFonts.dmSans(fontWeight: FontWeight.w600),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
             ),
             backgroundColor: AppColors.error,
+            duration: const Duration(seconds: 4),
           ),
         );
       }
