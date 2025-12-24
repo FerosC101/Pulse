@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:pulse/core/constants/app_colors.dart';
 import 'package:pulse/data/models/appointment_model.dart';
 import 'package:pulse/data/models/appointment_status.dart';
@@ -78,10 +80,11 @@ class _BookingDetailsScreenState extends ConsumerState<BookingDetailsScreen> {
         ),
         centerTitle: true,
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+      body: ClipRect(
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
             // Doctor Profile Header
             Container(
               color: Colors.white,
@@ -359,7 +362,8 @@ class _BookingDetailsScreenState extends ConsumerState<BookingDetailsScreen> {
               ),
               const SizedBox(height: 32),
             ],
-          ],
+            ],
+          ),
         ),
       ),
       bottomNavigationBar: _selectedTime != null
@@ -646,6 +650,7 @@ class _BookingDetailsScreenState extends ConsumerState<BookingDetailsScreen> {
       ),
     );
   }
+  }
 
   List<String> _generateTimeSlots(DoctorScheduleModel schedule) {
     // Parse start and end times
@@ -704,16 +709,24 @@ class _BookingDetailsScreenState extends ConsumerState<BookingDetailsScreen> {
     });
 
     try {
-      // Get current user from auth state
-      final authState = ref.read(authStateProvider);
-      final currentUser = authState.value ?? authState.asData?.value;
+      // Get current user from Firebase Auth directly
+      final currentUser = FirebaseAuth.instance.currentUser;
       
       if (currentUser == null) {
         throw Exception('Please login to book an appointment');
       }
       
-      final currentUserData = await ref.read(currentUserProvider.future);
-      if (currentUserData == null) throw Exception('User data not found');
+      // Get user data directly from Firestore
+      final userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(currentUser.uid)
+          .get();
+      
+      if (!userDoc.exists) {
+        throw Exception('User profile not found');
+      }
+      
+      final currentUserData = UserModel.fromMap(userDoc.data()!, currentUser.uid);
 
       final dateTime = DateTime(
         _selectedDate!.year,
