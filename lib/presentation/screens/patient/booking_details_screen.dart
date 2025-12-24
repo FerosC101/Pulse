@@ -12,10 +12,9 @@ import 'package:pulse/data/models/appointment_type.dart';
 import 'package:pulse/data/models/doctor_schedule_model.dart';
 import 'package:pulse/data/models/hospital_model.dart';
 import 'package:pulse/data/models/user_model.dart';
+import 'package:pulse/data/models/user_type.dart';
 import 'package:pulse/presentation/providers/appointment_provider.dart';
-import 'package:pulse/presentation/providers/auth_provider.dart';
 import 'package:pulse/presentation/providers/schedule_provider.dart';
-import 'package:pulse/presentation/providers/user_provider.dart';
 
 class BookingDetailsScreen extends ConsumerStatefulWidget {
   final HospitalModel hospital;
@@ -80,57 +79,105 @@ class _BookingDetailsScreenState extends ConsumerState<BookingDetailsScreen> {
         ),
         centerTitle: true,
       ),
-      body: ClipRect(
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-            // Doctor Profile Header
-            Container(
-              color: Colors.white,
-              padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
-              child: Row(
-                children: [
-                  Container(
-                    width: 56,
-                    height: 56,
-                    decoration: BoxDecoration(
-                      color: AppColors.background,
-                      borderRadius: BorderRadius.circular(28),
-                    ),
-                    child: const Icon(
-                      Icons.person,
-                      color: AppColors.textSecondary,
-                      size: 28,
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Dr. ${widget.doctor.fullName}',
-                          style: GoogleFonts.dmSans(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
-                            color: AppColors.darkText,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          widget.doctor.specialty ?? 'General Practitioner',
-                          style: GoogleFonts.dmSans(
-                            fontSize: 14,
-                            color: AppColors.textSecondary,
-                          ),
-                        ),
-                      ],
-                    ),
+      bottomNavigationBar: _selectedTime != null
+          ? Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 10,
+                    offset: const Offset(0, -2),
                   ),
                 ],
               ),
-            ),
+              child: SafeArea(
+                child: SizedBox(
+                  width: double.infinity,
+                  height: 50,
+                  child: ElevatedButton(
+                    onPressed: _canBook && !_isBooking ? _bookAppointment : null,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.darkText,
+                      disabledBackgroundColor: AppColors.darkText.withOpacity(0.4),
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      elevation: 0,
+                    ),
+                    child: _isBooking
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                            ),
+                          )
+                        : Text(
+                            'Book Appointment',
+                            style: GoogleFonts.dmSans(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                  ),
+                ),
+              ),
+            )
+          : null,
+      body: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Doctor Profile Header
+              Container(
+                color: Colors.white,
+                padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 56,
+                      height: 56,
+                      decoration: BoxDecoration(
+                        color: AppColors.background,
+                        borderRadius: BorderRadius.circular(28),
+                      ),
+                      child: const Icon(
+                        Icons.person,
+                        color: AppColors.textSecondary,
+                        size: 28,
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Dr. ${widget.doctor.fullName}',
+                            style: GoogleFonts.dmSans(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.darkText,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            widget.doctor.specialty ?? 'General Practitioner',
+                            style: GoogleFonts.dmSans(
+                              fontSize: 14,
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
 
             const SizedBox(height: 24),
 
@@ -237,7 +284,7 @@ class _BookingDetailsScreenState extends ConsumerState<BookingDetailsScreen> {
                 child: _buildFormField(
                   label: 'Appointment Type',
                   child: DropdownButtonFormField<AppointmentType>(
-                    value: _selectedType,
+                    initialValue: _selectedType,
                     decoration: InputDecoration(
                       hintText: 'Select appointment type',
                       hintStyle: GoogleFonts.dmSans(
@@ -362,59 +409,9 @@ class _BookingDetailsScreenState extends ConsumerState<BookingDetailsScreen> {
               ),
               const SizedBox(height: 32),
             ],
-            ],
-          ),
+          ],
         ),
       ),
-      bottomNavigationBar: _selectedTime != null
-          ? Container(
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
-                    blurRadius: 10,
-                    offset: const Offset(0, -2),
-                  ),
-                ],
-              ),
-              child: SafeArea(
-                child: SizedBox(
-                  width: double.infinity,
-                  height: 50,
-                  child: ElevatedButton(
-                    onPressed: _canBook && !_isBooking ? _bookAppointment : null,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.darkText,
-                      disabledBackgroundColor: AppColors.darkText.withOpacity(0.4),
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      elevation: 0,
-                    ),
-                    child: _isBooking
-                        ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                            ),
-                          )
-                        : Text(
-                            'Book Appointment',
-                            style: GoogleFonts.dmSans(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                  ),
-                ),
-              ),
-            )
-          : null,
     );
   }
 
@@ -650,7 +647,6 @@ class _BookingDetailsScreenState extends ConsumerState<BookingDetailsScreen> {
       ),
     );
   }
-  }
 
   List<String> _generateTimeSlots(DoctorScheduleModel schedule) {
     // Parse start and end times
@@ -726,7 +722,18 @@ class _BookingDetailsScreenState extends ConsumerState<BookingDetailsScreen> {
         throw Exception('User profile not found');
       }
       
-      final currentUserData = UserModel.fromMap(userDoc.data()!, currentUser.uid);
+      final userData = userDoc.data()!;
+      final currentUserData = UserModel(
+        id: currentUser.uid,
+        email: userData['email'] ?? currentUser.email ?? '',
+        fullName: userData['fullName'] ?? userData['full_name'] ?? '',
+        phoneNumber: userData['phoneNumber'] ?? userData['phone_number'],
+        userType: UserType.values.firstWhere(
+          (e) => e.toString().split('.').last == (userData['userType'] ?? 'patient'),
+          orElse: () => UserType.patient,
+        ),
+        createdAt: (userData['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
+      );
 
       final dateTime = DateTime(
         _selectedDate!.year,
