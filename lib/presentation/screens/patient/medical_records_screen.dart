@@ -1,6 +1,7 @@
 // lib/presentation/screens/patient/medical_records_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:pulse/core/constants/app_colors.dart';
 import 'package:pulse/presentation/providers/auth_provider.dart';
@@ -23,8 +24,17 @@ class _MedicalRecordsScreenState extends ConsumerState<MedicalRecordsScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text('Medical Records'),
+        backgroundColor: Colors.white,
         elevation: 0,
+        title: Text(
+          'Medical Records',
+          style: GoogleFonts.dmSans(
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+            color: AppColors.darkText,
+          ),
+        ),
+        centerTitle: true,
       ),
       body: userAsync.when(
         data: (user) {
@@ -37,16 +47,19 @@ class _MedicalRecordsScreenState extends ConsumerState<MedicalRecordsScreen> {
               // Tab Selector
               Container(
                 color: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 child: Row(
                   children: [
                     Expanded(
-                      child: _buildTab('Appointments', 'appointments', Icons.calendar_month),
+                      child: _buildTab('Appointments', 'appointments'),
                     ),
+                    const SizedBox(width: 8),
                     Expanded(
-                      child: _buildTab('Prescriptions', 'prescriptions', Icons.medication),
+                      child: _buildTab('Prescriptions', 'prescriptions'),
                     ),
+                    const SizedBox(width: 8),
                     Expanded(
-                      child: _buildTab('Test Results', 'tests', Icons.science),
+                      child: _buildTab('Test Results', 'tests'),
                     ),
                   ],
                 ),
@@ -65,37 +78,25 @@ class _MedicalRecordsScreenState extends ConsumerState<MedicalRecordsScreen> {
     );
   }
 
-  Widget _buildTab(String label, String value, IconData icon) {
+  Widget _buildTab(String label, String value) {
     final isSelected = _selectedTab == value;
-    return InkWell(
+    return GestureDetector(
       onTap: () => setState(() => _selectedTab = value),
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 16),
+        padding: const EdgeInsets.symmetric(vertical: 12),
         decoration: BoxDecoration(
-          border: Border(
-            bottom: BorderSide(
-              color: isSelected ? AppColors.primary : Colors.transparent,
-              width: 3,
+          color: isSelected ? AppColors.darkText : Colors.transparent,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Center(
+          child: Text(
+            label,
+            style: GoogleFonts.dmSans(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: isSelected ? Colors.white : AppColors.textSecondary,
             ),
           ),
-        ),
-        child: Column(
-          children: [
-            Icon(
-              icon,
-              color: isSelected ? AppColors.primary : Colors.grey,
-              size: 24,
-            ),
-            const SizedBox(height: 4),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                color: isSelected ? AppColors.primary : Colors.grey,
-              ),
-            ),
-          ],
         ),
       ),
     );

@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:pulse/core/theme/app_colors.dart';
 import 'package:pulse/data/models/hospital_model.dart';
-import 'package:pulse/presentation/screens/patient/book_appointment_screen.dart';
+import 'package:pulse/presentation/screens/patient/find_doctor_screen.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class HospitalDetailScreen extends StatelessWidget {
@@ -210,7 +210,7 @@ class HospitalDetailScreen extends StatelessWidget {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => BookAppointmentScreen(hospital: hospital),
+                            builder: (context) => FindDoctorScreen(hospital: hospital),
                           ),
                         );
                       },

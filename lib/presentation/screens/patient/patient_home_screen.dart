@@ -8,7 +8,8 @@ import 'package:pulse/presentation/screens/patient/hospital_list_screen.dart';
 import 'package:pulse/presentation/screens/patient/hospital_detail_screen.dart';
 import 'package:pulse/presentation/screens/patient/patient_appointments_screen.dart';
 import 'package:pulse/presentation/screens/patient/medical_records_screen.dart';
-import 'package:pulse/presentation/screens/patient/profile_management_screen.dart';
+import 'package:pulse/presentation/screens/patient/patient_profile_screen.dart';
+import 'package:pulse/presentation/screens/ai/ai_chat_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -25,9 +26,9 @@ class _PatientHomeScreenState extends ConsumerState<PatientHomeScreen> {
   final List<Widget> _screens = const [
     _HomePage(),
     _MapPage(),
-    _ChatbotPage(),
+    AIChatScreen(),
     MedicalRecordsScreen(),
-    ProfileManagementScreen(),
+    PatientProfileScreen(),
   ];
 
   @override
@@ -288,7 +289,7 @@ class _HomePage extends ConsumerWidget {
                         context,
                         icon: Icons.event_note,
                         title: 'Manage\nAppointments',
-                        color: AppColors.info,
+                        color: AppColors.primary,
                         onTap: () {
                           Navigator.push(
                             context,
@@ -337,7 +338,7 @@ class _HomePage extends ConsumerWidget {
                   return Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 24),
                     child: Container(
-                      padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 20),
+                      padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
                       decoration: BoxDecoration(
                         gradient: const LinearGradient(
                           begin: Alignment.centerLeft,
@@ -357,7 +358,7 @@ class _HomePage extends ConsumerWidget {
                         ],
                       ),
                       child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
                           _buildStatColumn(
                             title: 'Nearby\nHospitals',
@@ -513,29 +514,31 @@ class _HomePage extends ConsumerWidget {
     required String title,
     required String value,
   }) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(
-          title,
-          textAlign: TextAlign.center,
-          style: GoogleFonts.dmSans(
-            fontSize: 11,
-            fontWeight: FontWeight.w500,
-            color: Colors.white,
-            height: 1.3,
+    return Expanded(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            title,
+            textAlign: TextAlign.center,
+            style: GoogleFonts.dmSans(
+              fontSize: 10,
+              fontWeight: FontWeight.w500,
+              color: Colors.white.withOpacity(0.9),
+              height: 1.2,
+            ),
           ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          value,
-          style: GoogleFonts.dmSans(
-            fontSize: 36,
-            fontWeight: FontWeight.w700,
-            color: Colors.white,
+          const SizedBox(height: 6),
+          Text(
+            value,
+            style: GoogleFonts.dmSans(
+              fontSize: 28,
+              fontWeight: FontWeight.w700,
+              color: Colors.white,
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 

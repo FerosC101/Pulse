@@ -3,6 +3,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:pulse/core/constants/app_colors.dart';
 import 'package:pulse/presentation/providers/chat_provider.dart';
 import 'package:pulse/presentation/screens/ai/widgets/chat_bubble.dart';
@@ -76,116 +77,36 @@ class _AIChatScreenState extends ConsumerState<AIChatScreen> {
     final chatState = ref.watch(chatControllerProvider);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F5),
+      backgroundColor: AppColors.background,
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: AppColors.darkText),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: Text(
+          'AI Medical Assistant',
+          style: GoogleFonts.dmSans(
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+            color: AppColors.darkText,
+          ),
+        ),
+        centerTitle: true,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh, color: AppColors.darkText),
+            onPressed: () {
+              ref.read(chatControllerProvider.notifier).resetChat();
+              setState(() => _showQuickActions = true);
+            },
+            tooltip: 'Reset Chat',
+          ),
+        ],
+      ),
       body: Column(
         children: [
-          // Custom Header with red gradient
-          Container(
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [Color(0xFFFF6B6B), Color(0xFFD32F2F)],
-              ),
-            ),
-            child: SafeArea(
-              bottom: false,
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Row(
-                  children: [
-                    // Back button
-                    Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: IconButton(
-                        icon: const Icon(Icons.arrow_back, color: Colors.white),
-                        onPressed: () => Navigator.pop(context),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    // Avatar
-                    Container(
-                      width: 48,
-                      height: 48,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.1),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: const Icon(
-                        Icons.support_agent,
-                        color: Color(0xFFD32F2F),
-                        size: 28,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    // Info
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'AI Medical Assistant',
-                            style: TextStyle(
-                              fontSize: 17,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Row(
-                            children: [
-                              Container(
-                                width: 8,
-                                height: 8,
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  shape: BoxShape.circle,
-                                ),
-                              ),
-                              const SizedBox(width: 6),
-                              Text(
-                                'Metro General',
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  color: Colors.white.withOpacity(0.9),
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                    // Refresh button
-                    Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: IconButton(
-                        icon: const Icon(Icons.refresh, color: Colors.white),
-                        onPressed: () {
-                          ref.read(chatControllerProvider.notifier).resetChat();
-                          setState(() => _showQuickActions = true);
-                        },
-                        tooltip: 'Reset Chat',
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
           // Location Status Banner
           Consumer(
             builder: (context, ref, child) {
@@ -331,9 +252,9 @@ class _AIChatScreenState extends ConsumerState<AIChatScreen> {
         color: Colors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 20,
-            offset: const Offset(0, -4),
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, -2),
           ),
         ],
       ),
@@ -343,14 +264,18 @@ class _AIChatScreenState extends ConsumerState<AIChatScreen> {
             Expanded(
               child: TextField(
                 controller: _messageController,
+                style: GoogleFonts.dmSans(
+                  fontSize: 15,
+                  color: AppColors.darkText,
+                ),
                 decoration: InputDecoration(
                   hintText: 'Ask me anything about hospitals...',
-                  hintStyle: TextStyle(
-                    color: Colors.grey.shade400,
-                    fontSize: 14,
+                  hintStyle: GoogleFonts.dmSans(
+                    color: AppColors.textSecondary,
+                    fontSize: 15,
                   ),
                   filled: true,
-                  fillColor: Colors.grey.shade100,
+                  fillColor: AppColors.background,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(24),
                     borderSide: BorderSide.none,
@@ -370,17 +295,13 @@ class _AIChatScreenState extends ConsumerState<AIChatScreen> {
               width: 52,
               height: 52,
               decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [Color(0xFFFF6B6B), Color(0xFFD32F2F)],
-                ),
+                color: AppColors.darkText,
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
-                    color: AppColors.primary.withOpacity(0.4),
-                    blurRadius: 12,
-                    offset: const Offset(0, 4),
+                    color: AppColors.darkText.withOpacity(0.3),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
                   ),
                 ],
               ),
@@ -390,7 +311,7 @@ class _AIChatScreenState extends ConsumerState<AIChatScreen> {
                   onTap: _sendMessage,
                   borderRadius: BorderRadius.circular(26),
                   child: const Center(
-                    child: Icon(Icons.send_rounded, color: Colors.white, size: 24),
+                    child: Icon(Icons.send_rounded, color: Colors.white, size: 22),
                   ),
                 ),
               ),
