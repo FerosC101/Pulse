@@ -215,14 +215,14 @@ class QueueItemCard extends ConsumerWidget {
                           if (context.mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
-                        content: Text('Error: $e'),
-                        backgroundColor: AppColors.error,
-                      ),
-                    );
-                  }
-                }
-              }
-            } else if (value == 'remove') {
+                                content: Text('Error: $e'),
+                                backgroundColor: AppColors.error,
+                              ),
+                            );
+                          }
+                        }
+                      }
+                    } else if (value == 'remove') {
               final confirm = await showDialog<bool>(
                 context: context,
                 builder: (context) => AlertDialog(
@@ -268,9 +268,13 @@ class QueueItemCard extends ConsumerWidget {
                     );
                   }
                 }
-              ),
-            ],
-          ),
+              }
+            }
+          },
+        ),
+      ],
+    ),
+  ),
           // Critical status indicator (vertical text on right edge)
           if (queueItem.triageLevel == TriageLevel.critical)
             Positioned(
