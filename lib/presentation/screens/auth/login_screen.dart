@@ -5,7 +5,7 @@ import 'package:pulse/data/models/user_type.dart';
 import 'package:pulse/presentation/providers/auth_provider.dart';
 import 'package:pulse/presentation/screens/auth/register_screen.dart';
 import 'package:pulse/presentation/screens/auth/widgets/auth_text_field.dart';
-import 'package:pulse/presentation/screens/home/home_screen.dart';
+import 'package:pulse/presentation/screens/patient/patient_home_screen.dart';
 import 'package:pulse/presentation/screens/staff/staff_dashboard_screen.dart';
 import 'package:pulse/presentation/screens/admin/admin_dashboard_screen.dart';
 import 'package:pulse/presentation/screens/doctor/doctor_dashboard_screen.dart';
@@ -67,7 +67,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 target = const DoctorDashboardScreen();
                 break;
               case UserType.patient:
-                target = const HomeScreen();
+                target = const PatientHomeScreen();
                 break;
             }
 
@@ -108,7 +108,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               target = const DoctorDashboardScreen();
               break;
             case UserType.patient:
-              target = const HomeScreen();
+              target = const PatientHomeScreen();
               break;
           }
 

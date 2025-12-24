@@ -1,7 +1,8 @@
 // lib/presentation/screens/patient/hospital_list_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:pulse/core/constants/app_colors.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:pulse/core/theme/app_colors.dart';
 import 'package:pulse/data/models/hospital_model.dart';
 import 'package:pulse/presentation/providers/hospital_provider.dart';
 import 'package:pulse/presentation/screens/patient/hospital_detail_screen.dart';
@@ -39,314 +40,346 @@ class _HospitalListScreenState extends ConsumerState<HospitalListScreen> {
     final hospitalsAsync = ref.watch(hospitalsStreamProvider);
 
     return Scaffold(
+      backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text('Find Hospitals'),
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(120),
-          child: Container(
-            padding: const EdgeInsets.all(16),
-            color: AppColors.primary,
+        elevation: 0,
+        backgroundColor: Colors.white,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: AppColors.darkText),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: Text(
+          'Find Hospitals',
+          style: GoogleFonts.dmSans(
+            color: AppColors.darkText,
+            fontWeight: FontWeight.w600,
+            fontSize: 18,
+          ),
+        ),
+      ),
+      body: Column(
+        children: [
+          // Search and Filters Section
+          Container(
+            color: Colors.white,
+            padding: const EdgeInsets.fromLTRB(24, 16, 24, 20),
             child: Column(
               children: [
                 // Search Bar
-                TextField(
-                  onChanged: (value) {
-                    setState(() => _searchQuery = value.toLowerCase());
-                  },
-                  style: const TextStyle(color: Colors.white),
-                  decoration: InputDecoration(
-                    hintText: 'Search hospitals...',
-                    hintStyle: TextStyle(color: Colors.white.withOpacity(0.7)),
-                    prefixIcon: const Icon(Icons.search, color: Colors.white),
-                    filled: true,
-                    fillColor: Colors.white.withOpacity(0.2),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none,
+                Container(
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: AppColors.background,
+                    borderRadius: BorderRadius.circular(24),
+                    border: Border.all(color: Colors.grey.shade300),
+                  ),
+                  child: TextField(
+                    onChanged: (value) {
+                      setState(() => _searchQuery = value.toLowerCase());
+                    },
+                    decoration: InputDecoration(
+                      hintText: 'Search hospital, services...',
+                      hintStyle: GoogleFonts.dmSans(
+                        color: AppColors.darkText.withOpacity(0.5),
+                        fontSize: 14,
+                      ),
+                      prefixIcon: Icon(
+                        Icons.search,
+                        color: AppColors.darkText.withOpacity(0.5),
+                      ),
+                      border: InputBorder.none,
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                     ),
                   ),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 16),
                 
                 // Filter Chips
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: ['All', 'public', 'private', 'specialty'].map((type) {
-                      final isSelected = _filterType == type;
-                      return Padding(
-                        padding: const EdgeInsets.only(right: 8),
-                        child: FilterChip(
-                          label: Text(type == 'All' ? type : type.toUpperCase()),
-                          selected: isSelected,
-                          onSelected: (selected) {
-                            setState(() => _filterType = type);
-                          },
-                          backgroundColor: Colors.white,
-                          selectedColor: Colors.white,
-                          side: BorderSide(color: isSelected ? AppColors.primary : Colors.grey.shade300),
-                          labelStyle: TextStyle(
-                            color: isSelected ? AppColors.primary : AppColors.textPrimary,
-                            fontWeight: FontWeight.w600,
+                Row(
+                  children: ['All', 'Public', 'Private', 'Specialty'].map((type) {
+                    final isSelected = _filterType == type;
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: GestureDetector(
+                        onTap: () {
+                          setState(() => _filterType = type);
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                          decoration: BoxDecoration(
+                            color: isSelected ? AppColors.darkText : Colors.white,
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
+                              color: isSelected ? AppColors.darkText : Colors.grey.shade300,
+                            ),
+                          ),
+                          child: Text(
+                            type,
+                            style: GoogleFonts.dmSans(
+                              color: isSelected ? Colors.white : AppColors.darkText,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 13,
+                            ),
                           ),
                         ),
-                      );
-                    }).toList(),
-                  ),
+                      ),
+                    );
+                  }).toList(),
                 ),
               ],
             ),
           ),
-        ),
-      ),
-      body: hospitalsAsync.when(
-        data: (hospitals) {
-          // Filter hospitals
-          var filteredHospitals = hospitals.where((hospital) {
-            final matchesSearch = hospital.name.toLowerCase().contains(_searchQuery) ||
-                hospital.address.toLowerCase().contains(_searchQuery);
-            final matchesType = _filterType == 'All' || hospital.type == _filterType;
-            return matchesSearch && matchesType;
-          }).toList();
+          // Hospital List
+          Expanded(
+            child: hospitalsAsync.when(
+              data: (hospitals) {
+                // Filter hospitals
+                var filteredHospitals = hospitals.where((hospital) {
+                  final matchesSearch = hospital.name.toLowerCase().contains(_searchQuery) ||
+                      hospital.address.toLowerCase().contains(_searchQuery);
+                  
+                  String typeFilter = _filterType.toLowerCase();
+                  if (typeFilter == 'all') {
+                    return matchesSearch;
+                  }
+                  
+                  final matchesType = hospital.type.toLowerCase() == typeFilter;
+                  return matchesSearch && matchesType;
+                }).toList();
 
-          if (filteredHospitals.isEmpty) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.search_off,
-                    size: 80,
-                    color: Colors.grey.shade300,
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'No hospitals found',
-                    style: TextStyle(
-                      fontSize: 18,
-                      color: Colors.grey.shade600,
-                    ),
-                  ),
-                ],
-              ),
-            );
-          }
-
-          return ListView.builder(
-            padding: const EdgeInsets.all(16),
-            itemCount: filteredHospitals.length,
-            itemBuilder: (context, index) {
-              final hospital = filteredHospitals[index];
-              return Card(
-                margin: const EdgeInsets.only(bottom: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: InkWell(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => HospitalDetailScreen(hospital: hospital),
-                      ),
-                    );
-                  },
-                  borderRadius: BorderRadius.circular(12),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
+                if (filteredHospitals.isEmpty) {
+                  return Center(
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Row(
-                          children: [
-                            Container(
-                              width: 50,
-                              height: 50,
-                              decoration: BoxDecoration(
-                                color: AppColors.primary.withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(10),
-                                child: _getHospitalImage(hospital) != null
-                                    ? Image.network(
-                                        _getHospitalImage(hospital)!,
-                                        width: 50,
-                                        height: 50,
-                                        fit: BoxFit.cover,
-                                        errorBuilder: (context, error, stackTrace) => const Icon(
-                                          Icons.local_hospital,
-                                          color: AppColors.primary,
-                                          size: 28,
-                                        ),
-                                      )
-                                    : const Icon(
-                                        Icons.local_hospital,
-                                        color: AppColors.primary,
-                                        size: 28,
-                                      ),
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    hospital.name,
-                                    style: const TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    hospital.type.toUpperCase(),
-                                    style: const TextStyle(
-                                      fontSize: 11,
-                                      color: AppColors.textSecondary,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 4,
-                              ),
-                              decoration: BoxDecoration(
-                                color: hospital.status.isOperational
-                                    ? AppColors.success.withOpacity(0.1)
-                                    : AppColors.error.withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Text(
-                                hospital.status.isOperational ? 'Open' : 'Closed',
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w600,
-                                  color: hospital.status.isOperational
-                                      ? AppColors.success
-                                      : AppColors.error,
-                                ),
-                              ),
-                            ),
-                          ],
+                        Icon(
+                          Icons.search_off,
+                          size: 80,
+                          color: AppColors.darkText.withOpacity(0.2),
                         ),
-                        const SizedBox(height: 12),
-                        Row(
-                          children: [
-                            const Icon(
-                              Icons.location_on,
-                              size: 14,
-                              color: AppColors.textSecondary,
-                            ),
-                            const SizedBox(width: 4),
-                            Expanded(
-                              child: Text(
-                                hospital.address,
-                                style: const TextStyle(
-                                  fontSize: 13,
-                                  color: AppColors.textSecondary,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                        Row(
-                          children: [
-                            const Icon(
-                              Icons.phone,
-                              size: 14,
-                              color: AppColors.textSecondary,
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              hospital.phone,
-                              style: const TextStyle(
-                                fontSize: 13,
-                                color: AppColors.textSecondary,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 12),
-                        const Divider(),
-                        const SizedBox(height: 8),
-                        Row(
-                          children: [
-                            _buildStatusChip(
-                              'ICU: ${hospital.status.icuAvailable}/${hospital.status.icuTotal}',
-                              hospital.status.icuAvailable > 0
-                                  ? AppColors.success
-                                  : AppColors.error,
-                            ),
-                            const SizedBox(width: 8),
-                            _buildStatusChip(
-                              'ER: ${hospital.status.erAvailable}/${hospital.status.erTotal}',
-                              hospital.status.erAvailable > 0
-                                  ? AppColors.success
-                                  : AppColors.error,
-                            ),
-                            const SizedBox(width: 8),
-                            _buildStatusChip(
-                              'Ward: ${hospital.status.wardAvailable}/${hospital.status.wardTotal}',
-                              hospital.status.wardAvailable > 0
-                                  ? AppColors.success
-                                  : AppColors.error,
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                        Row(
-                          children: [
-                            const Icon(
-                              Icons.access_time,
-                              size: 14,
-                              color: AppColors.textSecondary,
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              'Wait time: ${hospital.status.waitTimeMinutes} min',
-                              style: const TextStyle(
-                                fontSize: 12,
-                                color: AppColors.textSecondary,
-                              ),
-                            ),
-                          ],
+                        const SizedBox(height: 16),
+                        Text(
+                          'No hospitals found',
+                          style: GoogleFonts.dmSans(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.darkText.withOpacity(0.5),
+                          ),
                         ),
                       ],
                     ),
-                  ),
+                  );
+                }
+
+                return ListView.builder(
+                  padding: const EdgeInsets.all(24),
+                  itemCount: filteredHospitals.length,
+                  itemBuilder: (context, index) {
+                    final hospital = filteredHospitals[index];
+                    return _buildHospitalCard(context, hospital);
+                  },
+                );
+              },
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (error, _) => Center(
+                child: Text(
+                  'Error loading hospitals',
+                  style: GoogleFonts.dmSans(color: AppColors.error),
                 ),
-              );
-            },
-          );
-        },
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => Center(child: Text('Error: $error')),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildStatusChip(String label, Color color) {
+  Widget _buildHospitalCard(BuildContext context, HospitalModel hospital) {
+    final icuOccupancy = hospital.status.icuTotal > 0 ? hospital.status.icuOccupied / hospital.status.icuTotal : 0.0;
+    final erOccupancy = hospital.status.erTotal > 0 ? hospital.status.erOccupied / hospital.status.erTotal : 0.0;
+    final wardOccupancy = hospital.status.wardTotal > 0 ? hospital.status.wardOccupied / hospital.status.wardTotal : 0.0;
+
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(8),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
-      child: Text(
-        label,
-        style: TextStyle(
-          fontSize: 11,
-          fontWeight: FontWeight.w600,
-          color: color,
+      child: InkWell(
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => HospitalDetailScreen(hospital: hospital),
+            ),
+          );
+        },
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  width: 56,
+                  height: 56,
+                  decoration: BoxDecoration(
+                    color: AppColors.background,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: _getHospitalImage(hospital) != null
+                        ? Image.network(
+                            _getHospitalImage(hospital)!,
+                            width: 56,
+                            height: 56,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) => const Icon(
+                              Icons.local_hospital,
+                              color: AppColors.primary,
+                              size: 28,
+                            ),
+                          )
+                        : const Icon(
+                            Icons.local_hospital,
+                            color: AppColors.primary,
+                            size: 28,
+                          ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        hospital.name,
+                        style: GoogleFonts.dmSans(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.darkText,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        hospital.address,
+                        style: GoogleFonts.dmSans(
+                          fontSize: 12,
+                          color: AppColors.darkText.withOpacity(0.6),
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: hospital.type == 'public' 
+                            ? Colors.transparent
+                            : Colors.transparent,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: hospital.type == 'public' ? AppColors.success : AppColors.warning,
+                          width: 1.5,
+                        ),
+                      ),
+                      child: Text(
+                        hospital.type == 'public' ? 'Open' : 'Private',
+                        style: GoogleFonts.dmSans(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          color: hospital.type == 'public' ? AppColors.success : AppColors.warning,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '30 min wait',
+                      style: GoogleFonts.dmSans(
+                        fontSize: 11,
+                        color: AppColors.primary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            _buildOccupancyBar('ICU', icuOccupancy, hospital.status.icuOccupied, hospital.status.icuTotal),
+            const SizedBox(height: 8),
+            _buildOccupancyBar('ER', erOccupancy, hospital.status.erOccupied, hospital.status.erTotal),
+            const SizedBox(height: 8),
+            _buildOccupancyBar('Ward', wardOccupancy, hospital.status.wardOccupied, hospital.status.wardTotal),
+          ],
         ),
       ),
+    );
+  }
+
+  Widget _buildOccupancyBar(String label, double occupancy, int occupied, int total) {
+    return Row(
+      children: [
+        SizedBox(
+          width: 40,
+          child: Text(
+            label,
+            style: GoogleFonts.dmSans(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: AppColors.darkText,
+            ),
+          ),
+        ),
+        Expanded(
+          child: Stack(
+            children: [
+              Container(
+                height: 8,
+                decoration: BoxDecoration(
+                  color: AppColors.background,
+                  borderRadius: BorderRadius.circular(4),
+                ),
+              ),
+              FractionallySizedBox(
+                widthFactor: occupancy.clamp(0.0, 1.0),
+                child: Container(
+                  height: 8,
+                  decoration: BoxDecoration(
+                    color: AppColors.primary,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(width: 8),
+        SizedBox(
+          width: 45,
+          child: Text(
+            '$occupied/$total',
+            style: GoogleFonts.dmSans(
+              fontSize: 11,
+              color: AppColors.darkText.withOpacity(0.6),
+            ),
+            textAlign: TextAlign.end,
+          ),
+        ),
+      ],
     );
   }
 }

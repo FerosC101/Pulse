@@ -8,7 +8,7 @@ import '../../../services/auth_service.dart';
 import '../../../data/models/user_type.dart';
 import '../../widgets/custom_button.dart';
 import '../../widgets/custom_text_field.dart';
-import '../home/home_screen.dart';
+import '../patient/patient_home_screen.dart';
 import '../doctor/doctor_dashboard_screen.dart';
 import '../staff/staff_dashboard_screen.dart';
 import '../admin/admin_dashboard_screen.dart';
@@ -218,7 +218,7 @@ class _RegisterPageState extends State<RegisterPage> {
         Widget dashboard;
         switch (widget.userRole) {
           case AppConstants.rolePatient:
-            dashboard = const HomeScreen();
+            dashboard = const PatientHomeScreen();
             break;
           case AppConstants.roleDoctor:
             dashboard = const DoctorDashboardScreen();
@@ -230,7 +230,7 @@ class _RegisterPageState extends State<RegisterPage> {
             dashboard = const AdminDashboardScreen();
             break;
           default:
-            dashboard = const HomeScreen();
+            dashboard = const PatientHomeScreen();
         }
 
         Navigator.of(context).pushAndRemoveUntil(

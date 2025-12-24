@@ -5,7 +5,7 @@ import '../../../services/auth_service.dart';
 import '../../../data/models/user_type.dart';
 import '../../widgets/custom_button.dart';
 import '../../widgets/custom_text_field.dart';
-import '../home/home_screen.dart';
+import '../patient/patient_home_screen.dart';
 import '../doctor/doctor_dashboard_screen.dart';
 import '../staff/staff_dashboard_screen.dart';
 import '../admin/admin_dashboard_screen.dart';
@@ -86,7 +86,7 @@ class _LoginPageState extends State<LoginPage> {
         Widget dashboard;
         switch (userModel.userType) {
           case UserType.patient:
-            dashboard = const HomeScreen();
+            dashboard = const PatientHomeScreen();
             break;
           case UserType.doctor:
             dashboard = const DoctorDashboardScreen();
@@ -98,7 +98,7 @@ class _LoginPageState extends State<LoginPage> {
             dashboard = const AdminDashboardScreen();
             break;
           default:
-            dashboard = const HomeScreen();
+            dashboard = const PatientHomeScreen();
         }
 
         Navigator.of(context).pushAndRemoveUntil(
