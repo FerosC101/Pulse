@@ -13,6 +13,7 @@ import 'package:pulse/core/constants/app_colors.dart';
 import 'package:pulse/data/models/hospital_model.dart';
 import 'package:pulse/presentation/providers/hospital_provider.dart';
 import 'package:pulse/presentation/screens/patient/hospital_detail_screen.dart';
+import 'package:pulse/presentation/screens/patient/find_doctor_screen.dart';
 
 class HospitalMapScreen extends ConsumerStatefulWidget {
   final bool isEmergencyMode;
@@ -1297,6 +1298,63 @@ class _HospitalMapScreenState extends ConsumerState<HospitalMapScreen> {
                   ),
                 ),
               ],
+            ),
+            const SizedBox(height: 12),
+            
+            // Book Appointment Button
+            Container(
+              width: double.infinity,
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [Color(0xFF4CAF50), Color(0xFF2E7D32)],
+                ),
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF4CAF50).withOpacity(0.3),
+                    blurRadius: 8,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => FindDoctorScreen(hospital: hospital),
+                      ),
+                    );
+                  },
+                  borderRadius: BorderRadius.circular(12),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(
+                          Icons.calendar_today,
+                          size: 20,
+                          color: Colors.white,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Book Appointment',
+                          style: GoogleFonts.dmSans(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
             ),
           ],
         ),

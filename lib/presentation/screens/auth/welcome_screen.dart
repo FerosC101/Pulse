@@ -31,8 +31,8 @@ class WelcomeScreen extends StatelessWidget {
                 const Spacer(),
                 
                 Image.asset(
-                  'assets/images/logo_pulse.png',
-                  width: 100,
+                  'assets/images/pulse-solid-red.png',
+                  width: 200,
                   height: 100,
                   fit: BoxFit.contain,
                   errorBuilder: (context, error, stackTrace) => const Icon(

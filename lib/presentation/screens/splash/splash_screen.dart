@@ -22,14 +22,20 @@ class SplashScreen extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(
-                Icons.local_hospital_rounded,
-                size: 100,
-                color: Colors.white,
+              Image.asset(
+                'assets/images/pulse-solid-red.png',
+                width: 250,
+                height: 120,
+                fit: BoxFit.contain,
+                errorBuilder: (context, error, stackTrace) => const Icon(
+                  Icons.local_hospital_rounded,
+                  size: 100,
+                  color: Colors.white,
+                ),
               ),
               const SizedBox(height: 24),
               const Text(
-                'MedMap AI',
+                'PULSE',
                 style: TextStyle(
                   fontSize: 40,
                   fontWeight: FontWeight.bold,

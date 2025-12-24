@@ -10,6 +10,7 @@ import 'package:pulse/presentation/screens/patient/patient_appointments_screen.d
 import 'package:pulse/presentation/screens/patient/medical_records_screen.dart';
 import 'package:pulse/presentation/screens/patient/patient_profile_screen.dart';
 import 'package:pulse/presentation/screens/ai/ai_chat_screen.dart';
+import 'package:pulse/presentation/screens/map/hospital_map_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -25,7 +26,7 @@ class _PatientHomeScreenState extends ConsumerState<PatientHomeScreen> {
 
   final List<Widget> _screens = const [
     _HomePage(),
-    _MapPage(),
+    HospitalMapScreen(),
     AIChatScreen(),
     MedicalRecordsScreen(),
     PatientProfileScreen(),
@@ -713,52 +714,7 @@ class _HomePage extends ConsumerWidget {
 }
 
 // Placeholder pages for other tabs
-class _MapPage extends StatelessWidget {
-  const _MapPage();
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        title: Text(
-          'Map View',
-          style: GoogleFonts.dmSans(
-            color: AppColors.darkText,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        backgroundColor: Colors.white,
-        elevation: 0,
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.map, size: 80, color: AppColors.primary.withOpacity(0.5)),
-            const SizedBox(height: 16),
-            Text(
-              'Map View',
-              style: GoogleFonts.dmSans(
-                fontSize: 20,
-                fontWeight: FontWeight.w600,
-                color: AppColors.darkText,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Coming Soon',
-              style: GoogleFonts.dmSans(
-                fontSize: 14,
-                color: AppColors.darkText.withOpacity(0.6),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
+// Map page is now using HospitalMapScreen directly
 
 class _ChatbotPage extends StatelessWidget {
   const _ChatbotPage();

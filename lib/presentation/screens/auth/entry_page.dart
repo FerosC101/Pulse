@@ -55,54 +55,18 @@ class EntryPage extends StatelessWidget {
   Widget _buildLogo(BuildContext context) {
     return Container(
       height: 200,
-      width: 200,
+      width: 300,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
       ),
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          // Gradient wave background
-          CustomPaint(
-            size: const Size(200, 200),
-            painter: WavePainter(),
-          ),
-          // Logo icon representation (pulse wave)
-          Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                    width: 12,
-                    height: 12,
-                    decoration: const BoxDecoration(
-                      color: AppColors.darkText,
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Container(
-                    width: 12,
-                    height: 12,
-                    decoration: const BoxDecoration(
-                      color: AppColors.primary,
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              // Wave icon
-              Icon(
-                Icons.graphic_eq,
-                size: 80,
-                color: AppColors.primary.withOpacity(0.8),
-              ),
-            ],
-          ),
-        ],
+      child: Image.asset(
+        'assets/images/pulse-solid-red.png',
+        fit: BoxFit.contain,
+        errorBuilder: (context, error, stackTrace) => Icon(
+          Icons.graphic_eq,
+          size: 120,
+          color: AppColors.primary,
+        ),
       ),
     );
   }

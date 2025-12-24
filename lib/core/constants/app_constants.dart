@@ -1,7 +1,7 @@
 /// App-wide constants
 class AppConstants {
   // Asset paths
-  static const String logoPath = 'assets/updated/sample logo.png';
+  static const String logoPath = 'assets/images/pulse-solid-red.png';
   static const String assetsDir = 'assets/updated/';
 
   // Route names
