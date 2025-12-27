@@ -1,6 +1,7 @@
 // lib/presentation/screens/staff/widgets/patient_admission_dialog.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:pulse/core/constants/app_colors.dart';
 import 'package:pulse/data/models/patient_model.dart';
 import 'package:pulse/presentation/providers/patient_provider.dart';
@@ -65,8 +66,11 @@ class _PatientAdmissionDialogState extends ConsumerState<PatientAdmissionDialog>
       if (mounted) {
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Patient admitted successfully'),
+          SnackBar(
+            content: Text(
+              'Patient admitted successfully',
+              style: GoogleFonts.dmSans(),
+            ),
             backgroundColor: AppColors.success,
           ),
         );
@@ -75,7 +79,10 @@ class _PatientAdmissionDialogState extends ConsumerState<PatientAdmissionDialog>
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error: $e'),
+            content: Text(
+              'Error: $e',
+              style: GoogleFonts.dmSans(),
+            ),
             backgroundColor: AppColors.error,
           ),
         );
@@ -90,54 +97,77 @@ class _PatientAdmissionDialogState extends ConsumerState<PatientAdmissionDialog>
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      backgroundColor: Colors.transparent,
+      insetPadding: const EdgeInsets.symmetric(horizontal: 32, vertical: 40),
       child: Container(
-        constraints: const BoxConstraints(maxWidth: 600, maxHeight: 700),
+        width: MediaQuery.of(context).size.width,
+        constraints: const BoxConstraints(maxWidth: 500, maxHeight: 700),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            // Header
             Container(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
               decoration: const BoxDecoration(
-                color: AppColors.primary,
+                color: Colors.white,
                 borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(16),
-                  topRight: Radius.circular(16),
+                  topLeft: Radius.circular(20),
+                  topRight: Radius.circular(20),
                 ),
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.person_add, color: Colors.white),
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: const Icon(
+                      Icons.person_add,
+                      color: AppColors.primary,
+                      size: 24,
+                    ),
+                  ),
                   const SizedBox(width: 12),
-                  const Text(
+                  Text(
                     'Admit Patient',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
+                    style: GoogleFonts.dmSans(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.darkNavy,
                     ),
                   ),
                   const Spacer(),
                   IconButton(
-                    icon: const Icon(Icons.close, color: Colors.white),
+                    icon: const Icon(Icons.close, color: AppColors.darkNavy),
                     onPressed: () => Navigator.pop(context),
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
                   ),
                 ],
               ),
             ),
+            const Divider(height: 1),
+            // Form Content
             Expanded(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.all(20),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
                 child: Form(
                   key: _formKey,
                   child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      TextFormField(
+                      _buildInputField(
+                        label: 'Patient Name',
+                        hint: 'Enter patient name',
                         controller: _nameController,
-                        decoration: const InputDecoration(
-                          labelText: 'Patient Name',
-                          prefixIcon: Icon(Icons.person),
-                        ),
+                        icon: Icons.person_outline,
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             return 'Please enter patient name';
@@ -147,14 +177,14 @@ class _PatientAdmissionDialogState extends ConsumerState<PatientAdmissionDialog>
                       ),
                       const SizedBox(height: 16),
                       Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Expanded(
-                            child: TextFormField(
+                            child: _buildInputField(
+                              label: 'Age',
+                              hint: 'Age',
                               controller: _ageController,
-                              decoration: const InputDecoration(
-                                labelText: 'Age',
-                                prefixIcon: Icon(Icons.cake),
-                              ),
+                              icon: Icons.cake_outlined,
                               keyboardType: TextInputType.number,
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
@@ -164,20 +194,13 @@ class _PatientAdmissionDialogState extends ConsumerState<PatientAdmissionDialog>
                               },
                             ),
                           ),
-                          const SizedBox(width: 16),
+                          const SizedBox(width: 6),
                           Expanded(
-                            child: DropdownButtonFormField<String>(
-                              initialValue: _selectedGender,
-                              decoration: const InputDecoration(
-                                labelText: 'Gender',
-                                prefixIcon: Icon(Icons.wc),
-                              ),
-                              items: ['Male', 'Female', 'Other'].map((gender) {
-                                return DropdownMenuItem(
-                                  value: gender,
-                                  child: Text(gender),
-                                );
-                              }).toList(),
+                            child: _buildDropdownField(
+                              label: 'Gender',
+                              value: _selectedGender,
+                              icon: Icons.wc_outlined,
+                              items: ['Male', 'Female', 'Other'],
                               onChanged: (value) {
                                 setState(() => _selectedGender = value!);
                               },
@@ -186,26 +209,23 @@ class _PatientAdmissionDialogState extends ConsumerState<PatientAdmissionDialog>
                         ],
                       ),
                       const SizedBox(height: 16),
-                      DropdownButtonFormField<String>(
-                        initialValue: _selectedBloodType,
-                        decoration: const InputDecoration(
-                          labelText: 'Blood Type (Optional)',
-                          prefixIcon: Icon(Icons.bloodtype),
-                        ),
-                        items: _bloodTypes.map((type) {
-                          return DropdownMenuItem(value: type, child: Text(type));
-                        }).toList(),
+                      _buildDropdownField(
+                        label: 'Blood Type',
+                        value: _selectedBloodType,
+                        icon: Icons.bloodtype_outlined,
+                        items: [null, ..._bloodTypes],
+                        itemLabels: ['Not specified', ..._bloodTypes],
                         onChanged: (value) {
                           setState(() => _selectedBloodType = value);
                         },
+                        isRequired: false,
                       ),
                       const SizedBox(height: 16),
-                      TextFormField(
+                      _buildInputField(
+                        label: 'Condition',
+                        hint: 'e.g., Pneumonia, Fracture',
                         controller: _conditionController,
-                        decoration: const InputDecoration(
-                          labelText: 'Condition',
-                          prefixIcon: Icon(Icons.medical_information),
-                        ),
+                        icon: Icons.medical_information_outlined,
                         maxLines: 2,
                         validator: (value) {
                           if (value == null || value.isEmpty) {
@@ -216,30 +236,26 @@ class _PatientAdmissionDialogState extends ConsumerState<PatientAdmissionDialog>
                       ),
                       const SizedBox(height: 16),
                       Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Expanded(
-                            child: DropdownButtonFormField<String>(
-                              initialValue: _selectedDepartment,
-                              decoration: const InputDecoration(
-                                labelText: 'Department',
-                                prefixIcon: Icon(Icons.apartment),
-                              ),
-                              items: _departments.map((dept) {
-                                return DropdownMenuItem(value: dept, child: Text(dept));
-                              }).toList(),
+                            child: _buildDropdownField(
+                              label: 'Department',
+                              value: _selectedDepartment,
+                              icon: Icons.local_hospital_outlined,
+                              items: _departments,
                               onChanged: (value) {
                                 setState(() => _selectedDepartment = value!);
                               },
                             ),
                           ),
-                          const SizedBox(width: 16),
+                          const SizedBox(width: 6),
                           Expanded(
-                            child: TextFormField(
+                            child: _buildInputField(
+                              label: 'Bed #',
+                              hint: 'e.g., 101',
                               controller: _bedNumberController,
-                              decoration: const InputDecoration(
-                                labelText: 'Bed Number',
-                                prefixIcon: Icon(Icons.bed),
-                              ),
+                              icon: Icons.bed_outlined,
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
                                   return 'Required';
@@ -251,41 +267,81 @@ class _PatientAdmissionDialogState extends ConsumerState<PatientAdmissionDialog>
                         ],
                       ),
                       const SizedBox(height: 16),
-                      TextFormField(
+                      _buildInputField(
+                        label: 'Notes (Optional)',
+                        hint: 'Additional notes...',
                         controller: _notesController,
-                        decoration: const InputDecoration(
-                          labelText: 'Notes (Optional)',
-                          prefixIcon: Icon(Icons.note),
-                        ),
+                        icon: Icons.note_outlined,
                         maxLines: 3,
+                        isRequired: false,
                       ),
                     ],
                   ),
                 ),
               ),
             ),
+            // Footer Buttons
             Container(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                border: Border(top: BorderSide(color: Colors.grey.shade200)),
+                color: Colors.grey[50],
+                borderRadius: const BorderRadius.only(
+                  bottomLeft: Radius.circular(20),
+                  bottomRight: Radius.circular(20),
+                ),
               ),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  TextButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: const Text('Cancel'),
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: _isLoading ? null : () => Navigator.pop(context),
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        side: BorderSide(color: Colors.grey[300]!),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: Text(
+                        'Cancel',
+                        style: GoogleFonts.dmSans(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.darkNavy,
+                        ),
+                      ),
+                    ),
                   ),
                   const SizedBox(width: 12),
-                  ElevatedButton(
-                    onPressed: _isLoading ? null : _admitPatient,
-                    child: _isLoading
-                        ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : const Text('Admit Patient'),
+                  Expanded(
+                    flex: 2,
+                    child: ElevatedButton(
+                      onPressed: _isLoading ? null : _admitPatient,
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        backgroundColor: AppColors.darkNavy,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: _isLoading
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                              ),
+                            )
+                          : Text(
+                              'Admit Patient',
+                              style: GoogleFonts.dmSans(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.white,
+                              ),
+                            ),
+                    ),
                   ),
                 ],
               ),
@@ -293,6 +349,123 @@ class _PatientAdmissionDialogState extends ConsumerState<PatientAdmissionDialog>
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildInputField({
+    required String label,
+    required String hint,
+    required TextEditingController controller,
+    required IconData icon,
+    TextInputType? keyboardType,
+    int maxLines = 1,
+    String? Function(String?)? validator,
+    bool isRequired = true,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          isRequired ? '$label*' : label,
+          style: GoogleFonts.dmSans(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            color: AppColors.darkNavy,
+          ),
+        ),
+        const SizedBox(height: 8),
+        TextFormField(
+          controller: controller,
+          keyboardType: keyboardType,
+          maxLines: maxLines,
+          style: GoogleFonts.dmSans(fontSize: 15),
+          decoration: InputDecoration(
+            hintText: hint,
+            hintStyle: GoogleFonts.dmSans(
+              fontSize: 15,
+              color: Colors.grey[400],
+            ),
+            prefixIcon: Icon(icon, color: AppColors.darkNavy.withOpacity(0.6), size: 20),
+            filled: true,
+            fillColor: Colors.grey[50],
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: Colors.grey[300]!),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: Colors.grey[300]!),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: AppColors.primary, width: 2),
+            ),
+            errorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: AppColors.error),
+            ),
+          ),
+          validator: validator,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDropdownField<T>({
+    required String label,
+    required T value,
+    required IconData icon,
+    required List<T> items,
+    List<String>? itemLabels,
+    required void Function(T?) onChanged,
+    bool isRequired = true,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          isRequired ? '$label*' : label,
+          style: GoogleFonts.dmSans(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            color: AppColors.darkNavy,
+          ),
+        ),
+        const SizedBox(height: 8),
+        DropdownButtonFormField<T>(
+          value: value,
+          style: GoogleFonts.dmSans(fontSize: 15, color: AppColors.darkNavy),
+          decoration: InputDecoration(
+            prefixIcon: Icon(icon, color: AppColors.darkNavy.withOpacity(0.6), size: 20),
+            filled: true,
+            fillColor: Colors.grey[50],
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: Colors.grey[300]!),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: Colors.grey[300]!),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: AppColors.primary, width: 2),
+            ),
+          ),
+          items: items.asMap().entries.map((entry) {
+            final index = entry.key;
+            final item = entry.value;
+            final displayText = itemLabels != null ? itemLabels[index] : item.toString();
+            return DropdownMenuItem<T>(
+              value: item,
+              child: Text(displayText),
+            );
+          }).toList(),
+          onChanged: onChanged,
+        ),
+      ],
     );
   }
 }

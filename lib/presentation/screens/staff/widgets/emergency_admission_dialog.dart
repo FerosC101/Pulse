@@ -1,6 +1,7 @@
 // lib/presentation/screens/staff/widgets/emergency_admission_dialog.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:pulse/core/constants/app_colors.dart';
 import 'package:pulse/data/models/patient_model.dart';
 import 'package:pulse/presentation/providers/patient_provider.dart';
@@ -61,8 +62,11 @@ class _EmergencyAdmissionDialogState extends ConsumerState<EmergencyAdmissionDia
       if (mounted) {
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Emergency patient admitted successfully'),
+          SnackBar(
+            content: Text(
+              'Emergency patient admitted successfully',
+              style: GoogleFonts.dmSans(),
+            ),
             backgroundColor: AppColors.success,
           ),
         );
@@ -71,7 +75,10 @@ class _EmergencyAdmissionDialogState extends ConsumerState<EmergencyAdmissionDia
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error: $e'),
+            content: Text(
+              'Error: $e',
+              style: GoogleFonts.dmSans(),
+            ),
             backgroundColor: AppColors.error,
           ),
         );
@@ -86,65 +93,77 @@ class _EmergencyAdmissionDialogState extends ConsumerState<EmergencyAdmissionDia
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      backgroundColor: Colors.transparent,
+      insetPadding: const EdgeInsets.symmetric(horizontal: 32, vertical: 40),
       child: Container(
-        constraints: const BoxConstraints(maxWidth: 600, maxHeight: 700),
+        width: MediaQuery.of(context).size.width,
+        constraints: const BoxConstraints(maxWidth: 500, maxHeight: 700),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            // Header with Emergency styling
             Container(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
               decoration: const BoxDecoration(
-                color: AppColors.error,
+                color: Colors.white,
                 borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(16),
-                  topRight: Radius.circular(16),
+                  topLeft: Radius.circular(20),
+                  topRight: Radius.circular(20),
                 ),
               ),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
-                    'Emergency Admission',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: AppColors.error.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: const Icon(
+                      Icons.emergency,
+                      color: AppColors.error,
+                      size: 24,
                     ),
                   ),
+                  const SizedBox(width: 12),
+                  Text(
+                    'Emergency Admission',
+                    style: GoogleFonts.dmSans(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.darkNavy,
+                    ),
+                  ),
+                  const Spacer(),
                   IconButton(
+                    icon: const Icon(Icons.close, color: AppColors.darkNavy),
                     onPressed: () => Navigator.pop(context),
-                    icon: const Icon(Icons.close, color: Colors.white),
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
                   ),
                 ],
               ),
             ),
+            const Divider(height: 1),
+            // Form Content
             Expanded(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.all(20),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
                 child: Form(
                   key: _formKey,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'Patient Information',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      TextFormField(
+                      _buildInputField(
+                        label: 'Patient Name',
+                        hint: 'Enter patient name',
                         controller: _nameController,
-                        decoration: InputDecoration(
-                          labelText: 'Full Name*',
-                          hintText: 'Enter patient full name',
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                        ),
+                        icon: Icons.person_outline,
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             return 'Please enter patient name';
@@ -152,45 +171,35 @@ class _EmergencyAdmissionDialogState extends ConsumerState<EmergencyAdmissionDia
                           return null;
                         },
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 16),
                       Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Expanded(
-                            child: TextFormField(
+                            child: _buildInputField(
+                              label: 'Age',
+                              hint: 'Age',
                               controller: _ageController,
+                              icon: Icons.cake_outlined,
                               keyboardType: TextInputType.number,
-                              decoration: InputDecoration(
-                                labelText: 'Age*',
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                              ),
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
-                                  return 'Please enter age';
+                                  return 'Required';
                                 }
                                 if (int.tryParse(value) == null) {
-                                  return 'Please enter a valid age';
+                                  return 'Invalid';
                                 }
                                 return null;
                               },
                             ),
                           ),
-                          const SizedBox(width: 12),
+                          const SizedBox(width: 6),
                           Expanded(
-                            child: DropdownButtonFormField<String>(
+                            child: _buildDropdownField(
+                              label: 'Gender',
                               value: _selectedGender,
-                              decoration: InputDecoration(
-                                labelText: 'Gender*',
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                              ),
-                              items: ['Male', 'Female', 'Other'].map((gender) {
-                                return DropdownMenuItem(value: gender, child: Text(gender));
-                              }).toList(),
+                              icon: Icons.wc_outlined,
+                              items: ['Male', 'Female', 'Other'],
                               onChanged: (value) {
                                 setState(() => _selectedGender = value!);
                               },
@@ -198,37 +207,25 @@ class _EmergencyAdmissionDialogState extends ConsumerState<EmergencyAdmissionDia
                           ),
                         ],
                       ),
-                      const SizedBox(height: 12),
-                      DropdownButtonFormField<String?>(
+                      const SizedBox(height: 16),
+                      _buildDropdownField(
+                        label: 'Blood Type',
                         value: _selectedBloodType,
-                        decoration: InputDecoration(
-                          labelText: 'Blood Type',
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                        ),
-                        items: [null, ..._bloodTypes].map((type) {
-                          return DropdownMenuItem(
-                            value: type,
-                            child: Text(type ?? 'Not specified'),
-                          );
-                        }).toList(),
+                        icon: Icons.bloodtype_outlined,
+                        items: [null, ..._bloodTypes],
+                        itemLabels: ['Not specified', ..._bloodTypes],
                         onChanged: (value) {
                           setState(() => _selectedBloodType = value);
                         },
+                        isRequired: false,
                       ),
-                      const SizedBox(height: 12),
-                      TextFormField(
+                      const SizedBox(height: 16),
+                      _buildInputField(
+                        label: 'Emergency Condition',
+                        hint: 'Describe the emergency condition',
                         controller: _conditionController,
-                        decoration: InputDecoration(
-                          labelText: 'Emergency Condition*',
-                          hintText: 'Describe the emergency condition',
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                        ),
+                        icon: Icons.emergency_outlined,
+                        maxLines: 2,
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             return 'Please describe the condition';
@@ -236,53 +233,81 @@ class _EmergencyAdmissionDialogState extends ConsumerState<EmergencyAdmissionDia
                           return null;
                         },
                       ),
-                      const SizedBox(height: 12),
-                      TextFormField(
+                      const SizedBox(height: 16),
+                      _buildInputField(
+                        label: 'Additional Notes',
+                        hint: 'Any additional information...',
                         controller: _notesController,
+                        icon: Icons.note_outlined,
                         maxLines: 3,
-                        decoration: InputDecoration(
-                          labelText: 'Additional Notes',
-                          hintText: 'Any additional information...',
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                        ),
+                        isRequired: false,
                       ),
                     ],
                   ),
                 ),
               ),
             ),
+            // Footer Buttons
             Container(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.grey[50],
+                borderRadius: const BorderRadius.only(
+                  bottomLeft: Radius.circular(20),
+                  bottomRight: Radius.circular(20),
+                ),
+              ),
               child: Row(
                 children: [
                   Expanded(
-                    child: ElevatedButton(
+                    child: OutlinedButton(
                       onPressed: _isLoading ? null : () => Navigator.pop(context),
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        backgroundColor: Colors.grey[300],
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        side: BorderSide(color: Colors.grey[300]!),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
-                      child: const Text('Cancel', style: TextStyle(color: Colors.black)),
+                      child: Text(
+                        'Cancel',
+                        style: GoogleFonts.dmSans(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.darkNavy,
+                        ),
+                      ),
                     ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
+                    flex: 2,
                     child: ElevatedButton(
                       onPressed: _isLoading ? null : _admitEmergency,
                       style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        backgroundColor: AppColors.error,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        backgroundColor: AppColors.darkNavy,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
                       child: _isLoading
                           ? const SizedBox(
-                              height: 20,
                               width: 20,
-                              child: CircularProgressIndicator(strokeWidth: 2, valueColor: AlwaysStoppedAnimation<Color>(Colors.white)),
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                              ),
                             )
-                          : const Text('Admit Emergency', style: TextStyle(color: Colors.white)),
+                          : Text(
+                              'Admit Emergency',
+                              style: GoogleFonts.dmSans(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.white,
+                              ),
+                            ),
                     ),
                   ),
                 ],
@@ -291,6 +316,123 @@ class _EmergencyAdmissionDialogState extends ConsumerState<EmergencyAdmissionDia
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildInputField({
+    required String label,
+    required String hint,
+    required TextEditingController controller,
+    required IconData icon,
+    TextInputType? keyboardType,
+    int maxLines = 1,
+    String? Function(String?)? validator,
+    bool isRequired = true,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          isRequired ? '$label*' : label,
+          style: GoogleFonts.dmSans(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            color: AppColors.darkNavy,
+          ),
+        ),
+        const SizedBox(height: 8),
+        TextFormField(
+          controller: controller,
+          keyboardType: keyboardType,
+          maxLines: maxLines,
+          style: GoogleFonts.dmSans(fontSize: 15),
+          decoration: InputDecoration(
+            hintText: hint,
+            hintStyle: GoogleFonts.dmSans(
+              fontSize: 15,
+              color: Colors.grey[400],
+            ),
+            prefixIcon: Icon(icon, color: AppColors.darkNavy.withOpacity(0.6), size: 20),
+            filled: true,
+            fillColor: Colors.grey[50],
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: Colors.grey[300]!),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: Colors.grey[300]!),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: AppColors.primary, width: 2),
+            ),
+            errorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: AppColors.error),
+            ),
+          ),
+          validator: validator,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDropdownField<T>({
+    required String label,
+    required T value,
+    required IconData icon,
+    required List<T> items,
+    List<String>? itemLabels,
+    required void Function(T?) onChanged,
+    bool isRequired = true,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          isRequired ? '$label*' : label,
+          style: GoogleFonts.dmSans(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            color: AppColors.darkNavy,
+          ),
+        ),
+        const SizedBox(height: 8),
+        DropdownButtonFormField<T>(
+          value: value,
+          style: GoogleFonts.dmSans(fontSize: 15, color: AppColors.darkNavy),
+          decoration: InputDecoration(
+            prefixIcon: Icon(icon, color: AppColors.darkNavy.withOpacity(0.6), size: 20),
+            filled: true,
+            fillColor: Colors.grey[50],
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: Colors.grey[300]!),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: Colors.grey[300]!),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: AppColors.primary, width: 2),
+            ),
+          ),
+          items: items.asMap().entries.map((entry) {
+            final index = entry.key;
+            final item = entry.value;
+            final displayText = itemLabels != null ? itemLabels[index] : item.toString();
+            return DropdownMenuItem<T>(
+              value: item,
+              child: Text(displayText),
+            );
+          }).toList(),
+          onChanged: onChanged,
+        ),
+      ],
     );
   }
 }

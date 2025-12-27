@@ -1,12 +1,14 @@
-// lib/presentation/screens/staff/staff_dashboard_screen.dart (COMPLETE NEW VERSION)
+// lib/presentation/screens/staff/staff_dashboard_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:pulse/core/constants/app_colors.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:pulse/core/theme/app_colors.dart';
 import 'package:pulse/presentation/providers/auth_provider.dart';
 import 'package:pulse/presentation/screens/staff/tabs/overview_tab.dart';
-import 'package:pulse/presentation/screens/staff/tabs/bed_status_tab.dart';
+import 'package:pulse/presentation/screens/staff/tabs/bed_status_tab_redesigned.dart';
 import 'package:pulse/presentation/screens/staff/tabs/queue_tab.dart';
 import 'package:pulse/presentation/screens/staff/tabs/discharge_records_tab.dart';
+import 'package:pulse/presentation/screens/staff/staff_analytics_screen.dart';
 import 'package:pulse/utils/auth_utils.dart';
 
 class StaffDashboardScreen extends ConsumerStatefulWidget {
@@ -17,7 +19,15 @@ class StaffDashboardScreen extends ConsumerStatefulWidget {
 }
 
 class _StaffDashboardScreenState extends ConsumerState<StaffDashboardScreen> {
-  int _currentIndex = 0;
+  int _selectedIndex = 0;
+
+  // Screens matching Patient Dashboard structure
+  late final List<Widget> _screens;
+
+  @override
+  void initState() {
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -78,114 +88,38 @@ class _StaffDashboardScreenState extends ConsumerState<StaffDashboardScreen> {
         // Create tabs with hospital ID
         final tabs = [
           OverviewTab(hospitalId: user.staffHospitalId!),
-          BedStatusTab(hospitalId: user.staffHospitalId!),
+          BedStatusTabRedesigned(hospitalId: user.staffHospitalId!),
           QueueTab(hospitalId: user.staffHospitalId!),
           DischargeRecordsTab(hospitalId: user.staffHospitalId!),
         ];
 
         return Scaffold(
-          appBar: AppBar(
-            title: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'Staff Portal',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                Text(
-                  user.staffHospitalName ?? 'Hospital',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.white.withOpacity(0.9),
-                    fontWeight: FontWeight.normal,
-                  ),
+          body: tabs[_selectedIndex],
+          bottomNavigationBar: Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 10,
+                  offset: const Offset(0, -2),
                 ),
               ],
             ),
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.notifications_outlined),
-                onPressed: () {
-                  // TODO: Show notifications
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Notifications feature coming soon'),
-                    ),
-                  );
-                },
+            child: SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    _buildNavItem(Icons.dashboard_outlined, 'Overview', 0),
+                    _buildNavItem(Icons.bed_outlined, 'Bed Status', 1),
+                    _buildNavItem(Icons.queue_outlined, 'Queue', 2),
+                    _buildNavItem(Icons.receipt_long_outlined, 'Discharge', 3),
+                  ],
+                ),
               ),
-              PopupMenuButton(
-                icon: const Icon(Icons.more_vert),
-                itemBuilder: (context) => [
-                  PopupMenuItem(
-                    child: ListTile(
-                      leading: const Icon(Icons.person),
-                      title: const Text('Profile'),
-                      onTap: () {
-                        Navigator.pop(context);
-                        // TODO: Navigate to profile
-                      },
-                    ),
-                  ),
-                  PopupMenuItem(
-                    child: ListTile(
-                      leading: const Icon(Icons.settings),
-                      title: const Text('Settings'),
-                      onTap: () {
-                        Navigator.pop(context);
-                        // TODO: Navigate to settings
-                      },
-                    ),
-                  ),
-                  PopupMenuItem(
-                    child: ListTile(
-                      leading: const Icon(Icons.logout, color: AppColors.error),
-                      title: const Text(
-                        'Logout',
-                        style: TextStyle(color: AppColors.error),
-                      ),
-                      onTap: () {
-                        Navigator.pop(context);
-                        AuthUtils.handleLogout(context, ref);
-                      },
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-          body: tabs[_currentIndex],
-          bottomNavigationBar: BottomNavigationBar(
-            currentIndex: _currentIndex,
-            onTap: (index) => setState(() => _currentIndex = index),
-            selectedItemColor: AppColors.primary,
-            unselectedItemColor: AppColors.textSecondary,
-            type: BottomNavigationBarType.fixed,
-            items: const [
-              BottomNavigationBarItem(
-                icon: Icon(Icons.dashboard_outlined),
-                activeIcon: Icon(Icons.dashboard),
-                label: 'Overview',
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.bed_outlined),
-                activeIcon: Icon(Icons.bed),
-                label: 'Bed Status',
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.queue_outlined),
-                activeIcon: Icon(Icons.queue),
-                label: 'Queue',
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.receipt_long_outlined),
-                activeIcon: Icon(Icons.receipt_long),
-                label: 'Discharge',
-              ),
-            ],
+            ),
           ),
         );
       },
@@ -202,6 +136,39 @@ class _StaffDashboardScreenState extends ConsumerState<StaffDashboardScreen> {
               Text('Error: $error'),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNavItem(IconData icon, String label, int index) {
+    final isSelected = _selectedIndex == index;
+    return GestureDetector(
+      onTap: () => setState(() => _selectedIndex = index),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected ? AppColors.primary.withOpacity(0.1) : Colors.transparent,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              color: isSelected ? AppColors.primary : AppColors.darkNavy.withOpacity(0.6),
+              size: 24,
+            ),
+            const SizedBox(height: 4),
+            Text(
+              label,
+              style: GoogleFonts.dmSans(
+                fontSize: 11,
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                color: isSelected ? AppColors.primary : AppColors.darkNavy.withOpacity(0.6),
+              ),
+            ),
+          ],
         ),
       ),
     );

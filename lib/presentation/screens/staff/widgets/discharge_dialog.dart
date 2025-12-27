@@ -1,6 +1,7 @@
 // lib/presentation/screens/staff/widgets/discharge_dialog.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:pulse/core/constants/app_colors.dart';
 import 'package:pulse/data/models/patient_model.dart';
 import 'package:pulse/presentation/providers/patient_provider.dart';
@@ -48,8 +49,11 @@ class _DischargDialogState extends ConsumerState<DischargeDialog> {
       if (mounted) {
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Patient discharged successfully'),
+          SnackBar(
+            content: Text(
+              'Patient discharged successfully',
+              style: GoogleFonts.dmSans(),
+            ),
             backgroundColor: AppColors.success,
           ),
         );
@@ -58,7 +62,10 @@ class _DischargDialogState extends ConsumerState<DischargeDialog> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error: $e'),
+            content: Text(
+              'Error: $e',
+              style: GoogleFonts.dmSans(),
+            ),
             backgroundColor: AppColors.error,
           ),
         );
@@ -75,52 +82,78 @@ class _DischargDialogState extends ConsumerState<DischargeDialog> {
     final patientsAsync = ref.watch(patientsStreamProvider(widget.hospitalId));
 
     return Dialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      backgroundColor: Colors.transparent,
+      insetPadding: const EdgeInsets.symmetric(horizontal: 32, vertical: 40),
       child: Container(
-        constraints: const BoxConstraints(maxWidth: 600, maxHeight: 600),
+        width: MediaQuery.of(context).size.width,
+        constraints: const BoxConstraints(maxWidth: 500, maxHeight: 600),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            // Header
             Container(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
               decoration: const BoxDecoration(
-                color: AppColors.info,
+                color: Colors.white,
                 borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(16),
-                  topRight: Radius.circular(16),
+                  topLeft: Radius.circular(20),
+                  topRight: Radius.circular(20),
                 ),
               ),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
-                    'Discharge Patient',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: AppColors.info.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: const Icon(
+                      Icons.logout,
+                      color: AppColors.info,
+                      size: 24,
                     ),
                   ),
+                  const SizedBox(width: 12),
+                  Text(
+                    'Discharge Patient',
+                    style: GoogleFonts.dmSans(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.darkNavy,
+                    ),
+                  ),
+                  const Spacer(),
                   IconButton(
+                    icon: const Icon(Icons.close, color: AppColors.darkNavy),
                     onPressed: () => Navigator.pop(context),
-                    icon: const Icon(Icons.close, color: Colors.white),
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
                   ),
                 ],
               ),
             ),
+            const Divider(height: 1),
+            // Form Content
             Expanded(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.all(20),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
                 child: Form(
                   key: _formKey,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'Select Patient',
-                        style: TextStyle(
-                          fontSize: 16,
+                      Text(
+                        'Select Patient*',
+                        style: GoogleFonts.dmSans(
+                          fontSize: 14,
                           fontWeight: FontWeight.w600,
+                          color: AppColors.darkNavy,
                         ),
                       ),
                       const SizedBox(height: 8),
@@ -128,12 +161,26 @@ class _DischargDialogState extends ConsumerState<DischargeDialog> {
                         data: (patients) {
                           return DropdownButtonFormField<String>(
                             value: _selectedPatientId,
+                            style: GoogleFonts.dmSans(fontSize: 15, color: AppColors.darkNavy),
                             decoration: InputDecoration(
-                              hintText: 'Select a patient to discharge',
+                              hintText: 'Select patient to discharge',
+                              hintStyle: GoogleFonts.dmSans(color: Colors.grey[400]),
+                              prefixIcon: Icon(Icons.person_outline, color: AppColors.darkNavy.withOpacity(0.6), size: 20),
+                              filled: true,
+                              fillColor: Colors.grey[50],
+                              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                               border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(8),
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: BorderSide(color: Colors.grey[300]!),
                               ),
-                              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: BorderSide(color: Colors.grey[300]!),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: const BorderSide(color: AppColors.primary, width: 2),
+                              ),
                             ),
                             items: patients.map((patient) {
                               return DropdownMenuItem<String>(
@@ -162,23 +209,41 @@ class _DischargDialogState extends ConsumerState<DischargeDialog> {
                         error: (error, _) => Text('Error loading patients: $error'),
                       ),
                       const SizedBox(height: 16),
-                      const Text(
-                        'Discharge Notes',
-                        style: TextStyle(
-                          fontSize: 16,
+                      Text(
+                        'Discharge Notes (Optional)',
+                        style: GoogleFonts.dmSans(
+                          fontSize: 14,
                           fontWeight: FontWeight.w600,
+                          color: AppColors.darkNavy,
                         ),
                       ),
                       const SizedBox(height: 8),
                       TextFormField(
                         controller: _dischargeNotesController,
                         maxLines: 4,
+                        style: GoogleFonts.dmSans(fontSize: 15),
                         decoration: InputDecoration(
                           hintText: 'Enter discharge notes...',
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
+                          hintStyle: GoogleFonts.dmSans(color: Colors.grey[400]),
+                          prefixIcon: Padding(
+                            padding: const EdgeInsets.only(bottom: 60),
+                            child: Icon(Icons.note_outlined, color: AppColors.darkNavy.withOpacity(0.6), size: 20),
                           ),
-                          contentPadding: const EdgeInsets.all(12),
+                          filled: true,
+                          fillColor: Colors.grey[50],
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(color: Colors.grey[300]!),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(color: Colors.grey[300]!),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: const BorderSide(color: AppColors.primary, width: 2),
+                          ),
                         ),
                       ),
                     ],
@@ -186,35 +251,67 @@ class _DischargDialogState extends ConsumerState<DischargeDialog> {
                 ),
               ),
             ),
+            // Footer Buttons
             Container(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.grey[50],
+                borderRadius: const BorderRadius.only(
+                  bottomLeft: Radius.circular(20),
+                  bottomRight: Radius.circular(20),
+                ),
+              ),
               child: Row(
                 children: [
                   Expanded(
-                    child: ElevatedButton(
+                    child: OutlinedButton(
                       onPressed: _isLoading ? null : () => Navigator.pop(context),
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        backgroundColor: Colors.grey[300],
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        side: BorderSide(color: Colors.grey[300]!),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
-                      child: const Text('Cancel', style: TextStyle(color: Colors.black)),
+                      child: Text(
+                        'Cancel',
+                        style: GoogleFonts.dmSans(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.darkNavy,
+                        ),
+                      ),
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: 8),
                   Expanded(
+                    flex: 2,
                     child: ElevatedButton(
                       onPressed: _isLoading ? null : _dischargePatient,
                       style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        backgroundColor: AppColors.info,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        backgroundColor: AppColors.darkNavy,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
                       child: _isLoading
                           ? const SizedBox(
-                              height: 20,
                               width: 20,
-                              child: CircularProgressIndicator(strokeWidth: 2, valueColor: AlwaysStoppedAnimation<Color>(Colors.white)),
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                              ),
                             )
-                          : const Text('Discharge', style: TextStyle(color: Colors.white)),
+                          : Text(
+                              'Discharge',
+                              style: GoogleFonts.dmSans(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.white,
+                              ),
+                            ),
                     ),
                   ),
                 ],

@@ -25,4 +25,11 @@ class AppColors {
   // Emergency Mode
   static const Color emergencyRed = Color(0xFFDC2626);
   static const Color emergencyBackground = Color(0xFFFEE2E2);
+  
+  // Pulse Design System Colors
+  static const Color primaryRed = Color(0xFFF7444E);
+  static const Color mutedBlue = Color(0xFF78BCC4);
+  static const Color darkNavy = Color(0xFF002C3E);
+  static const Color gradientStart = Color(0xFFB91C1C); // Dark red for gradients
+  static const Color gradientEnd = Color(0xFF1E3A8A); // Dark blue for gradients
 }
