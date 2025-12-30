@@ -6,8 +6,8 @@ import 'package:pulse/core/theme/app_colors.dart';
 import 'package:pulse/presentation/providers/auth_provider.dart';
 import 'package:pulse/presentation/screens/staff/tabs/overview_tab.dart';
 import 'package:pulse/presentation/screens/staff/tabs/bed_status_tab_redesigned.dart';
-import 'package:pulse/presentation/screens/staff/tabs/queue_tab.dart';
-import 'package:pulse/presentation/screens/staff/tabs/discharge_records_tab.dart';
+import 'package:pulse/presentation/screens/staff/tabs/queue_tab_redesigned.dart';
+import 'package:pulse/presentation/screens/staff/tabs/discharge_records_tab_redesigned.dart';
 import 'package:pulse/presentation/screens/staff/staff_analytics_screen.dart';
 import 'package:pulse/utils/auth_utils.dart';
 
@@ -89,8 +89,8 @@ class _StaffDashboardScreenState extends ConsumerState<StaffDashboardScreen> {
         final tabs = [
           OverviewTab(hospitalId: user.staffHospitalId!),
           BedStatusTabRedesigned(hospitalId: user.staffHospitalId!),
-          QueueTab(hospitalId: user.staffHospitalId!),
-          DischargeRecordsTab(hospitalId: user.staffHospitalId!),
+          QueueTabRedesigned(hospitalId: user.staffHospitalId!),
+          DischargeRecordsTabRedesigned(hospitalId: user.staffHospitalId!),
         ];
 
         return Scaffold(

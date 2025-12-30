@@ -64,7 +64,7 @@ class _BedStatusTabRedesignedState extends ConsumerState<BedStatusTabRedesigned>
           style: GoogleFonts.openSansCondensed(
             fontSize: 28,
             fontWeight: FontWeight.w700,
-            color: AppColors.darkNavy,
+            color: const Color(0xFF002C3E), // Navy
           ),
         ),
         centerTitle: false,
@@ -210,7 +210,7 @@ class _BedStatusTabRedesignedState extends ConsumerState<BedStatusTabRedesigned>
       ),
       child: Row(
         children: [
-          Icon(icon, size: 20, color: AppColors.darkNavy.withOpacity(0.6)),
+          Icon(icon, size: 20, color: const Color(0xFF002C3E).withOpacity(0.6)), // Navy
           const SizedBox(width: 8),
           Expanded(
             child: DropdownButtonHideUnderline(
@@ -221,7 +221,7 @@ class _BedStatusTabRedesignedState extends ConsumerState<BedStatusTabRedesigned>
                 style: GoogleFonts.dmSans(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
-                  color: AppColors.darkNavy,
+                  color: const Color(0xFF002C3E), // Navy
                 ),
                 items: items.map((item) {
                   return DropdownMenuItem(
@@ -271,7 +271,7 @@ class _BedStatusTabRedesignedState extends ConsumerState<BedStatusTabRedesigned>
                 if (onToggle != null)
                   Icon(
                     isExpanded ? Icons.keyboard_arrow_down : Icons.keyboard_arrow_right,
-                    color: AppColors.darkNavy,
+                    color: const Color(0xFF002C3E), // Navy
                   ),
                 const SizedBox(width: 8),
                 Text(
@@ -279,7 +279,7 @@ class _BedStatusTabRedesignedState extends ConsumerState<BedStatusTabRedesigned>
                   style: GoogleFonts.dmSans(
                     fontSize: 18,
                     fontWeight: FontWeight.w700,
-                    color: AppColors.darkNavy,
+                    color: const Color(0xFF002C3E), // Navy
                   ),
                 ),
               ],

@@ -46,12 +46,12 @@ class PatientDetailDialogRedesigned extends StatelessWidget {
                     style: GoogleFonts.dmSans(
                       fontSize: 22,
                       fontWeight: FontWeight.w700,
-                      color: AppColors.darkNavy,
+                      color: const Color(0xFF002C3E), // Navy
                     ),
                   ),
                   const Spacer(),
                   IconButton(
-                    icon: const Icon(Icons.close, color: AppColors.darkNavy),
+                    icon: const Icon(Icons.close, color: Color(0xFF002C3E)), // Navy
                     onPressed: () => Navigator.pop(context),
                     padding: EdgeInsets.zero,
                     constraints: const BoxConstraints(),
@@ -113,7 +113,7 @@ class PatientDetailDialogRedesigned extends StatelessWidget {
                   onPressed: () => Navigator.pop(context),
                   style: OutlinedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 14),
-                    side: BorderSide(color: AppColors.darkNavy),
+                    side: const BorderSide(color: Color(0xFF002C3E)), // Navy
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
@@ -123,7 +123,7 @@ class PatientDetailDialogRedesigned extends StatelessWidget {
                     style: GoogleFonts.dmSans(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
-                      color: AppColors.darkNavy,
+                      color: const Color(0xFF002C3E), // Navy
                     ),
                   ),
                 ),
@@ -141,7 +141,7 @@ class PatientDetailDialogRedesigned extends StatelessWidget {
       style: GoogleFonts.dmSans(
         fontSize: 16,
         fontWeight: FontWeight.w700,
-        color: AppColors.darkNavy,
+        color: const Color(0xFF002C3E), // Navy
       ),
     );
   }
@@ -169,7 +169,7 @@ class PatientDetailDialogRedesigned extends StatelessWidget {
               style: GoogleFonts.dmSans(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
-                color: AppColors.darkNavy,
+                color: const Color(0xFF002C3E), // Navy
               ),
             ),
           ),

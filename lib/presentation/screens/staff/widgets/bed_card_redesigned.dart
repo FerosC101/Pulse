@@ -32,7 +32,7 @@ class BedCardRedesigned extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: isOccupied 
-              ? AppColors.primary.withOpacity(0.3)
+              ? const Color(0xFFF7444E).withOpacity(0.3) // Primary Red
               : Colors.grey[300]!,
           width: 1,
         ),
@@ -64,7 +64,7 @@ class BedCardRedesigned extends StatelessWidget {
                     style: GoogleFonts.dmSans(
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
-                      color: AppColors.darkNavy,
+                      color: const Color(0xFF002C3E), // Navy
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -83,7 +83,7 @@ class BedCardRedesigned extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
-                color: AppColors.primary,
+                color: const Color(0xFFF7444E), // Primary Red
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Text(
@@ -156,7 +156,7 @@ class BedCardRedesigned extends StatelessWidget {
                 style: GoogleFonts.dmSans(
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.darkNavy,
+                  color: const Color(0xFF002C3E), // Navy
                 ),
               ),
               const SizedBox(height: 4),
@@ -177,7 +177,7 @@ class BedCardRedesigned extends StatelessWidget {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
-              color: AppColors.mutedBlue,
+              color: const Color(0xFF78BCC4), // Muted teal/grey
               width: 1.5,
             ),
           ),
@@ -186,7 +186,7 @@ class BedCardRedesigned extends StatelessWidget {
             style: GoogleFonts.dmSans(
               fontSize: 12,
               fontWeight: FontWeight.w700,
-              color: AppColors.mutedBlue,
+              color: const Color(0xFF78BCC4), // Muted teal/grey
             ),
           ),
         ),
@@ -204,7 +204,7 @@ class BedCardRedesigned extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 10),
         decoration: BoxDecoration(
-          color: AppColors.darkNavy,
+          color: const Color(0xFF002C3E), // Navy
           borderRadius: BorderRadius.circular(8),
         ),
         alignment: Alignment.center,
