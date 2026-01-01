@@ -1,66 +1,63 @@
-// lib/presentation/screens/doctor/doctor_schedule_screen.dart
+// lib/presentation/screens/doctor/doctor_schedule_screen_redesigned.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:pulse/presentation/screens/doctor/doctor_schedule_screen_redesigned.dart';
-
-class DoctorScheduleScreen extends ConsumerWidget {
-  final String doctorId;
-  final String hospitalId;
-
-  const DoctorScheduleScreen({
-    super.key,
-    required this.doctorId,
-    required this.hospitalId,
-  });
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    // Use the redesigned version
-    return DoctorScheduleScreenRedesigned(
-      doctorId: doctorId,
-      hospitalId: hospitalId,
-    );
-  }
-}
-
-// Legacy implementation (commented out)
-/*
-import 'package:pulse/core/constants/app_colors.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:pulse/core/theme/app_colors.dart';
 import 'package:pulse/data/models/doctor_schedule_model.dart';
 import 'package:pulse/presentation/providers/schedule_provider.dart';
+import 'package:table_calendar/table_calendar.dart';
 
-class DoctorScheduleScreenOld extends ConsumerStatefulWidget {
+class DoctorScheduleScreenRedesigned extends ConsumerStatefulWidget {
   final String doctorId;
   final String hospitalId;
 
-  const DoctorScheduleScreen({
+  const DoctorScheduleScreenRedesigned({
     super.key,
     required this.doctorId,
     required this.hospitalId,
   });
 
   @override
-  ConsumerState<DoctorScheduleScreen> createState() => _DoctorScheduleScreenState();
+  ConsumerState<DoctorScheduleScreenRedesigned> createState() => _DoctorScheduleScreenRedesignedState();
 }
 
-class _DoctorScheduleScreenState extends ConsumerState<DoctorScheduleScreen> {
+class _DoctorScheduleScreenRedesignedState extends ConsumerState<DoctorScheduleScreenRedesigned> {
   int _appointmentDuration = 30;
   int _maxAppointments = 16;
+  DateTime _focusedDay = DateTime.now();
+  DateTime? _selectedDay;
 
   @override
   Widget build(BuildContext context) {
     final scheduleAsync = ref.watch(doctorScheduleProvider(widget.doctorId));
 
     return Scaffold(
+      backgroundColor: const Color(0xFFF7F8F3), // Off-white background
       appBar: AppBar(
-        title: const Text('My Schedule'),
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Color(0xFF002C3E)),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: Text(
+          'My Schedule',
+          style: GoogleFonts.openSansCondensed(
+            fontSize: 22,
+            fontWeight: FontWeight.w700,
+            color: const Color(0xFF002C3E),
+          ),
+        ),
         actions: [
           TextButton.icon(
             onPressed: () => _createDefaultSchedule(),
-            icon: const Icon(Icons.add, color: Colors.white),
-            label: const Text(
+            icon: const Icon(Icons.add, color: Color(0xFFF7444E)),
+            label: Text(
               'Default',
-              style: TextStyle(color: Colors.white),
+              style: GoogleFonts.dmSans(
+                color: const Color(0xFFF7444E),
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
         ],
@@ -68,7 +65,7 @@ class _DoctorScheduleScreenState extends ConsumerState<DoctorScheduleScreen> {
       body: scheduleAsync.when(
         data: (schedules) {
           return SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
+            padding: const EdgeInsets.all(20),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -76,20 +73,20 @@ class _DoctorScheduleScreenState extends ConsumerState<DoctorScheduleScreen> {
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: AppColors.info.withOpacity(0.1),
+                    color: Colors.blue.shade50,
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: AppColors.info.withOpacity(0.3)),
+                    border: Border.all(color: Colors.blue.shade200),
                   ),
                   child: Row(
                     children: [
-                      Icon(Icons.info_outline, color: AppColors.info),
+                      Icon(Icons.info_outline, color: Colors.blue.shade700),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(
                           'Set your weekly availability. Patients can book appointments during these times.',
-                          style: TextStyle(
+                          style: GoogleFonts.dmSans(
                             fontSize: 13,
-                            color: AppColors.textPrimary,
+                            color: const Color(0xFF002C3E),
                           ),
                         ),
                       ),
@@ -98,12 +95,26 @@ class _DoctorScheduleScreenState extends ConsumerState<DoctorScheduleScreen> {
                 ),
                 const SizedBox(height: 24),
 
+                // Calendar View
+                Text(
+                  'Calendar Overview',
+                  style: GoogleFonts.openSansCondensed(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w700,
+                    color: const Color(0xFF002C3E),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                _buildCalendarCard(),
+                const SizedBox(height: 24),
+
                 // Weekly Schedule
-                const Text(
+                Text(
                   'Weekly Availability',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
+                  style: GoogleFonts.openSansCondensed(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w700,
+                    color: const Color(0xFF002C3E),
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -128,24 +139,13 @@ class _DoctorScheduleScreenState extends ConsumerState<DoctorScheduleScreen> {
                 const SizedBox(height: 24),
 
                 // Settings
-                Row(
-                  children: [
-                    Image.network(
-                      'https://res.cloudinary.com/dhqosbqeh/image/upload/v1763999280/appointment_settings_zntbxo.png',
-                      width: 20,
-                      height: 20,
-                      fit: BoxFit.contain,
-                      errorBuilder: (context, error, stack) => const Icon(Icons.settings, color: AppColors.textSecondary, size: 20),
-                    ),
-                    const SizedBox(width: 8),
-                    const Text(
-                      'Appointment Settings',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
+                Text(
+                  'Appointment Settings',
+                  style: GoogleFonts.openSansCondensed(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w700,
+                    color: const Color(0xFF002C3E),
+                  ),
                 ),
                 const SizedBox(height: 16),
 
@@ -153,7 +153,7 @@ class _DoctorScheduleScreenState extends ConsumerState<DoctorScheduleScreen> {
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(16),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withOpacity(0.05),
@@ -169,15 +169,13 @@ class _DoctorScheduleScreenState extends ConsumerState<DoctorScheduleScreen> {
                         '$_appointmentDuration minutes',
                         Icons.timer,
                         () => _showDurationPicker(),
-                        iconAsset: 'https://res.cloudinary.com/dhqosbqeh/image/upload/v1763999287/wait_time_znlspm.png',
                       ),
-                      const Divider(height: 24),
+                      const Divider(height: 32),
                       _buildSettingRow(
                         'Max Appointments per Day',
                         '$_maxAppointments appointments',
                         Icons.event_note,
                         () => _showMaxAppointmentsPicker(),
-                        iconAsset: 'https://res.cloudinary.com/dhqosbqeh/image/upload/v1763999281/my_appointment_unk0ra.png',
                       ),
                     ],
                   ),
@@ -188,6 +186,57 @@ class _DoctorScheduleScreenState extends ConsumerState<DoctorScheduleScreen> {
         },
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, _) => Center(child: Text('Error: $error')),
+      ),
+    );
+  }
+
+  Widget _buildCalendarCard() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      padding: const EdgeInsets.all(16),
+      child: TableCalendar(
+        firstDay: DateTime.utc(2020, 1, 1),
+        lastDay: DateTime.utc(2030, 12, 31),
+        focusedDay: _focusedDay,
+        selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
+        onDaySelected: (selectedDay, focusedDay) {
+          setState(() {
+            _selectedDay = selectedDay;
+            _focusedDay = focusedDay;
+          });
+        },
+        calendarStyle: CalendarStyle(
+          todayDecoration: BoxDecoration(
+            color: const Color(0xFFF7444E).withOpacity(0.3),
+            shape: BoxShape.circle,
+          ),
+          selectedDecoration: const BoxDecoration(
+            color: Color(0xFF002C3E),
+            shape: BoxShape.circle,
+          ),
+          weekendTextStyle: GoogleFonts.dmSans(
+            color: const Color(0xFFF7444E),
+          ),
+        ),
+        headerStyle: HeaderStyle(
+          formatButtonVisible: false,
+          titleCentered: true,
+          titleTextStyle: GoogleFonts.dmSans(
+            fontSize: 16,
+            fontWeight: FontWeight.w700,
+            color: const Color(0xFF002C3E),
+          ),
+        ),
       ),
     );
   }
@@ -208,12 +257,20 @@ class _DoctorScheduleScreenState extends ConsumerState<DoctorScheduleScreen> {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: schedule.isAvailable
-              ? AppColors.success.withOpacity(0.3)
-              : Colors.grey.withOpacity(0.3),
+              ? Colors.green.withOpacity(0.3)
+              : Colors.grey.withOpacity(0.2),
+          width: 2,
         ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Row(
         children: [
@@ -221,7 +278,10 @@ class _DoctorScheduleScreenState extends ConsumerState<DoctorScheduleScreen> {
           Checkbox(
             value: schedule.isAvailable,
             onChanged: (value) => _toggleDayAvailability(schedule, value ?? false),
-            activeColor: AppColors.success,
+            activeColor: const Color(0xFF002C3E),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(4),
+            ),
           ),
           const SizedBox(width: 12),
 
@@ -232,12 +292,12 @@ class _DoctorScheduleScreenState extends ConsumerState<DoctorScheduleScreen> {
               children: [
                 Text(
                   days[schedule.dayOfWeek],
-                  style: TextStyle(
+                  style: GoogleFonts.dmSans(
                     fontSize: 16,
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.w700,
                     color: schedule.isAvailable
-                        ? AppColors.textPrimary
-                        : AppColors.textSecondary,
+                        ? const Color(0xFF002C3E)
+                        : Colors.grey[600],
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -245,11 +305,11 @@ class _DoctorScheduleScreenState extends ConsumerState<DoctorScheduleScreen> {
                   schedule.isAvailable
                       ? '${schedule.startTime} - ${schedule.endTime}'
                       : 'Not available',
-                  style: TextStyle(
+                  style: GoogleFonts.dmSans(
                     fontSize: 14,
                     color: schedule.isAvailable
-                        ? AppColors.textSecondary
-                        : AppColors.textTertiary,
+                        ? Colors.grey[700]
+                        : Colors.grey[500],
                   ),
                 ),
               ],
@@ -258,10 +318,16 @@ class _DoctorScheduleScreenState extends ConsumerState<DoctorScheduleScreen> {
 
           // Edit Button
           if (schedule.isAvailable)
-            IconButton(
-              onPressed: () => _editSchedule(schedule),
-              icon: const Icon(Icons.edit, size: 20),
-              color: AppColors.primary,
+            Container(
+              decoration: BoxDecoration(
+                color: const Color(0xFFF7444E).withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: IconButton(
+                onPressed: () => _editSchedule(schedule),
+                icon: const Icon(Icons.edit, size: 20),
+                color: const Color(0xFFF7444E),
+              ),
             ),
         ],
       ),
@@ -272,9 +338,8 @@ class _DoctorScheduleScreenState extends ConsumerState<DoctorScheduleScreen> {
     String title,
     String value,
     IconData icon,
-    VoidCallback onTap, {
-    String? iconAsset,
-  }) {
+    VoidCallback onTap,
+  ) {
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(8),
@@ -283,30 +348,12 @@ class _DoctorScheduleScreenState extends ConsumerState<DoctorScheduleScreen> {
         child: Row(
           children: [
             Container(
-              padding: const EdgeInsets.all(10),
+              padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: AppColors.primary.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(8),
+                color: const Color(0xFF002C3E).withOpacity(0.1),
+                borderRadius: BorderRadius.circular(10),
               ),
-              child: iconAsset != null
-                  ? (iconAsset.startsWith('http://') || iconAsset.startsWith('https://')
-                      ? Image.network(
-                          iconAsset,
-                          width: 20,
-                          height: 20,
-                          fit: BoxFit.contain,
-                          color: AppColors.primary,
-                          errorBuilder: (context, error, stack) => Icon(icon, color: AppColors.primary, size: 20),
-                        )
-                      : Image.asset(
-                          iconAsset,
-                          width: 20,
-                          height: 20,
-                          fit: BoxFit.contain,
-                          color: AppColors.primary,
-                          errorBuilder: (context, error, stack) => Icon(icon, color: AppColors.primary, size: 20),
-                        ))
-                  : Icon(icon, color: AppColors.primary, size: 20),
+              child: Icon(icon, color: const Color(0xFF002C3E), size: 24),
             ),
             const SizedBox(width: 16),
             Expanded(
@@ -315,23 +362,24 @@ class _DoctorScheduleScreenState extends ConsumerState<DoctorScheduleScreen> {
                 children: [
                   Text(
                     title,
-                    style: const TextStyle(
+                    style: GoogleFonts.dmSans(
                       fontSize: 14,
-                      color: AppColors.textSecondary,
+                      color: Colors.grey[600],
                     ),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     value,
-                    style: const TextStyle(
+                    style: GoogleFonts.dmSans(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
+                      color: const Color(0xFF002C3E),
                     ),
                   ),
                 ],
               ),
             ),
-            const Icon(Icons.arrow_forward_ios, size: 16, color: AppColors.textSecondary),
+            const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
           ],
         ),
       ),
@@ -365,9 +413,9 @@ class _DoctorScheduleScreenState extends ConsumerState<DoctorScheduleScreen> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Schedule updated'),
-            backgroundColor: AppColors.success,
+          SnackBar(
+            content: Text('Schedule updated', style: GoogleFonts.dmSans()),
+            backgroundColor: Colors.green,
           ),
         );
       }
@@ -375,8 +423,8 @@ class _DoctorScheduleScreenState extends ConsumerState<DoctorScheduleScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error: $e'),
-            backgroundColor: AppColors.error,
+            content: Text('Error: $e', style: GoogleFonts.dmSans()),
+            backgroundColor: const Color(0xFFF7444E),
           ),
         );
       }
@@ -420,9 +468,9 @@ class _DoctorScheduleScreenState extends ConsumerState<DoctorScheduleScreen> {
 
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Schedule updated'),
-              backgroundColor: AppColors.success,
+            SnackBar(
+              content: Text('Schedule updated', style: GoogleFonts.dmSans()),
+              backgroundColor: Colors.green,
             ),
           );
         }
@@ -430,8 +478,8 @@ class _DoctorScheduleScreenState extends ConsumerState<DoctorScheduleScreen> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Error: $e'),
-              backgroundColor: AppColors.error,
+              content: Text('Error: $e', style: GoogleFonts.dmSans()),
+              backgroundColor: const Color(0xFFF7444E),
             ),
           );
         }
@@ -443,19 +491,35 @@ class _DoctorScheduleScreenState extends ConsumerState<DoctorScheduleScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Create Default Schedule'),
-        content: const Text(
-          'This will create a default schedule (Mon-Fri, 9AM-5PM). '
-          'Existing schedules will not be affected.',
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Text(
+          'Create Default Schedule',
+          style: GoogleFonts.openSansCondensed(
+            fontSize: 20,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        content: Text(
+          'This will create a default schedule (Mon-Fri, 9AM-5PM). Existing schedules will not be affected.',
+          style: GoogleFonts.dmSans(),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.grey[600],
+            ),
+            child: Text('Cancel', style: GoogleFonts.dmSans()),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Create'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF002C3E),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: Text('Create', style: GoogleFonts.dmSans()),
           ),
         ],
       ),
@@ -470,9 +534,9 @@ class _DoctorScheduleScreenState extends ConsumerState<DoctorScheduleScreen> {
 
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Default schedule created'),
-              backgroundColor: AppColors.success,
+            SnackBar(
+              content: Text('Default schedule created', style: GoogleFonts.dmSans()),
+              backgroundColor: Colors.green,
             ),
           );
         }
@@ -480,8 +544,8 @@ class _DoctorScheduleScreenState extends ConsumerState<DoctorScheduleScreen> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Error: $e'),
-              backgroundColor: AppColors.error,
+              content: Text('Error: $e', style: GoogleFonts.dmSans()),
+              backgroundColor: const Color(0xFFF7444E),
             ),
           );
         }
@@ -494,7 +558,14 @@ class _DoctorScheduleScreenState extends ConsumerState<DoctorScheduleScreen> {
     final selected = await showDialog<int>(
       context: context,
       builder: (context) => SimpleDialog(
-        title: const Text('Appointment Duration'),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Text(
+          'Appointment Duration',
+          style: GoogleFonts.openSansCondensed(
+            fontSize: 20,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
         children: durations.map((duration) {
           return SimpleDialogOption(
             onPressed: () => Navigator.pop(context, duration),
@@ -502,14 +573,14 @@ class _DoctorScheduleScreenState extends ConsumerState<DoctorScheduleScreen> {
               padding: const EdgeInsets.symmetric(vertical: 8),
               child: Text(
                 '$duration minutes',
-                style: TextStyle(
+                style: GoogleFonts.dmSans(
                   fontSize: 16,
                   fontWeight: duration == _appointmentDuration
                       ? FontWeight.bold
                       : FontWeight.normal,
                   color: duration == _appointmentDuration
-                      ? AppColors.primary
-                      : AppColors.textPrimary,
+                      ? const Color(0xFFF7444E)
+                      : const Color(0xFF002C3E),
                 ),
               ),
             ),
@@ -530,7 +601,14 @@ class _DoctorScheduleScreenState extends ConsumerState<DoctorScheduleScreen> {
     final selected = await showDialog<int>(
       context: context,
       builder: (context) => SimpleDialog(
-        title: const Text('Max Appointments per Day'),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Text(
+          'Max Appointments per Day',
+          style: GoogleFonts.openSansCondensed(
+            fontSize: 20,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
         children: counts.map((count) {
           return SimpleDialogOption(
             onPressed: () => Navigator.pop(context, count),
@@ -538,14 +616,14 @@ class _DoctorScheduleScreenState extends ConsumerState<DoctorScheduleScreen> {
               padding: const EdgeInsets.symmetric(vertical: 8),
               child: Text(
                 '$count appointments',
-                style: TextStyle(
+                style: GoogleFonts.dmSans(
                   fontSize: 16,
                   fontWeight: count == _maxAppointments
                       ? FontWeight.bold
                       : FontWeight.normal,
                   color: count == _maxAppointments
-                      ? AppColors.primary
-                      : AppColors.textPrimary,
+                      ? const Color(0xFFF7444E)
+                      : const Color(0xFF002C3E),
                 ),
               ),
             ),
@@ -592,62 +670,37 @@ class _TimeRangePickerDialogState extends State<_TimeRangePickerDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text('Edit ${widget.dayName}'),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      title: Text(
+        'Edit ${widget.dayName}',
+        style: GoogleFonts.openSansCondensed(
+          fontSize: 20,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          ListTile(
-            leading: const Icon(Icons.access_time),
-            title: const Text('Start Time'),
-            trailing: Text(
-              _startTime.format(context),
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: AppColors.primary,
-              ),
-            ),
-            onTap: () async {
-              final time = await showTimePicker(
-                context: context,
-                initialTime: _startTime,
-              );
-              if (time != null) {
-                setState(() {
-                  _startTime = time;
-                });
-              }
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.access_time),
-            title: const Text('End Time'),
-            trailing: Text(
-              _endTime.format(context),
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: AppColors.primary,
-              ),
-            ),
-            onTap: () async {
-              final time = await showTimePicker(
-                context: context,
-                initialTime: _endTime,
-              );
-              if (time != null) {
-                setState(() {
-                  _endTime = time;
-                });
-              }
-            },
-          ),
+          _buildTimeRow('Start Time', _startTime, (time) {
+            setState(() {
+              _startTime = time;
+            });
+          }),
+          const SizedBox(height: 16),
+          _buildTimeRow('End Time', _endTime, (time) {
+            setState(() {
+              _endTime = time;
+            });
+          }),
         ],
       ),
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('Cancel'),
+          style: TextButton.styleFrom(
+            foregroundColor: Colors.grey[600],
+          ),
+          child: Text('Cancel', style: GoogleFonts.dmSans()),
         ),
         ElevatedButton(
           onPressed: () {
@@ -656,9 +709,60 @@ class _TimeRangePickerDialogState extends State<_TimeRangePickerDialog> {
               'end': _endTime,
             });
           },
-          child: const Text('Save'),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFF002C3E),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ),
+          child: Text('Save', style: GoogleFonts.dmSans()),
         ),
       ],
     );
   }
-}*/
+
+  Widget _buildTimeRow(String label, TimeOfDay time, Function(TimeOfDay) onTimeSelected) {
+    return InkWell(
+      onTap: () async {
+        final newTime = await showTimePicker(
+          context: context,
+          initialTime: time,
+        );
+        if (newTime != null) {
+          onTimeSelected(newTime);
+        }
+      },
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: const Color(0xFFF7F8F3),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.grey[300]!),
+        ),
+        child: Row(
+          children: [
+            Icon(Icons.access_time, color: const Color(0xFF002C3E)),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                label,
+                style: GoogleFonts.dmSans(
+                  fontSize: 14,
+                  color: Colors.grey[700],
+                ),
+              ),
+            ),
+            Text(
+              time.format(context),
+              style: GoogleFonts.dmSans(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: const Color(0xFFF7444E),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}

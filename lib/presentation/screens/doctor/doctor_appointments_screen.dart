@@ -1,6 +1,25 @@
 // lib/presentation/screens/doctor/doctor_appointments_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:pulse/presentation/screens/doctor/doctor_appointments_screen_redesigned.dart';
+
+class DoctorAppointmentsScreen extends ConsumerWidget {
+  final String doctorId;
+
+  const DoctorAppointmentsScreen({
+    super.key,
+    required this.doctorId,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Use the redesigned version
+    return DoctorAppointmentsScreenRedesigned(doctorId: doctorId);
+  }
+}
+
+// Legacy implementation (commented out)
+/*
 import 'package:pulse/core/constants/app_colors.dart';
 import 'package:pulse/data/models/appointment_model.dart';
 import 'package:pulse/data/models/appointment_status.dart' show AppointmentStatus;
@@ -8,7 +27,7 @@ import 'package:pulse/presentation/providers/appointment_provider.dart';
 import 'package:pulse/presentation/screens/doctor/appointment_detail_screen.dart';
 import 'package:intl/intl.dart';
 
-class DoctorAppointmentsScreen extends ConsumerStatefulWidget {
+class DoctorAppointmentsScreenOld extends ConsumerStatefulWidget {
   final String doctorId;
 
   const DoctorAppointmentsScreen({
@@ -304,3 +323,4 @@ class _DoctorAppointmentsScreenState extends ConsumerState<DoctorAppointmentsScr
     );
   }
 }
+*/

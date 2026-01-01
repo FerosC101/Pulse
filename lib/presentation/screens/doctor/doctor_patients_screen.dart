@@ -1,10 +1,29 @@
 // lib/presentation/screens/doctor/doctor_patients_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:pulse/presentation/screens/doctor/doctor_patients_screen_redesigned.dart';
+
+class DoctorPatientsScreen extends ConsumerWidget {
+  final String doctorId;
+
+  const DoctorPatientsScreen({
+    super.key,
+    required this.doctorId,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Use the redesigned version
+    return DoctorPatientsScreenRedesigned(doctorId: doctorId);
+  }
+}
+
+// Legacy implementation (commented out)
+/*
 import 'package:pulse/core/constants/app_colors.dart';
 import 'package:pulse/presentation/providers/appointment_provider.dart';
 
-class DoctorPatientsScreen extends ConsumerWidget {
+class DoctorPatientsScreenOld extends ConsumerWidget {
   final String doctorId;
 
   const DoctorPatientsScreen({
@@ -366,4 +385,4 @@ class DoctorPatientsScreen extends ConsumerWidget {
         return AppColors.error;
     }
   }
-}
+}*/

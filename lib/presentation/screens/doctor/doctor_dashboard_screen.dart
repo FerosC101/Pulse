@@ -1,6 +1,20 @@
 // lib/presentation/screens/doctor/doctor_dashboard_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:pulse/presentation/screens/doctor/doctor_dashboard_screen_redesigned.dart';
+
+class DoctorDashboardScreen extends ConsumerWidget {
+  const DoctorDashboardScreen({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Use the redesigned version
+    return const DoctorDashboardScreenRedesigned();
+  }
+}
+
+// Legacy implementation (commented out)
+/*
 import 'package:pulse/core/constants/app_colors.dart';
 import 'package:pulse/data/models/appointment_model.dart';
 import 'package:pulse/data/models/appointment_status.dart' show AppointmentStatus;
@@ -13,8 +27,8 @@ import 'package:pulse/presentation/screens/doctor/appointment_detail_screen.dart
 import 'package:pulse/utils/auth_utils.dart';
 import 'package:intl/intl.dart';
 
-class DoctorDashboardScreen extends ConsumerWidget {
-  const DoctorDashboardScreen({super.key});
+class DoctorDashboardScreenOld extends ConsumerWidget {
+  const DoctorDashboardScreenOld({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -559,3 +573,4 @@ class DoctorDashboardScreen extends ConsumerWidget {
     );
   }
 }
+*/
