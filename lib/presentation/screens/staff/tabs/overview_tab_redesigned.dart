@@ -121,65 +121,180 @@ class OverviewTabRedesigned extends ConsumerWidget {
 
   // Helper methods matching Patient Dashboard style
   Widget _buildGradientHeader(BuildContext context, WidgetRef ref) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
-      decoration: const BoxDecoration(
-        image: DecorationImage(
-          image: AssetImage('assets/updated/gradient banner.png'),
-          fit: BoxFit.cover,
-        ),
-        borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(24),
-          bottomRight: Radius.circular(24),
-        ),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
+    final userAsync = ref.watch(currentUserProvider);
+    
+    return userAsync.when(
+      data: (user) {
+        final userName = user?.fullName ?? 'Staff Member';
+        final position = user?.position ?? 'Hospital Staff';
+        
+        return Container(
+          width: double.infinity,
+          decoration: const BoxDecoration(
+            image: DecorationImage(
+              image: AssetImage('assets/updated/red banner.png'),
+              fit: BoxFit.cover,
+            ),
+            borderRadius: BorderRadius.only(
+              bottomLeft: Radius.circular(24),
+              bottomRight: Radius.circular(24),
+            ),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Staff Portal',
-                  style: TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.w700,
+                // Top Row: Menu, Title, Logout
+                Row(
+                  children: [
+                    // Hamburger Menu Icon
+                    Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Icon(
+                        Icons.menu,
+                        color: Colors.white,
+                        size: 24,
+                      ),
+                    ),
+                    const Spacer(),
+                    // Title - Centered
+                    const Text(
+                      'Staff Portal',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
+                        fontFamily: 'Open Sans',
+                        height: 1.1,
+                      ),
+                    ),
+                    const Spacer(),
+                    // Logout Icon
+                    IconButton(
+                      icon: const Icon(Icons.logout, color: Colors.white, size: 22),
+                      onPressed: () => AuthUtils.handleLogout(context, ref),
+                      tooltip: 'Logout',
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                
+                // Profile Section
+                Row(
+                  children: [
+                    // Avatar
+                    Container(
+                      width: 60,
+                      height: 60,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: Colors.white.withOpacity(0.3),
+                          width: 2,
+                        ),
+                      ),
+                      child: Center(
+                        child: Text(
+                          userName.isNotEmpty ? userName[0].toUpperCase() : 'S',
+                          style: const TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.primary,
+                            fontFamily: 'DM Sans',
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    // Name and Role
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          userName,
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white,
+                            fontFamily: 'DM Sans',
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          position,
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w400,
+                            color: Colors.white.withOpacity(0.9),
+                            fontFamily: 'DM Sans',
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                
+                // Search Bar
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  height: 48,
+                  decoration: BoxDecoration(
                     color: Colors.white,
-                    fontFamily: 'Open Sans',
+                    borderRadius: BorderRadius.circular(24),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: 10,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
                   ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  DateFormat('EEEE, MMMM d, yyyy').format(DateTime.now()),
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.white.withOpacity(0.9),
-                    fontFamily: 'DM Sans',
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  'Daily Summary',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.white.withOpacity(0.85),
-                    fontWeight: FontWeight.w500,
-                    fontFamily: 'DM Sans',
+                  child: Row(
+                    children: [
+                      Icon(Icons.search, color: AppColors.darkText.withOpacity(0.5)),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: TextField(
+                          decoration: InputDecoration(
+                            hintText: 'Search patients, tasks...',
+                            hintStyle: TextStyle(
+                              color: AppColors.darkText.withOpacity(0.5),
+                              fontSize: 14,
+                              fontFamily: 'DM Sans',
+                            ),
+                            border: InputBorder.none,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
             ),
           ),
-          // Logout button
-          IconButton(
-            icon: const Icon(Icons.logout, color: Colors.white, size: 24),
-            onPressed: () => AuthUtils.handleLogout(context, ref),
-            tooltip: 'Logout',
+        );
+      },
+      loading: () => Container(
+        width: double.infinity,
+        height: 200,
+        decoration: const BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage('assets/updated/red banner.png'),
+            fit: BoxFit.cover,
           ),
-        ],
+        ),
+      ),
+      error: (_, __) => Container(
+        width: double.infinity,
+        height: 200,
+        color: AppColors.primary,
       ),
     );
   }

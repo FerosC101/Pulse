@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:pulse/core/theme/app_colors.dart';
 import 'doctor_appointments_screen.dart';
 import 'doctor_schedule_screen.dart';
 import 'doctor_patients_screen.dart';
@@ -54,7 +55,7 @@ class DoctorDashboardScreenRedesigned extends ConsumerWidget {
   /// Gradient Header
   Widget _buildGradientHeader(BuildContext context, String userId) {
     return SliverAppBar(
-      expandedHeight: 180,
+      expandedHeight: 210,
       floating: false,
       pinned: false,
       automaticallyImplyLeading: false,
@@ -81,26 +82,90 @@ class DoctorDashboardScreenRedesigned extends ConsumerWidget {
               final fullName = data?['fullName'] ?? 'Doctor';
               final specialty = data?['specialty'] ?? 'General Medicine';
               
-              // Extract first name for avatar initial
-              final firstName = fullName.split(' ').first;
-              
               return SafeArea(
                 child: Padding(
-                  padding: const EdgeInsets.all(20.0),
+                  padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      // Top Row: Menu, Title, Logout
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
+                          // Hamburger Menu Icon
+                          Container(
+                            width: 40,
+                            height: 40,
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: const Icon(
+                              Icons.menu,
+                              color: Colors.white,
+                              size: 24,
+                            ),
+                          ),
+                          const Spacer(),
+                          // Title - Centered
+                          Text(
+                            'Doctor Dashboard',
+                            style: GoogleFonts.openSansCondensed(
+                              fontSize: 24,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.white,
+                              height: 1.1,
+                            ),
+                          ),
+                          const Spacer(),
+                          // Logout Icon
+                          IconButton(
+                            onPressed: () async {
+                              await FirebaseAuth.instance.signOut();
+                              if (context.mounted) {
+                                Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
+                              }
+                            },
+                            icon: const Icon(Icons.logout, color: Colors.white, size: 22),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      
+                      // Profile Section
+                      Row(
+                        children: [
+                          // Avatar
+                          Container(
+                            width: 60,
+                            height: 60,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: Colors.white.withOpacity(0.3),
+                                width: 2,
+                              ),
+                            ),
+                            child: Center(
+                              child: Text(
+                                fullName.isNotEmpty ? fullName[0].toUpperCase() : 'D',
+                                style: GoogleFonts.dmSans(
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.w700,
+                                  color: AppColors.primary,
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          // Name and Role
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
                                 'Dr. $fullName',
                                 style: GoogleFonts.dmSans(
-                                  fontSize: 22,
-                                  fontWeight: FontWeight.w700,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w600,
                                   color: Colors.white,
                                 ),
                               ),
@@ -109,21 +174,49 @@ class DoctorDashboardScreenRedesigned extends ConsumerWidget {
                                 specialty,
                                 style: GoogleFonts.dmSans(
                                   fontSize: 14,
+                                  fontWeight: FontWeight.w400,
                                   color: Colors.white.withOpacity(0.9),
                                 ),
                               ),
                             ],
                           ),
-                          IconButton(
-                            onPressed: () async {
-                              await FirebaseAuth.instance.signOut();
-                              if (context.mounted) {
-                                Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
-                              }
-                            },
-                            icon: const Icon(Icons.logout, color: Colors.white, size: 24),
-                          ),
                         ],
+                      ),
+                      const SizedBox(height: 16),
+                      
+                      // Search Bar
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        height: 48,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(24),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.1),
+                              blurRadius: 10,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(Icons.search, color: AppColors.darkText.withOpacity(0.5)),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: TextField(
+                                decoration: InputDecoration(
+                                  hintText: 'Search patients, appointments...',
+                                  hintStyle: GoogleFonts.dmSans(
+                                    color: AppColors.darkText.withOpacity(0.5),
+                                    fontSize: 14,
+                                  ),
+                                  border: InputBorder.none,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ],
                   ),
@@ -192,7 +285,10 @@ class DoctorDashboardScreenRedesigned extends ConsumerWidget {
             Container(
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
-                  colors: [Color(0xFF8B4A5A), Color(0xFF2C5F6F)],
+                  colors: [
+                    Color(0xFFF7444E), // Red
+                    Color(0xFF78BCC4), // Muted Teal
+                  ],
                   begin: Alignment.centerLeft,
                   end: Alignment.centerRight,
                 ),
@@ -206,24 +302,34 @@ class DoctorDashboardScreenRedesigned extends ConsumerWidget {
                 ],
               ),
               padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              child: Column(
                 children: [
-                  _buildStatItem(
-                    title: 'Total\nToday',
-                    value: todayAppointments.length.toString(),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      _buildStatItem(
+                        title: 'Total\nToday',
+                        value: todayAppointments.length.toString(),
+                      ),
+                      _buildStatItem(
+                        title: 'Pending',
+                        value: todayPendingCount.toString(),
+                      ),
+                    ],
                   ),
-                  _buildStatItem(
-                    title: 'Pending',
-                    value: todayPendingCount.toString(),
-                  ),
-                  _buildStatItem(
-                    title: 'Confirmed',
-                    value: confirmedCount.toString(),
-                  ),
-                  _buildStatItem(
-                    title: 'Completed',
-                    value: completedCount.toString(),
+                  const SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      _buildStatItem(
+                        title: 'Confirmed',
+                        value: confirmedCount.toString(),
+                      ),
+                      _buildStatItem(
+                        title: 'Completed',
+                        value: completedCount.toString(),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -354,11 +460,11 @@ class DoctorDashboardScreenRedesigned extends ConsumerWidget {
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.08),
-              blurRadius: 8,
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 10,
               offset: const Offset(0, 2),
             ),
           ],
@@ -367,16 +473,24 @@ class DoctorDashboardScreenRedesigned extends ConsumerWidget {
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, color: color, size: 40),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: color.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(icon, color: color, size: 28),
+            ),
             const SizedBox(height: 12),
             Text(
               title,
+              textAlign: TextAlign.center,
               style: GoogleFonts.dmSans(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
-                color: const Color(0xFF1A3A4A),
+                color: AppColors.darkText,
+                height: 1.3,
               ),
-              textAlign: TextAlign.center,
               maxLines: 2,
             ),
           ],

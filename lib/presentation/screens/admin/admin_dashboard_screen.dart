@@ -179,55 +179,38 @@ class AdminDashboardScreen extends ConsumerWidget {
     );
   }
 
-  // Header with red-tinted background and profile
+  // Header with red medical banner and profile
   Widget _buildHeader(BuildContext context, WidgetRef ref, String userName) {
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: AppColors.primary,
-        image: const DecorationImage(
-          image: AssetImage('assets/updated/red banner.png'),
-          fit: BoxFit.cover,
+    return Column(
+      children: [
+        // White status bar background
+        Container(
+          height: MediaQuery.of(context).padding.top,
+          color: Colors.white,
         ),
-      ),
-      child: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  // Back/Menu Icon
-                  Container(
-                    width: 40,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: const Icon(
-                      Icons.menu,
-                      color: Colors.white,
-                      size: 24,
-                    ),
-                  ),
-                  const Spacer(),
-                  // Title - Centered
-                  Text(
-                    'Admin Dashboard',
-                    style: GoogleFonts.openSansCondensed(
-                      fontSize: 24,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.white,
-                      height: 1.1,
-                    ),
-                  ),
-                  const Spacer(),
-                  // Logout Icon
-                  InkWell(
-                    onTap: () => AuthUtils.handleLogout(context, ref),
-                    child: Container(
+        // Red banner with rounded bottom corners
+        Container(
+          width: double.infinity,
+          decoration: const BoxDecoration(
+            image: DecorationImage(
+              image: AssetImage('assets/updated/red banner.png'),
+              fit: BoxFit.cover,
+            ),
+            borderRadius: BorderRadius.only(
+              bottomLeft: Radius.circular(24),
+              bottomRight: Radius.circular(24),
+            ),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Top Row: Menu, Title, Logout
+                Row(
+                  children: [
+                    // Hamburger Menu Icon
+                    Container(
                       width: 40,
                       height: 40,
                       decoration: BoxDecoration(
@@ -235,73 +218,155 @@ class AdminDashboardScreen extends ConsumerWidget {
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: const Icon(
-                        Icons.logout,
+                        Icons.menu,
                         color: Colors.white,
-                        size: 22,
+                        size: 24,
                       ),
                     ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              
-              // Profile Section
-              Row(
-                children: [
-                  // Avatar
-                  Container(
-                    width: 60,
-                    height: 60,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: Colors.white.withOpacity(0.3),
-                        width: 2,
+                    const Spacer(),
+                    // Title - Centered
+                    Text(
+                      'Admin Dashboard',
+                      style: GoogleFonts.openSansCondensed(
+                        fontSize: 24,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
+                        height: 1.1,
                       ),
                     ),
-                  ),
-                  const SizedBox(width: 16),
-                  // Name and Role
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        userName,
-                        style: GoogleFonts.dmSans(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
+                    const Spacer(),
+                    // Logout Icon
+                    InkWell(
+                      onTap: () => AuthUtils.handleLogout(context, ref),
+                      child: Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: const Icon(
+                          Icons.logout,
                           color: Colors.white,
+                          size: 22,
                         ),
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'System Administrator',
-                        style: GoogleFonts.dmSans(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w400,
-                          color: Colors.white.withOpacity(0.9),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                
+                // Profile Section
+                Row(
+                  children: [
+                    // Avatar
+                    Container(
+                      width: 60,
+                      height: 60,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: Colors.white.withOpacity(0.3),
+                          width: 2,
                         ),
                       ),
-                    ],
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-            ],
+                      child: Center(
+                        child: Text(
+                          userName.isNotEmpty ? userName[0].toUpperCase() : 'A',
+                          style: GoogleFonts.dmSans(
+                            fontSize: 24,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.primary,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    // Name and Role
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          userName,
+                          style: GoogleFonts.dmSans(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'System Administrator',
+                          style: GoogleFonts.dmSans(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w400,
+                            color: Colors.white.withOpacity(0.9),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
-      ),
+        // Search Bar
+        Padding(
+          padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            height: 48,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(24),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 10,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.search, color: AppColors.darkText.withOpacity(0.5)),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: TextField(
+                    decoration: InputDecoration(
+                      hintText: 'Search hospitals, staff...',
+                      hintStyle: GoogleFonts.dmSans(
+                        color: AppColors.darkText.withOpacity(0.5),
+                        fontSize: 14,
+                      ),
+                      border: InputBorder.none,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 
-  // System Overview Stats Card
+  // System Overview Stats Card with Red-to-Teal Gradient
   Widget _buildStatsCard(int hospitals, int beds, int staff, int occupancy) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: AppColors.primary,
+        gradient: const LinearGradient(
+          colors: [
+            Color(0xFFF7444E), // Red
+            Color(0xFF78BCC4), // Muted Teal
+          ],
+          begin: Alignment.centerLeft,
+          end: Alignment.centerRight,
+        ),
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -311,13 +376,23 @@ class AdminDashboardScreen extends ConsumerWidget {
           ),
         ],
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
+      child: Column(
         children: [
-          _buildStatItem('Hospitals', hospitals.toString()),
-          _buildStatItem('Beds', beds.toString()),
-          _buildStatItem('Staff', staff.toString()),
-          _buildStatItem('Occupancy', '$occupancy%'),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              _buildStatItem('Hospitals', hospitals.toString()),
+              _buildStatItem('Beds', beds.toString()),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              _buildStatItem('Staff', staff.toString()),
+              _buildStatItem('Occupancy', '$occupancy%'),
+            ],
+          ),
         ],
       ),
     );

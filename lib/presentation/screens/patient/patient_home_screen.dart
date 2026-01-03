@@ -124,7 +124,7 @@ class _HomePage extends ConsumerWidget {
                     height: 180,
                     decoration: const BoxDecoration(
                       image: DecorationImage(
-                        image: AssetImage('assets/updated/gradient banner.png'),
+                        image: AssetImage('assets/updated/red banner.png'),
                         fit: BoxFit.cover,
                       ),
                       borderRadius: BorderRadius.only(
@@ -345,8 +345,8 @@ class _HomePage extends ConsumerWidget {
                           begin: Alignment.centerLeft,
                           end: Alignment.centerRight,
                           colors: [
-                            Color(0xFF8B4A5A), // Burgundy/dark red
-                            Color(0xFF2C5F6F), // Dark teal/blue
+                            Color(0xFFF7444E), // Red
+                            Color(0xFF78BCC4), // Muted Teal
                           ],
                         ),
                         borderRadius: BorderRadius.circular(16),
@@ -358,24 +358,34 @@ class _HomePage extends ConsumerWidget {
                           ),
                         ],
                       ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      child: Column(
                         children: [
-                          _buildStatColumn(
-                            title: 'Nearby\nHospitals',
-                            value: operationalHospitals.toString(),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              _buildStatColumn(
+                                title: 'Nearby\nHospitals',
+                                value: operationalHospitals.toString(),
+                              ),
+                              _buildStatColumn(
+                                title: 'Available\nICU',
+                                value: availableICU.toString(),
+                              ),
+                            ],
                           ),
-                          _buildStatColumn(
-                            title: 'Available\nICU',
-                            value: availableICU.toString(),
-                          ),
-                          _buildStatColumn(
-                            title: 'Available\nER',
-                            value: availableER.toString(),
-                          ),
-                          _buildStatColumn(
-                            title: 'Operational',
-                            value: '${((operationalHospitals / hospitals.length) * 100).toStringAsFixed(0)}%',
+                          const SizedBox(height: 16),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              _buildStatColumn(
+                                title: 'Available\nER',
+                                value: availableER.toString(),
+                              ),
+                              _buildStatColumn(
+                                title: 'Operational',
+                                value: '${((operationalHospitals / hospitals.length) * 100).toStringAsFixed(0)}%',
+                              ),
+                            ],
                           ),
                         ],
                       ),
