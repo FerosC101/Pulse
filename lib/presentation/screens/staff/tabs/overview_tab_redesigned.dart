@@ -166,7 +166,7 @@ class OverviewTabRedesigned extends ConsumerWidget {
                     const Text(
                       'Staff Portal',
                       style: TextStyle(
-                        fontSize: 24,
+                        fontSize: 20,
                         fontWeight: FontWeight.w700,
                         color: Colors.white,
                         fontFamily: 'Open Sans',
@@ -175,10 +175,21 @@ class OverviewTabRedesigned extends ConsumerWidget {
                     ),
                     const Spacer(),
                     // Logout Icon
-                    IconButton(
-                      icon: const Icon(Icons.logout, color: Colors.white, size: 22),
-                      onPressed: () => AuthUtils.handleLogout(context, ref),
-                      tooltip: 'Logout',
+                    InkWell(
+                      onTap: () => AuthUtils.handleLogout(context, ref),
+                      child: Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.2),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.logout,
+                          color: Colors.white,
+                          size: 22,
+                        ),
+                      ),
                     ),
                   ],
                 ),
@@ -388,22 +399,21 @@ class OverviewTabRedesigned extends ConsumerWidget {
     required Color color,
     required VoidCallback onTap,
   }) {
-    return InkWell(
+    return GestureDetector(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(16),
       child: Container(
+        padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.08),
-              blurRadius: 12,
-              offset: const Offset(0, 4),
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 2),
             ),
           ],
         ),
-        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
@@ -411,12 +421,12 @@ class OverviewTabRedesigned extends ConsumerWidget {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: color.withOpacity(0.15),
-                shape: BoxShape.circle,
+                color: color.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
               ),
-              child: Icon(icon, color: color, size: 26),
+              child: Icon(icon, color: color, size: 28),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 12),
             Text(
               label,
               style: const TextStyle(

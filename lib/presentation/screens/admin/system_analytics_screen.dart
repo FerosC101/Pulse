@@ -180,61 +180,78 @@ class SystemAnalyticsScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 24),
 
-            // Summary Cards - 2x2 Grid
-            Row(
-              children: [
-                Expanded(
-                  child: _buildMetricCard(
-                    title: 'Hospitals',
-                    value: hospitalsCount.when(
-                      data: (count) => count.toString(),
-                      loading: () => '...',
-                      error: (_, __) => '0',
-                    ),
-                    context: context,
-                  ),
+            // Summary Cards - Single Gradient Card with 2-column layout
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [
+                    Color(0xFFF7444E), // Red
+                    Color(0xFF78BCC4), // Muted Teal
+                  ],
+                  begin: Alignment.centerLeft,
+                  end: Alignment.centerRight,
                 ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: _buildMetricCard(
-                    title: 'Beds',
-                    value: bedsCount.when(
-                      data: (count) => count.toString(),
-                      loading: () => '...',
-                      error: (_, __) => '0',
-                    ),
-                    context: context,
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.primary.withOpacity(0.3),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: _buildMetricCard(
-                    title: 'Staff',
-                    value: staffCount.when(
-                      data: (count) => count.toString(),
-                      loading: () => '...',
-                      error: (_, __) => '0',
+                ],
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      children: [
+                        _buildStatItem(
+                          'Hospitals',
+                          hospitalsCount.when(
+                            data: (count) => count.toString(),
+                            loading: () => '...',
+                            error: (_, __) => '0',
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        _buildStatItem(
+                          'Staff',
+                          staffCount.when(
+                            data: (count) => count.toString(),
+                            loading: () => '...',
+                            error: (_, __) => '0',
+                          ),
+                        ),
+                      ],
                     ),
-                    context: context,
                   ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: _buildMetricCard(
-                    title: 'Occupancy',
-                    value: occupancyRate.when(
-                      data: (rate) => '${rate.toStringAsFixed(0)}%',
-                      loading: () => '...',
-                      error: (_, __) => '0%',
+                  Expanded(
+                    child: Column(
+                      children: [
+                        _buildStatItem(
+                          'Beds',
+                          bedsCount.when(
+                            data: (count) => count.toString(),
+                            loading: () => '...',
+                            error: (_, __) => '0',
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        _buildStatItem(
+                          'Occupancy',
+                          occupancyRate.when(
+                            data: (rate) => '${rate.toStringAsFixed(0)}%',
+                            loading: () => '...',
+                            error: (_, __) => '0%',
+                          ),
+                        ),
+                      ],
                     ),
-                    context: context,
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
 
             const SizedBox(height: 32),
@@ -400,45 +417,28 @@ class SystemAnalyticsScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildMetricCard({
-    required String title,
-    required String value,
-    required BuildContext context,
-  }) {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 20),
-      decoration: BoxDecoration(
-        color: AppColors.primary,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primary.withOpacity(0.2),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
+  Widget _buildStatItem(String label, String value) {
+    return Column(
+      children: [
+        Text(
+          label,
+          style: GoogleFonts.dmSans(
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+            color: Colors.white.withOpacity(0.9),
           ),
-        ],
-      ),
-      child: Column(
-        children: [
-          Text(
-            title,
-            style: GoogleFonts.dmSans(
-              fontSize: 16,
-              color: Colors.white,
-              fontWeight: FontWeight.w500,
-            ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          value,
+          style: GoogleFonts.dmSans(
+            fontSize: 32,
+            fontWeight: FontWeight.w700,
+            color: Colors.white,
+            height: 1,
           ),
-          const SizedBox(height: 12),
-          Text(
-            value,
-            style: GoogleFonts.dmSans(
-              fontSize: 48,
-              fontWeight: FontWeight.w700,
-              color: Colors.white,
-            ),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 

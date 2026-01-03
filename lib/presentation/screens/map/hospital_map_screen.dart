@@ -401,10 +401,10 @@ class _HospitalMapScreenState extends ConsumerState<HospitalMapScreen> {
     final canvas = Canvas(recorder);
     final size = 70.0;
     
-    // Draw gradient background circle
+    // Draw gradient background circle with red theme
     final gradientPaint = Paint()
       ..shader = const LinearGradient(
-        colors: [Color(0xFF60A5FA), Color(0xFF2563EB)],
+        colors: [Color(0xFFF7444E), Color(0xFFE03945)],
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
       ).createShader(Rect.fromLTWH(0, 0, size, size));
@@ -422,7 +422,7 @@ class _HospitalMapScreenState extends ConsumerState<HospitalMapScreen> {
         style: TextStyle(
           fontSize: size / 3,
           fontFamily: Icons.local_hospital.fontFamily,
-          color: const Color(0xFF2563EB),
+          color: const Color(0xFFF7444E),
         ),
       ),
       textDirection: TextDirection.ltr,
@@ -587,154 +587,96 @@ class _HospitalMapScreenState extends ConsumerState<HospitalMapScreen> {
                 },
               ),
 
-              // Top Header with Gradient
+              // Top Header with White Background
               Positioned(
                 top: 0,
                 left: 0,
                 right: 0,
                 child: Container(
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        widget.isEmergencyMode 
-                            ? const Color(0xFFFF6B6B)
-                            : const Color(0xFF2563EB),
-                        widget.isEmergencyMode 
-                            ? const Color(0xFFFF6B6B).withOpacity(0.9)
-                            : const Color(0xFF2563EB).withOpacity(0.9),
-                        Colors.transparent,
-                      ],
-                      stops: const [0.0, 0.7, 1.0],
+                    color: Colors.white,
+                    borderRadius: const BorderRadius.only(
+                      bottomLeft: Radius.circular(24),
+                      bottomRight: Radius.circular(24),
                     ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 10,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
                   ),
                   child: SafeArea(
                     bottom: false,
                     child: Padding(
-                      padding: const EdgeInsets.all(16.0),
+                      padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
                       child: Column(
                         children: [
                           // Top bar
                           Row(
                             children: [
-                              // Back button
-                              Container(
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(12),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withOpacity(0.1),
-                                      blurRadius: 8,
-                                      offset: const Offset(0, 2),
-                                    ),
-                                  ],
-                                ),
-                                child: Material(
-                                  color: Colors.transparent,
-                                  child: InkWell(
-                                    onTap: () => Navigator.pop(context),
-                                    borderRadius: BorderRadius.circular(12),
-                                    child: const Padding(
-                                      padding: EdgeInsets.all(12),
-                                      child: Icon(
-                                        Icons.arrow_back,
-                                        color: AppColors.primary,
-                                        size: 24,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                              // Title
-                              Expanded(
+                              // Menu/Back button
+                              InkWell(
+                                onTap: () => Navigator.pop(context),
+                                borderRadius: BorderRadius.circular(8),
                                 child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 20,
-                                    vertical: 14,
-                                  ),
+                                  width: 40,
+                                  height: 40,
                                   decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(12),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black.withOpacity(0.1),
-                                        blurRadius: 8,
-                                        offset: const Offset(0, 2),
-                                      ),
-                                    ],
+                                    color: AppColors.primary.withOpacity(0.1),
+                                    borderRadius: BorderRadius.circular(8),
                                   ),
-                                  child: Row(
-                                    children: [
-                                      Icon(
-                                        widget.isEmergencyMode 
-                                            ? Icons.emergency 
-                                            : Icons.map,
-                                        color: widget.isEmergencyMode
-                                            ? const Color(0xFFFF6B6B)
-                                            : AppColors.primary,
-                                        size: 24,
-                                      ),
-                                      const SizedBox(width: 12),
-                                      Expanded(
-                                        child: Text(
-                                          widget.isEmergencyMode 
-                                              ? 'Emergency Mode' 
-                                              : 'Hospital Map',
-                                          style: GoogleFonts.dmSans(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.w600,
-                                            color: AppColors.darkText,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
+                                  child: const Icon(
+                                    Icons.arrow_back,
+                                    color: AppColors.primary,
+                                    size: 24,
                                   ),
                                 ),
                               ),
-                              const SizedBox(width: 12),
+                              const Spacer(),
+                              // Title - Centered
+                              Text(
+                                widget.isEmergencyMode ? 'Emergency Mode' : 'Hospital Map',
+                                style: GoogleFonts.openSansCondensed(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.w700,
+                                  color: AppColors.darkText,
+                                  height: 1.1,
+                                ),
+                              ),
+                              const Spacer(),
                               // My Location button
                               if (_currentPosition != null)
-                                Container(
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(12),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black.withOpacity(0.1),
-                                        blurRadius: 8,
-                                        offset: const Offset(0, 2),
-                                      ),
-                                    ],
-                                  ),
-                                  child: Material(
-                                    color: Colors.transparent,
-                                    child: InkWell(
-                                      onTap: () {
-                                        _mapController?.animateCamera(
-                                          CameraUpdate.newLatLngZoom(
-                                            LatLng(
-                                              _currentPosition!.latitude,
-                                              _currentPosition!.longitude,
-                                            ),
-                                            15,
-                                          ),
-                                        );
-                                      },
-                                      borderRadius: BorderRadius.circular(12),
-                                      child: const Padding(
-                                        padding: EdgeInsets.all(12),
-                                        child: Icon(
-                                          Icons.my_location,
-                                          color: AppColors.primary,
-                                          size: 24,
+                                InkWell(
+                                  onTap: () {
+                                    _mapController?.animateCamera(
+                                      CameraUpdate.newLatLngZoom(
+                                        LatLng(
+                                          _currentPosition!.latitude,
+                                          _currentPosition!.longitude,
                                         ),
+                                        15,
                                       ),
+                                    );
+                                  },
+                                  borderRadius: BorderRadius.circular(20),
+                                  child: Container(
+                                    width: 40,
+                                    height: 40,
+                                    decoration: BoxDecoration(
+                                      color: AppColors.primary.withOpacity(0.1),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: const Icon(
+                                      Icons.my_location,
+                                      color: AppColors.primary,
+                                      size: 22,
                                     ),
                                   ),
-                                ),
+                                )
+                              else
+                                const SizedBox(width: 40),
                             ],
                           ),
                           const SizedBox(height: 12),
@@ -820,12 +762,8 @@ class _HospitalMapScreenState extends ConsumerState<HospitalMapScreen> {
     
     return Container(
       decoration: BoxDecoration(
-        color: isSelected ? Colors.white : Colors.white.withOpacity(0.9),
+        color: isSelected ? const Color(0xFFF7444E) : Colors.white.withOpacity(0.9),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: isSelected ? AppColors.primary : Colors.transparent,
-          width: 2,
-        ),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.1),
@@ -851,7 +789,7 @@ class _HospitalMapScreenState extends ConsumerState<HospitalMapScreen> {
                 Icon(
                   icon,
                   size: 18,
-                  color: isSelected ? AppColors.primary : AppColors.darkText,
+                  color: isSelected ? Colors.white : AppColors.darkText,
                 ),
                 const SizedBox(width: 8),
                 Text(
@@ -859,7 +797,7 @@ class _HospitalMapScreenState extends ConsumerState<HospitalMapScreen> {
                   style: GoogleFonts.dmSans(
                     fontSize: 14,
                     fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                    color: isSelected ? AppColors.primary : AppColors.darkText,
+                    color: isSelected ? Colors.white : AppColors.darkText,
                   ),
                 ),
               ],

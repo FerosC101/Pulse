@@ -55,7 +55,7 @@ class DoctorDashboardScreenRedesigned extends ConsumerWidget {
   /// Gradient Header
   Widget _buildGradientHeader(BuildContext context, String userId) {
     return SliverAppBar(
-      expandedHeight: 210,
+      expandedHeight: 240,
       floating: false,
       pinned: false,
       automaticallyImplyLeading: false,
@@ -109,22 +109,31 @@ class DoctorDashboardScreenRedesigned extends ConsumerWidget {
                           Text(
                             'Doctor Dashboard',
                             style: GoogleFonts.openSansCondensed(
-                              fontSize: 24,
+                              fontSize: 20,
                               fontWeight: FontWeight.w700,
                               color: Colors.white,
                               height: 1.1,
                             ),
                           ),
                           const Spacer(),
-                          // Logout Icon
-                          IconButton(
-                            onPressed: () async {
+                          // Logout Icon - Translucent Circular
+                          InkWell(
+                            onTap: () async {
                               await FirebaseAuth.instance.signOut();
                               if (context.mounted) {
                                 Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
                               }
                             },
-                            icon: const Icon(Icons.logout, color: Colors.white, size: 22),
+                            borderRadius: BorderRadius.circular(20),
+                            child: Container(
+                              width: 40,
+                              height: 40,
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.2),
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(Icons.logout, color: Colors.white, size: 22),
+                            ),
                           ),
                         ],
                       ),
@@ -185,38 +194,44 @@ class DoctorDashboardScreenRedesigned extends ConsumerWidget {
                       const SizedBox(height: 16),
                       
                       // Search Bar
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        height: 48,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(24),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.1),
-                              blurRadius: 10,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        child: Row(
-                          children: [
-                            Icon(Icons.search, color: AppColors.darkText.withOpacity(0.5)),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: TextField(
-                                decoration: InputDecoration(
-                                  hintText: 'Search patients, appointments...',
-                                  hintStyle: GoogleFonts.dmSans(
-                                    color: AppColors.darkText.withOpacity(0.5),
-                                    fontSize: 14,
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 16),
+                              height: 48,
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(24),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.1),
+                                    blurRadius: 10,
+                                    offset: const Offset(0, 2),
                                   ),
-                                  border: InputBorder.none,
-                                ),
+                                ],
+                              ),
+                              child: Row(
+                                children: [
+                                  Icon(Icons.search, color: AppColors.darkText.withOpacity(0.5)),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: TextField(
+                                      decoration: InputDecoration(
+                                        hintText: 'Search patients, appointments...',
+                                        hintStyle: GoogleFonts.dmSans(
+                                          color: AppColors.darkText.withOpacity(0.5),
+                                          fontSize: 14,
+                                        ),
+                                        border: InputBorder.none,
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
@@ -393,7 +408,7 @@ class DoctorDashboardScreenRedesigned extends ConsumerWidget {
                 context,
                 'All\nAppointments',
                 Icons.event_note_outlined,
-                const Color(0xFF002C3E),
+                AppColors.primary,
                 () {
                   Navigator.push(
                     context,
@@ -410,7 +425,7 @@ class DoctorDashboardScreenRedesigned extends ConsumerWidget {
                 context,
                 'My\nPatients',
                 Icons.groups_outlined,
-                const Color(0xFF002C3E),
+                AppColors.primary,
                 () {
                   Navigator.push(
                     context,
@@ -427,7 +442,7 @@ class DoctorDashboardScreenRedesigned extends ConsumerWidget {
                 context,
                 'Manage\nSchedule',
                 Icons.calendar_month_outlined,
-                const Color(0xFF002C3E),
+                AppColors.primary,
                 () {
                   Navigator.push(
                     context,

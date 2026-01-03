@@ -228,7 +228,7 @@ class AdminDashboardScreen extends ConsumerWidget {
                     Text(
                       'Admin Dashboard',
                       style: GoogleFonts.openSansCondensed(
-                        fontSize: 24,
+                        fontSize: 20,
                         fontWeight: FontWeight.w700,
                         color: Colors.white,
                         height: 1.1,
@@ -243,7 +243,7 @@ class AdminDashboardScreen extends ConsumerWidget {
                         height: 40,
                         decoration: BoxDecoration(
                           color: Colors.white.withOpacity(0.2),
-                          borderRadius: BorderRadius.circular(8),
+                          shape: BoxShape.circle,
                         ),
                         child: const Icon(
                           Icons.logout,
@@ -308,41 +308,40 @@ class AdminDashboardScreen extends ConsumerWidget {
                     ),
                   ],
                 ),
-              ],
-            ),
-          ),
-        ),
-        // Search Bar
-        Padding(
-          padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            height: 48,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(24),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
-                  blurRadius: 10,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: Row(
-              children: [
-                Icon(Icons.search, color: AppColors.darkText.withOpacity(0.5)),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: TextField(
-                    decoration: InputDecoration(
-                      hintText: 'Search hospitals, staff...',
-                      hintStyle: GoogleFonts.dmSans(
-                        color: AppColors.darkText.withOpacity(0.5),
-                        fontSize: 14,
+                const SizedBox(height: 16),
+                
+                // Search Bar inside banner
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(24),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: 10,
+                        offset: const Offset(0, 2),
                       ),
-                      border: InputBorder.none,
-                    ),
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.search, color: AppColors.darkText.withOpacity(0.5)),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: TextField(
+                          decoration: InputDecoration(
+                            hintText: 'Search hospitals, staff...',
+                            hintStyle: GoogleFonts.dmSans(
+                              color: AppColors.darkText.withOpacity(0.5),
+                              fontSize: 14,
+                            ),
+                            border: InputBorder.none,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
@@ -376,22 +375,25 @@ class AdminDashboardScreen extends ConsumerWidget {
           ),
         ],
       ),
-      child: Column(
+      child: Row(
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              _buildStatItem('Hospitals', hospitals.toString()),
-              _buildStatItem('Beds', beds.toString()),
-            ],
+          Expanded(
+            child: Column(
+              children: [
+                _buildStatItem('Hospitals', hospitals.toString()),
+                const SizedBox(height: 20),
+                _buildStatItem('Staff', staff.toString()),
+              ],
+            ),
           ),
-          const SizedBox(height: 16),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              _buildStatItem('Staff', staff.toString()),
-              _buildStatItem('Occupancy', '$occupancy%'),
-            ],
+          Expanded(
+            child: Column(
+              children: [
+                _buildStatItem('Beds', beds.toString()),
+                const SizedBox(height: 20),
+                _buildStatItem('Occupancy', '$occupancy%'),
+              ],
+            ),
           ),
         ],
       ),
@@ -404,7 +406,7 @@ class AdminDashboardScreen extends ConsumerWidget {
         Text(
           label,
           style: GoogleFonts.dmSans(
-            fontSize: 12,
+            fontSize: 14,
             fontWeight: FontWeight.w500,
             color: Colors.white.withOpacity(0.9),
           ),
