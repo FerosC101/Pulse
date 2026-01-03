@@ -104,6 +104,11 @@ class MLPredictionService {
       (sum, h) => sum + h.status.totalOccupied,
     );
 
+    // Use baseline of 60% occupancy if current is too low
+    final baselineOccupancy = currentOccupied > 0 
+        ? currentOccupied 
+        : (totalBeds * 0.6).round();
+
     for (int i = 0; i < 24; i++) {
       final hour = (startTime.hour + i) % 24;
       final futureTime = startTime.add(Duration(hours: i));
@@ -130,8 +135,8 @@ class MLPredictionService {
       final noise = 1.0 + (_random.nextDouble() * 0.1 - 0.05);
       multiplier *= noise;
 
-      // Calculate predicted occupancy
-      final predicted = (currentOccupied * multiplier).clamp(0, totalBeds).round();
+      // Calculate predicted occupancy using baseline
+      final predicted = (baselineOccupancy * multiplier).clamp(0, totalBeds).round();
 
       // Calculate confidence (decreases with time)
       final confidence = (1.0 - (i / 48)).clamp(0.5, 1.0);
@@ -168,15 +173,16 @@ class MLPredictionService {
     List<HospitalModel> hospitals,
     DateTime currentTime,
   ) {
-    double riskScore = 0.0;
+    double riskScore = 0.3; // Start with base risk of 30%
     final factors = <String>[];
 
     final hour = currentTime.hour;
     final totalOccupied = hospitals.fold<int>(0, (sum, h) => sum + h.status.totalOccupied);
     final totalBeds = hospitals.fold<int>(0, (sum, h) => sum + h.status.totalBeds);
-    final avgWaitTime = hospitals.fold<int>(0, (sum, h) => sum + h.status.waitTimeMinutes) / 
-        hospitals.length;
-    final occupancyRate = totalBeds > 0 ? totalOccupied / totalBeds : 0;
+    final avgWaitTime = hospitals.isNotEmpty 
+        ? hospitals.fold<int>(0, (sum, h) => sum + h.status.waitTimeMinutes) / hospitals.length
+        : 30;
+    final occupancyRate = totalBeds > 0 ? totalOccupied / totalBeds : 0.6;
 
     // Time of day factor
     if (hour >= 8 && hour <= 11) {
@@ -185,6 +191,9 @@ class MLPredictionService {
     } else if (hour >= 14 && hour <= 17) {
       riskScore += 0.25;
       factors.add('Afternoon peak hours');
+    } else if (hour >= 18 && hour <= 20) {
+      riskScore += 0.15;
+      factors.add('Evening admission window');
     }
 
     // Occupancy factor
@@ -194,6 +203,9 @@ class MLPredictionService {
     } else if (occupancyRate > 0.75) {
       riskScore += 0.2;
       factors.add('High occupancy (>75%)');
+    } else if (occupancyRate > 0.5) {
+      riskScore += 0.1;
+      factors.add('Moderate occupancy');
     }
 
     // Wait time factor
@@ -247,25 +259,32 @@ class MLPredictionService {
     List<HospitalModel> hospitals,
     DateTime currentTime,
   ) {
+    final totalBeds = hospitals.fold<int>(0, (sum, h) => sum + h.status.totalBeds);
     final totalOccupied = hospitals.fold<int>(0, (sum, h) => sum + h.status.totalOccupied);
     final icuOccupied = hospitals.fold<int>(0, (sum, h) => sum + h.status.icuOccupied);
     final erOccupied = hospitals.fold<int>(0, (sum, h) => sum + h.status.erOccupied);
     final wardOccupied = hospitals.fold<int>(0, (sum, h) => sum + h.status.wardOccupied);
 
+    // Use baseline occupancy if current is too low
+    final baselineOccupancy = totalOccupied > 0 ? totalOccupied : (totalBeds * 0.6).round();
+    final baselineICU = icuOccupied > 0 ? icuOccupied : (hospitals.fold<int>(0, (sum, h) => sum + h.status.icuTotal) * 0.7).round();
+    final baselineER = erOccupied > 0 ? erOccupied : (hospitals.fold<int>(0, (sum, h) => sum + h.status.erTotal) * 0.5).round();
+    final baselineWard = wardOccupied > 0 ? wardOccupied : (hospitals.fold<int>(0, (sum, h) => sum + h.status.wardTotal) * 0.6).round();
+
     // Calculate recommended staff
     // General: 1 nurse per 6 patients, 1 doctor per 15 patients
-    final recommendedNurses = (totalOccupied / 6).ceil();
-    final recommendedDoctors = (totalOccupied / 15).ceil();
+    final recommendedNurses = (baselineOccupancy / 6).ceil().clamp(5, 100);
+    final recommendedDoctors = (baselineOccupancy / 15).ceil().clamp(3, 50);
 
     // Department-specific
-    // ICU: 1 staff per 3 patients
-    final icuStaff = (icuOccupied / 3).ceil();
+    // ICU: 1 staff per 3 patients (most intensive)
+    final icuStaff = (baselineICU / 3).ceil().clamp(2, 20);
     
     // ER: 1 staff per 5 patients
-    final erStaff = (erOccupied / 5).ceil();
+    final erStaff = (baselineER / 5).ceil().clamp(2, 15);
     
     // Ward: 1 staff per 8 patients
-    final wardStaff = (wardOccupied / 8).ceil();
+    final wardStaff = (baselineWard / 8).ceil().clamp(3, 25);
 
     // Confidence (90-95%)
     final confidence = 0.90 + (_random.nextDouble() * 0.05);

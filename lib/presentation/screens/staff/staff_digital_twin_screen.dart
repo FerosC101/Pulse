@@ -6,6 +6,7 @@ import 'package:pulse/core/constants/app_colors.dart';
 import 'package:pulse/data/models/patient_model.dart';
 import 'package:pulse/presentation/providers/hospital_provider.dart';
 import 'package:pulse/presentation/providers/patient_provider.dart';
+import 'package:pulse/presentation/screens/digital_twin/simulation_screen.dart';
 
 class StaffDigitalTwinScreen extends ConsumerStatefulWidget {
   final String hospitalId;
@@ -494,6 +495,46 @@ class _StaffDigitalTwinScreenState extends ConsumerState<StaffDigitalTwinScreen>
                   },
                   loading: () => const SizedBox.shrink(),
                   error: (_, __) => const SizedBox.shrink(),
+                ),
+
+                const SizedBox(height: 16),
+
+                // What-If Scenario Button
+                Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 16),
+                  child: ElevatedButton.icon(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => SimulationScreen(
+                            hospital: hospital,
+                          ),
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.science, size: 20),
+                    label: const Text(
+                      'Run What-If Scenario',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 16,
+                      ),
+                      minimumSize: const Size(double.infinity, 56),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      elevation: 2,
+                    ),
+                  ),
                 ),
 
                 const SizedBox(height: 16),
